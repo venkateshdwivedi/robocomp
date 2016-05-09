@@ -13,6 +13,10 @@ module RoboCompCAIPersonEchord{
 
 	interface PersonCompToAgent{
 		void  IsPersonWithRobot(bool personWithRobot);
+		void  HandPositions(string positions);
+	};
+	interface AgentToPersonComp{
+		void  IsFrontalFace(out bool frontalFace);
 	};
 };
   

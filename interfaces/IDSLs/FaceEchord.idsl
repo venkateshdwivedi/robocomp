@@ -1,6 +1,13 @@
 import "RGBDEchord.idsl";
 module RoboCompFaceEchord
 {
+	struct Point3D
+	{
+		float x;
+		float y;
+		float z;
+	};
+
 	struct DetailedFace
 	{
 	
@@ -22,6 +29,10 @@ module RoboCompFaceEchord
 
 		//Face image (portion of the input image where the face is located)
 		RoboCompRGBDEchord::TRGBImage faceImage;       
+
+		Point3D nose;
+		Point3D leftEar;
+		Point3D rightEar;
 	};
 
 	// FaceMap - A map storing all faces in the scene
