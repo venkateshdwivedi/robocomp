@@ -17,6 +17,7 @@ module RoboCompCAIPersonEchord{
 	};
 	interface AgentToPersonComp{
 		void  IsFrontalFace(out bool frontalFace);
+		void  AreEyesClosed(out bool eyesClosed);
 	};
 };
   
