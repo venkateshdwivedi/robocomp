@@ -68,9 +68,9 @@ module RoboCompBodyEchord
 
 	struct TPerson
 	{
-        JointList joints;
+        	JointList joints;
 		bool trackedState;
-        SkeletonPoint Position;
+        	SkeletonPoint Position;
 		int TrackingId;
 		
     };

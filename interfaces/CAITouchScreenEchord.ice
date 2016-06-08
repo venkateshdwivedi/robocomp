@@ -24,6 +24,8 @@ module RoboCompCAITouchScreenEchord{
 		void  setAnswer(string answer);
 		void  stopTest();
 		void  resumeTest();
+		void  correctLastResponse();
+		void  repeatLastQuestion();
 	};
 };
   
