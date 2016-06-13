@@ -3,7 +3,7 @@ module RoboCompCAIHMCEchord{
 		
 		void searchPatientSeated();
 		void restart();
-		
+		void processData();
 	};
 	
 	interface HMCCompToAgent{
@@ -11,6 +11,7 @@ module RoboCompCAIHMCEchord{
 		void patientIsSeated(bool seated);
 		void testIsFinished();
 		void patientIsFar();
+		void processDataIsFinished(string result);
 		
 	};
 };

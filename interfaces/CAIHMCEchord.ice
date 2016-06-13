@@ -14,11 +14,13 @@ module RoboCompCAIHMCEchord{
 	interface AgentToHMCComp{
 		void  searchPatientSeated();
 		void  restart();
+		void  processData();
 	};
 	interface HMCCompToAgent{
 		void  patientIsSeated(bool seated);
 		void  testIsFinished();
 		void  patientIsFar();
+		void  processDataIsFinished(string result);
 	};
 };
   
