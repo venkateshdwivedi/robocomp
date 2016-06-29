@@ -11,9 +11,12 @@
 
 module RoboCompSpeech{
 
+	enum languageType {SPANISH, ENGLISH, MEXICAN};
+
 	interface Speech{
 		bool say(string text, bool overwrite);
 		bool isBusy();
+		void setLanguage(languageType type);
 	};
 };
   
