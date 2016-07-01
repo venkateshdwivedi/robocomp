@@ -12,7 +12,7 @@
 module RoboCompCAIRecorderEchord{
 
 	interface AgentToRecorderComp{
-		void  setRecordingStatus(bool recording);
+		void  setRecordingStatus(bool recording, string filename);
 		void  insertTimeStamp(string timeStamp);
 		void  insertSubtitle(string startTime, string stopTime, string subtitle);
 	};
