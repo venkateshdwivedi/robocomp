@@ -22,9 +22,7 @@
 
 InnerModelReader::InnerModelReader()
 {
-
 }
-
 
 bool InnerModelReader::load(const QString &file, InnerModel *model)
 {
@@ -106,7 +104,6 @@ InnerModelReader::~InnerModelReader()
 }
 
 
-
 void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, InnerModelNode *imNode)
 {
 	QMap<QString, QStringList> nodeAttributes;
@@ -129,7 +126,6 @@ void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, Inne
 	for (QDomNode domNode = parentDomNode.firstChild(); not domNode.isNull(); domNode = domNode.nextSibling())
 	{
 		e = domNode.toElement();
-
 		if (not e.isNull())
 		{
 			// Check there are no unknown node attributes

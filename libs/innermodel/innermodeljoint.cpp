@@ -27,8 +27,8 @@ InnerModelJoint::InnerModelJoint() : InnerModelTransform("invalid",QString("stat
 
 InnerModelJoint::InnerModelJoint(QString id_, float lx_, float ly_, float lz_, float hx_, float hy_, float hz_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, float min_, float max_, uint32_t port_, std::string axis_, float home_, InnerModelTransform *parent_) : InnerModelTransform(id_,QString("static"),tx_,ty_,tz_,rx_,ry_,rz_, 0, parent_)
 {
-		#if FCL_SUPPORT==1
-	collisionObject = NULL;
+	#if FCL_SUPPORT==1
+		collisionObject = NULL;
 	#endif
 
 	// 		set(rx_, ry_, rz_, tx_, ty_, tz_);
@@ -188,7 +188,6 @@ QVec InnerModelJoint::unitaryAxis()
 
 InnerModelNode * InnerModelJoint::copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
 {
-	std::cout << id.toStdString() << "--------------------------------: " << getAngle() << std::endl;
 	InnerModelJoint *ret;
 	if (axis == "x")
 	{
@@ -213,13 +212,10 @@ InnerModelNode * InnerModelJoint::copyNode(QHash<QString, InnerModelNode *> &has
 	ret->attributes.clear();
 	hash[id] = ret;
 
-	std::cout << "just before 1 " << id.toStdString() << "--------------------------------: " << ret->getAngle() << ret->backrZ << std::endl;
-
 	for (QList<InnerModelNode*>::iterator i=children.begin(); i!=children.end(); i++)
 	{
 		ret->addChild((*i)->copyNode(hash, ret));
 	}
-	std::cout << "just before " << id.toStdString() << "--------------------------------: " << ret->getAngle() << ret->backrZ << std::endl;
 
 	return ret;
 }

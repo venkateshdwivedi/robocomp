@@ -193,8 +193,8 @@ RMat::RTMat::RTMat(T rx, T ry, T rz, T tx, T ty, T tz, bool XCW, bool YCW, bool 
 	do_inject();
 }
 
-
-RTMat::~RTMat() {
+RTMat::~RTMat() 
+{
 	if(Rx!=NULL)
 	  delete Rx;
 	if(Ry!=NULL)

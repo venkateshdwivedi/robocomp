@@ -21,24 +21,26 @@
 // RoboComp includes
 #include <qmat/QMatAll>
 #include <innermodel/innermodelconfig.h>
+#include <mutex>
 
 #if FCL_SUPPORT==1
-#include <boost/shared_ptr.hpp>
-#include <fcl/collision.h>
-#include <fcl/narrowphase/narrowphase.h>
-#include <fcl/ccd/motion.h>
-#include <fcl/BV/BV.h>
-#include <fcl/BVH/BVH_model.h>
-#include <fcl/shape/geometric_shapes.h>
-#include <fcl/traversal/traversal_node_setup.h>
-#include <fcl/traversal/traversal_node_bvh_shape.h>
-#include <fcl/traversal/traversal_node_bvhs.h>
-typedef fcl::BVHModel<fcl::OBBRSS> FCLModel;
-typedef boost::shared_ptr<FCLModel> FCLModelPtr;
+	#include <boost/shared_ptr.hpp>
+	#include <fcl/collision.h>
+	#include <fcl/narrowphase/narrowphase.h>
+	#include <fcl/ccd/motion.h>
+	#include <fcl/BV/BV.h>
+	#include <fcl/BVH/BVH_model.h>
+	#include <fcl/shape/geometric_shapes.h>
+	#include <fcl/traversal/traversal_node_setup.h>
+	#include <fcl/traversal/traversal_node_bvh_shape.h>
+	#include <fcl/traversal/traversal_node_bvhs.h>
+	typedef fcl::BVHModel<fcl::OBBRSS> FCLModel;
+	typedef boost::shared_ptr<FCLModel> FCLModelPtr;
 #endif
 
 class InnerModel;
-
+typedef std::lock_guard<std::recursive_mutex> Guard;
+	
 class InnerModelNode : public RTMat
 {
 		friend class InnerModelCamera;
@@ -49,6 +51,20 @@ class InnerModelNode : public RTMat
 		InnerModelNode(QString id_, InnerModelNode *parent_=NULL);
 		virtual ~InnerModelNode();
 	
+		mutable std::recursive_mutex mutex;
+		
+		QString getId()
+		{
+			Guard guard(mutex);
+			return id;
+		};
+		void setId(QString id_)
+		{
+			Guard guard(mutex);
+			id = id_;
+		};
+		
+		
 		struct AttributeType
 		{
 			QString type;
@@ -66,16 +82,17 @@ class InnerModelNode : public RTMat
 		bool isFixed();
 		void updateChildren();
 
-		//protected:
 		QString id;
 		int level;
 		bool fixed;
+		QHash<QString, AttributeType> attributes;
 		InnerModel *innerModel;
 		InnerModelNode *parent;
 		QList<InnerModelNode *> children;
-		QHash<QString,AttributeType> attributes;
 
+		//////////////////////
 		// FCLModel
+		//////////////////////
 		bool collidable;
 		#if FCL_SUPPORT==1
 			FCLModelPtr fclMesh;

@@ -43,9 +43,9 @@ class InnerModelTransform : public InnerModelNode
 
 		void print(bool verbose);
 		void save(QTextStream &out, int tabs);
-		void setUpdatePointers(float *tx_, float *ty_, float *tz_, float *rx_, float *ry_, float *rz_);
-		void setUpdateTranslationPointers(float *tx_, float *ty_, float *tz_);
-		void setUpdateRotationPointers(float *rx_, float *ry_, float *rz_);
+// 		void setUpdatePointers(float *tx_, float *ty_, float *tz_, float *rx_, float *ry_, float *rz_);
+// 		void setUpdateTranslationPointers(float *tx_, float *ty_, float *tz_);
+// 		void setUpdateRotationPointers(float *rx_, float *ry_, float *rz_);
 		void update();
 		void update(float tx_, float ty_, float tz_, float rx_, float ry_, float rz_);
 		virtual InnerModelNode *copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
@@ -57,7 +57,6 @@ class InnerModelTransform : public InnerModelNode
 		float backrX, backrY, backrZ;
 		bool gui_translation, gui_rotation;
 		QString engine;
-		QMutex *mutex;
 };
 	
 

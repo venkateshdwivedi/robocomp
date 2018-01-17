@@ -42,6 +42,7 @@ InnerModelTransform::~InnerModelTransform()
 
 void InnerModelTransform::print(bool verbose)
 {
+	Guard guard(mutex);
 	printf("Transform: %s\n", qPrintable(id));
 	if (verbose)
 	{
@@ -53,6 +54,7 @@ void InnerModelTransform::print(bool verbose)
 
 void InnerModelTransform::save(QTextStream &out, int tabs)
 {
+	Guard guard(mutex);
 	QList<InnerModelNode*>::iterator c;
 
 	if (id == "root")
@@ -86,38 +88,39 @@ void InnerModelTransform::save(QTextStream &out, int tabs)
 	}
 }
 
-void InnerModelTransform::setUpdatePointers(float *tx_, float *ty_, float *tz_, float *rx_, float *ry_, float *rz_)
-{
-	tx = tx_;
-	ty = ty_;
-	tz = tz_;
-	rx = rx_;
-	ry = ry_;
-	rz = rz_;
-	fixed = false;
-}
-
-void InnerModelTransform::setUpdateTranslationPointers(float *tx_, float *ty_, float *tz_)
-{
-	tx = tx_;
-	ty = ty_;
-	tz = tz_;
-	fixed = false;
-}
-
-
-
-void InnerModelTransform::setUpdateRotationPointers(float *rx_, float *ry_, float *rz_)
-{
-	rx = rx_;
-	ry = ry_;
-	rz = rz_;
-	fixed = false;
-}
+// void InnerModelTransform::setUpdatePointers(float *tx_, float *ty_, float *tz_, float *rx_, float *ry_, float *rz_)
+// {
+// 	tx = tx_;
+// 	ty = ty_;
+// 	tz = tz_;
+// 	rx = rx_;
+// 	ry = ry_;
+// 	rz = rz_;
+// 	fixed = false;
+// }
+// 
+// void InnerModelTransform::setUpdateTranslationPointers(float *tx_, float *ty_, float *tz_)
+// {
+// 	tx = tx_;
+// 	ty = ty_;
+// 	tz = tz_;
+// 	fixed = false;
+// }
+// 
+// 
+// 
+// void InnerModelTransform::setUpdateRotationPointers(float *rx_, float *ry_, float *rz_)
+// {
+// 	rx = rx_;
+// 	ry = ry_;
+// 	rz = rz_;
+// 	fixed = false;
+// }
 
 
 void InnerModelTransform::update()
 {
+	Guard guard(mutex);
 	if (!fixed)
 	{
 		if (tx) backtX = *tx;
@@ -144,6 +147,7 @@ void InnerModelTransform::update()
  */
 void InnerModelTransform::update(float tx_, float ty_, float tz_, float rx_, float ry_, float rz_)
 {
+	Guard guard(mutex);
 	backrX = rx_; backrY = ry_; backrZ = rz_;
 	backtX = tx_; backtY = ty_; backtZ = tz_;
 	set(backrX, backrY, backrZ, backtX, backtY, backtZ);
@@ -151,8 +155,9 @@ void InnerModelTransform::update(float tx_, float ty_, float tz_, float rx_, flo
 }
 
 
-InnerModelNode * InnerModelTransform::copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
+InnerModelNode* InnerModelTransform::copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
 {
+	Guard guard(mutex);
 	InnerModelTransform *ret = new InnerModelTransform(id, engine, backtX, backtY, backtZ, backrX, backrY, backrZ, mass, parent);
 	ret->level = level;
 	ret->fixed = fixed;
