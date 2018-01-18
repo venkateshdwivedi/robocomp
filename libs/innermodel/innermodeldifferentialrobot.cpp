@@ -27,7 +27,7 @@ InnerModelDifferentialRobot::InnerModelDifferentialRobot(QString id_, float tx_,
 	collide = collide_;
 }
 
-InnerModelNode * InnerModelDifferentialRobot::copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
+InnerModelNode * InnerModelDifferentialRobot::copyNode(ThreadSafeHash<InnerModelNode *> &hash, InnerModelNode *parent)
 {
 	InnerModelDifferentialRobot *ret = new InnerModelDifferentialRobot(id, backtX, backtY, backtZ, backrX, backrY, backrZ, port, noise, (InnerModelTransform *)parent);
 	ret->level = level;

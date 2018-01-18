@@ -21,6 +21,7 @@
 // RoboComp includes
 #include <qmat/QMatAll>
 #include <innermodel/innermodelconfig.h>
+#include <innermodel/threadsafehash.h>
 #include <mutex>
 
 #if FCL_SUPPORT==1
@@ -39,7 +40,8 @@
 #endif
 
 class InnerModel;
-typedef std::lock_guard<std::recursive_mutex> Guard;
+	
+typedef std::lock_guard<std::recursive_mutex> Lock;
 	
 class InnerModelNode : public RTMat
 {
@@ -55,12 +57,12 @@ class InnerModelNode : public RTMat
 		
 		QString getId()
 		{
-			Guard guard(mutex);
+			Lock lock(mutex);
 			return id;
 		};
 		void setId(QString id_)
 		{
-			Guard guard(mutex);
+			Lock lock(mutex);
 			id = id_;
 		};
 		
@@ -74,7 +76,9 @@ class InnerModelNode : public RTMat
 		void treePrint(QString s, bool verbose=false);
 		virtual void print(bool verbose) = 0;
 		virtual void update() = 0;
-		virtual InnerModelNode *copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent) = 0;
+		//virtual InnerModelNode *copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent) = 0;
+		virtual InnerModelNode *copyNode(ThreadSafeHash<InnerModelNode *> &hash, InnerModelNode *parent) = 0;
+	
 		virtual void save(QTextStream &out, int tabs) = 0;
 		void setParent(InnerModelNode *parent_);
 		void addChild(InnerModelNode *child);

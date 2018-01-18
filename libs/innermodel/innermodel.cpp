@@ -52,7 +52,7 @@ InnerModel::InnerModel()
 	root->parent = NULL;
 	setRoot(root);
 	root->innerModel = this;
-	hash["root"] = root;
+	hash.put("root",root);
 }
 
 InnerModel::InnerModel(const InnerModel &original)
@@ -60,8 +60,8 @@ InnerModel::InnerModel(const InnerModel &original)
 	root = new InnerModelTransform("root", "static", 0, 0, 0, 0, 0, 0, 0);
 	setRoot(root);
 	root->innerModel = this;
-	hash["root"] = root;
-
+	hash.put("root",root);
+	
 	QList<InnerModelNode *>::iterator i;
 	for (i=original.root->children.begin(); i!=original.root->children.end(); i++)
 	{
@@ -75,7 +75,7 @@ InnerModel::InnerModel(InnerModel &original)
 	root = new InnerModelTransform("root", "static", 0, 0, 0, 0, 0, 0, 0);
 	setRoot(root);
 	root->innerModel = this;
-	hash["root"] = root;
+	hash.put("root", root);
 
 	QList<InnerModelNode *>::iterator i;
 	for (i=original.root->children.begin(); i!=original.root->children.end(); i++)
@@ -90,7 +90,7 @@ InnerModel::InnerModel(InnerModel *original)
 	root = new InnerModelTransform("root", "static", 0, 0, 0, 0, 0, 0, 0);
 	setRoot(root);
 	root->innerModel = this;
-	hash["root"] = root;
+	hash.put("root", root);
 
 	QList<InnerModelNode *>::iterator i;
 	for (i=original->root->children.begin(); i!=original->root->children.end(); i++)
@@ -125,7 +125,6 @@ InnerModel* InnerModel::copy()
 
 void InnerModel::removeNode(const QString & id)  ///Que pasa con los hijos y el padre?
 {
-	
 	InnerModelNode *dd = hash[id];
 	delete dd;
 	hash.remove(id);
@@ -242,6 +241,18 @@ void InnerModel::updateTransformValues(QString transformId, float tx, float ty, 
 {
 	cleanupTables();
 	InnerModelTransform *aux = dynamic_cast<InnerModelTransform *>(hash[transformId]);
+	InnerModelTransform *auxParent = dynamic_cast<InnerModelTransform *>(hash[parentId]);
+	if (aux != NULL)
+		aux->transformValues(getTransformationMatrix(hash[transformId]->parent->id,parentId), tx, ty, tz, rx, ry, rz, auxParent);
+	else if (hash[transformId] == NULL)
+		qDebug() << __FUNCTION__ << "There is no such" << transformId << "node";
+}
+
+/*
+void InnerModel::updateTransformValues(QString transformId, float tx, float ty, float tz, float rx, float ry, float rz, QString parentId)
+{
+	cleanupTables();
+	InnerModelTransform *aux = dynamic_cast<InnerModelTransform *>(hash[transformId]);
 	if (aux != NULL)
 	{
 		if (parentId != "")
@@ -280,7 +291,7 @@ void InnerModel::updateTransformValues(QString transformId, float tx, float ty, 
 	{
 		qDebug() << __FUNCTION__ << "There is no such" << transformId << "node";
 	}
-}
+}*/
 
 void InnerModel::updateTransformValuesS(std::string transformId, float tx, float ty, float tz, float rx, float ry, float rz, std::string parentId)
 {
@@ -292,7 +303,6 @@ void InnerModel::updateTransformValuesS(std::string transformId, QVec v, std::st
 		updateTransformValues(QString::fromStdString(transformId), v(0), v(1), v(2), v(3), v(4), v(5), QString::fromStdString(parentId));
 }
 
-
 void InnerModel::updateTransformValues(QString transformId, QVec v, QString parentId)
 {
 		updateTransformValues(transformId, v(0), v(1), v(2), v(3), v(4), v(5), parentId);
@@ -300,7 +310,6 @@ void InnerModel::updateTransformValues(QString transformId, QVec v, QString pare
 
 void InnerModel::updatePlaneValues(QString planeId, float nx, float ny, float nz, float px, float py, float pz)
 {
-	
 	cleanupTables();
 
 	InnerModelPlane *plane = dynamic_cast<InnerModelPlane *>(hash[planeId]);
@@ -315,8 +324,7 @@ void InnerModel::updatePlaneValues(QString planeId, float nx, float ny, float nz
 }
 
 void InnerModel::updateTranslationValues(QString transformId, float tx, float ty, float tz, QString parentId)
-{
-	
+{	
 	cleanupTables();
 
 	InnerModelTransform *aux = dynamic_cast<InnerModelTransform *>(hash[transformId]);
@@ -335,7 +343,6 @@ void InnerModel::updateTranslationValues(QString transformId, float tx, float ty
 
 void InnerModel::updateRotationValues(QString transformId, float rx, float ry, float rz, QString parentId)
 {
-	
 	cleanupTables();
 
 	InnerModelTransform *aux = dynamic_cast<InnerModelTransform *>(hash[transformId]);
@@ -391,7 +398,7 @@ void InnerModel::setRoot(InnerModelNode *node)
 {
 	
 	root = node;
-	hash["root"] = root;
+	hash.put("root", root);
 	root->parent=NULL;
 }
 
@@ -405,8 +412,7 @@ InnerModelJoint *InnerModel::newJoint(QString id, InnerModelTransform *parent,fl
 		throw error;
 	}
 	InnerModelJoint *newnode = new InnerModelJoint(id,lx,ly,lz,hx,hy,hz, tx, ty, tz, rx, ry, rz, min, max, port, axis, home, parent);
-	hash[id] = newnode;
-// 	parent->addChild(newnode);
+	hash[id] = newnode; 
 	return newnode;
 }
 

@@ -11,11 +11,12 @@
 #include <mutex>
 
 // RoboComp includes
-#include <qmat/qmat.h>
-#include <qmat/qvec.h>
-#include <qmat/qcamera.h>
-#include <qmat/qrtmat.h>
-#include <qmat/qfundamental.h>
+#include <qmat/QMatAll>
+// #include <qmat/qmat.h>
+// #include <qmat/qvec.h>
+// #include <qmat/qcamera.h>
+// #include <qmat/qrtmat.h>
+// #include <qmat/qfundamental.h>
 
 //Derived and auxiliary classes
 #include <innermodel/innermodelconfig.h>
@@ -35,6 +36,7 @@
 #include <innermodel/innermodelimu.h>
 #include <innermodel/innermodelpointcloud.h>
 #include <innermodel/innermodeltouchsensor.h>
+#include <innermodel/threadsafehash.h>
 
 #if FCL_SUPPORT==1
 #include <boost/shared_ptr.hpp>
@@ -55,6 +57,8 @@ typedef boost::shared_ptr<FCLModel> FCLModelPtr;
 #ifdef PYTHON_BINDINGS_SUPPORT
 #include <boost/python/stl_iterator.hpp>
 #endif
+
+
 
 using namespace RMat;
 
@@ -138,20 +142,14 @@ class InnerModel
 		InnerModelMesh *getMesh(const QString &id)                           { return getNode<InnerModelMesh>(id); }
 		InnerModelPointCloud *getPointCloud(const QString &id)               { return getNode<InnerModelPointCloud>(id); }
 		QList<QString> getIDKeys() {return hash.keys(); }
-		InnerModelNode *getNode(const QString & id) const { /*QMutexLocker ml(mutex); */if (hash.contains(id)) return hash[id]; else return NULL;}
-		template <class N> N* getNode(const QString &id) const
+		InnerModelNode *getNode(const QString & id) 	 					 { if (hash.contains(id)) return hash.get(id); else return NULL;}
+		template <class N> N* getNode(const QString &id) 
 		{
 			N* r = dynamic_cast<N *>(getNode(id));
-			if (not r)
-			{
-				QString error;
-				if (not hash[id])
-					error.sprintf("getNode() error: No such node %s", id.toStdString().c_str());
-				throw error;
-			}
+			if (r == nullptr)
+				throw QString("InnerModel::getNode() error: No such node: " + id);
 			return r;
 		}
-		
 		///////////////////////////////////
 		/// Kinematic transformation methods
 		////////////////////////////////////
@@ -254,11 +252,16 @@ class InnerModel
 
 	protected:
 		InnerModelNode *root;
-		QHash<QString, InnerModelNode *> hash;
+		/*QHash<QString, InnerModelNode *> hash;
 		QHash<QPair<QString, QString>, RTMat> localHashTr;
 		QHash<QPair<QString, QString>, QMat> localHashRot;
+		*/
+		ThreadSafeHash<InnerModelNode*> hash;
+		ThreadSafeHash<RTMat> localHashRot;
+		ThreadSafeHash<QMat> localHashTr;
 
 		void setLists(const QString &origId, const QString &destId);
 		QList<InnerModelNode *> listA, listB;
 };
+
 #endif
