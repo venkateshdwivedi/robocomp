@@ -50,14 +50,14 @@ void InnerModelCamera::update()
 	updateChildren();
 }
 
-InnerModelNode * InnerModelCamera::copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
+InnerModelNode * InnerModelCamera::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
 {
 	InnerModelCamera *ret = new InnerModelCamera(id, width, height, focal, innermodel, parent);
 	ret->level = level;
 	ret->fixed = fixed;
 	ret->children.clear();
 	ret->attributes.clear();
-	hash[id] = ret;
+	hash.put(id,ret);
 
 	ret->camera = camera;
 

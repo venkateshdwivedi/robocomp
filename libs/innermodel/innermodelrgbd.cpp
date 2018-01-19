@@ -41,14 +41,14 @@ void InnerModelRGBD::save(QTextStream &out, int tabs)
 }
 
 
-InnerModelNode * InnerModelRGBD::copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
+InnerModelNode * InnerModelRGBD::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
 {
 	InnerModelRGBD *ret = new InnerModelRGBD(id, width, height, focal, noise, port, ifconfig, innermodel, parent);
 	ret->level = level;
 	ret->fixed = fixed;
 	ret->children.clear();
 	ret->attributes.clear();
-	hash[id] = ret;
+	hash.put(id,ret);
 
 	for (QList<InnerModelNode*>::iterator i=children.begin(); i!=children.end(); i++)
 	{

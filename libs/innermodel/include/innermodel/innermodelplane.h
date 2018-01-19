@@ -33,7 +33,7 @@ class InnerModelPlane : public InnerModelNode
 		void setUpdatePointers(float *nx_, float *ny_, float *nz_, float *px_, float *py_, float *pz_);
 		void update();
 		void update(float nx_, float ny_, float nz_, float px_, float py_, float pz_);
-		virtual InnerModelNode *copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
+		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
 
 		QVec normal, point;
 		QString texture;

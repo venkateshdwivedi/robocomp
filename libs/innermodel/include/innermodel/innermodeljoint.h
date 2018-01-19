@@ -34,7 +34,7 @@ class InnerModelJoint : public InnerModelTransform
 		float getAngle();
 		float setAngle(float angle, bool force=false);
 		QVec unitaryAxis();
-		virtual InnerModelNode *copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
+		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
 
 		float *lx, *ly, *lz;
 		float *hx, *hy, *hz;

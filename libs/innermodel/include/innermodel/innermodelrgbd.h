@@ -27,7 +27,7 @@ class InnerModelRGBD : public InnerModelCamera
 	public:
 		InnerModelRGBD(QString id_, float width, float height, float focal, float _noise, uint32_t _port, QString _ifconfig, InnerModel *innermdoel_, InnerModelNode *parent_=NULL);
 		void save(QTextStream &out, int tabs);
-		virtual InnerModelNode *copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
+		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
 	
 		float noise;
 		uint32_t port;

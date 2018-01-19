@@ -27,14 +27,14 @@ InnerModelOmniRobot::InnerModelOmniRobot(QString id_, float tx_, float ty_, floa
 	collide = collide_;
 }
 
-InnerModelNode * InnerModelOmniRobot::copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
+InnerModelNode * InnerModelOmniRobot::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
 {
 	InnerModelOmniRobot *ret = new InnerModelOmniRobot(id, backtX, backtY, backtZ, backrX, backrY, backrZ, port, noise, (InnerModelTransform *)parent);
 	ret->level = level;
 	ret->fixed = fixed;
 	ret->children.clear();
 	ret->attributes.clear();
-	hash[id] = ret;
+	hash.put(id,ret);
 
 	for (QList<InnerModelNode*>::iterator i=children.begin(); i!=children.end(); i++)
 	{

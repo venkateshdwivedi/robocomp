@@ -44,14 +44,14 @@ void InnerModelPointCloud::update()
 	updateChildren();
 }
 
-InnerModelNode * InnerModelPointCloud::copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
+InnerModelNode * InnerModelPointCloud::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
 {
 	InnerModelPointCloud *ret = new InnerModelPointCloud(id, parent);
 	ret->level = level;
 	ret->fixed = fixed;
 	ret->children.clear();
 	ret->attributes.clear();
-	hash[id] = ret;
+	hash.put(id,ret);
 
 	for (QList<InnerModelNode*>::iterator i=children.begin(); i!=children.end(); i++)
 	{

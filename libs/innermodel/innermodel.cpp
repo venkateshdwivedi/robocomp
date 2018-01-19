@@ -412,7 +412,7 @@ InnerModelJoint *InnerModel::newJoint(QString id, InnerModelTransform *parent,fl
 		throw error;
 	}
 	InnerModelJoint *newnode = new InnerModelJoint(id,lx,ly,lz,hx,hy,hz, tx, ty, tz, rx, ry, rz, min, max, port, axis, home, parent);
-	hash[id] = newnode; 
+	hash.put(id,newnode); 
 	return newnode;
 }
 
@@ -426,8 +426,7 @@ InnerModelTouchSensor *InnerModel::newTouchSensor(QString id, InnerModelTransfor
 		throw error;
 	}
 	InnerModelTouchSensor *newnode = new InnerModelTouchSensor(id, stype, nx, ny, nz, min, max, port, parent);
-	hash[id] = newnode;
-// 	parent->addChild(newnode);
+	hash.put(id,newnode);
 	return newnode;
 }
 
@@ -441,8 +440,7 @@ InnerModelPrismaticJoint *InnerModel::newPrismaticJoint(QString id, InnerModelTr
 		throw error;
 	}
 	InnerModelPrismaticJoint *newnode = new InnerModelPrismaticJoint(id, min, max, value, offset, port, axis, home, parent);
-	hash[id] = newnode;
-// 	parent->addChild(newnode);
+	hash.put(id,newnode);
 	return newnode;
 }
 
@@ -456,8 +454,7 @@ InnerModelDifferentialRobot *InnerModel::newDifferentialRobot(QString id, InnerM
 		throw error;
 	}
 	InnerModelDifferentialRobot *newnode = new InnerModelDifferentialRobot(id, tx, ty, tz, rx, ry, rz, port, noise, collide, parent);
-	hash[id] = newnode;
-// 	parent->addChild(newnode);
+	hash.put(id,newnode);
 	return newnode;
 }
 
@@ -471,8 +468,7 @@ InnerModelOmniRobot *InnerModel::newOmniRobot(QString id, InnerModelTransform *p
 		throw error;
 	}
 	InnerModelOmniRobot *newnode = new InnerModelOmniRobot(id, tx, ty, tz, rx, ry, rz, port, noise, collide, parent);
-	hash[id] = newnode;
-// 	parent->addChild(newnode);
+	hash.put(id,newnode);
 	return newnode;
 }
 
@@ -486,8 +482,7 @@ InnerModelCamera *InnerModel::newCamera(QString id, InnerModelNode *parent, floa
 		throw error;
 	}
 	InnerModelCamera *newnode = new InnerModelCamera(id, width, height, focal, this, parent);
-	hash[id] = newnode;
-// 	parent->addChild(newnode);
+	hash.put(id,newnode);
 	return newnode;
 }
 
@@ -507,8 +502,7 @@ InnerModelRGBD *InnerModel::newRGBD(QString id, InnerModelNode *parent, float wi
 		throw error;
 	}
 	InnerModelRGBD *newnode = new InnerModelRGBD(id, width, height, focal, noise, port, ifconfig, this, parent);
-	hash[id] = newnode;
-// 	parent->addChild(newnode);
+	hash.put(id,newnode);
 	return newnode;
 }
 
@@ -523,8 +517,7 @@ InnerModelIMU *InnerModel::newIMU(QString id, InnerModelNode *parent, uint32_t p
 	}
 	// 	printf("newIMU id=%s  parentId=%s port=%d\n", id.toStdString().c_str(), parent->id.toStdString().c_str(), port);
 	InnerModelIMU *newnode = new InnerModelIMU(id, port, parent);
-	hash[id] = newnode;
-// 	parent->addChild(newnode);
+	hash.put(id,newnode);
 	return newnode;
 }
 
@@ -538,8 +531,7 @@ InnerModelLaser *InnerModel::newLaser(QString id, InnerModelNode *parent, uint32
 		throw error;
 	}
 	InnerModelLaser *newnode = new InnerModelLaser(id, port, min, max, angle, measures, ifconfig, this, parent);
-	hash[id] = newnode;
-// 	parent->addChild(newnode);
+	hash.put(id,newnode);
 	return newnode;
 }
 
@@ -553,8 +545,7 @@ InnerModelPlane *InnerModel::newPlane(QString id, InnerModelNode *parent, QStrin
 		throw error;
 	}
 	InnerModelPlane *newnode = new InnerModelPlane(id, texture, width, height, depth, repeat, nx, ny, nz, px, py, pz, collidable, parent);
-	hash[id] = newnode;
-// 	parent->addChild(newnode);
+	hash.put(id,newnode);
 	return newnode;
 }
 
@@ -568,8 +559,7 @@ InnerModelMesh *InnerModel::newMesh(QString id, InnerModelNode *parent, QString 
 		throw error;
 	}
 	InnerModelMesh *newnode = new InnerModelMesh(id, path, scalex, scaley, scalez, (InnerModelMesh::RenderingModes)render, tx, ty, tz, rx, ry, rz, collidable, parent);
-	hash[id] = newnode;
-// 	parent->addChild(newnode);
+	hash.put(id,newnode);
 	return newnode;
 }
 
@@ -589,9 +579,7 @@ InnerModelPointCloud *InnerModel::newPointCloud(QString id, InnerModelNode *pare
 		throw error;
 	}
 	InnerModelPointCloud *newnode = new InnerModelPointCloud(id, parent);
-	hash[id] = newnode;
-	//printf("Inserted point cloud %s ptr(%p), on node %s\n", id.toStdString().c_str(), newnode, parent->id.toStdString().c_str());
-// 	parent->addChild(newnode);
+	hash.put(id,newnode);
 	return newnode;
 }
 
@@ -605,9 +593,7 @@ InnerModelTransform *InnerModel::newTransform(QString id, QString engine, InnerM
 		throw error;
 	}
 	InnerModelTransform *newnode = new InnerModelTransform(id, engine, tx, ty, tz, rx, ry, rz, mass, parent);
-	hash[id] = newnode;
-// 	std::cout << (void *)newnode << "  " << (uint64_t)newnode << std::endl;
-// 	parent->addChild(newnode);
+	hash.put(id,newnode);
 	return newnode;
 }
 
@@ -661,23 +647,24 @@ RTMat InnerModel::getTransformationMatrix(const QString &to, const QString &from
 {
 	RTMat ret;
 
-	
 	if (localHashTr.contains(QPair<QString, QString>(to, from)))
 	{
-		ret = localHashTr[QPair<QString, QString>(to, from)];
+		ret = localHashTr.get(QPair<QString, QString>(to, from));
 	}
 	else
 	{
 		setLists(from, to);
-		foreach (InnerModelNode *i, listA)
+		//foreach (InnerModelNode *i, listA)
+		for(int i=0; i<listA.size(); i++)
 		{
-			ret = ((RTMat)(*i)).operator*(ret);
+			ret = ((RTMat)(listA[i])).operator*(ret);
 		}
-		foreach (InnerModelNode *i, listB)
+		//foreach (InnerModelNode *i, listB)
+		for(int i=0; i<listB.size(); i++)
 		{
-			ret = i->invert() * ret;
+			ret = listB[i]->invert() * ret;
 		}
-		localHashTr[QPair<QString, QString>(to, from)] = ret;
+		localHashTr.put(QPair<QString, QString>(to, from),ret);
 	}
 	return RTMat(ret);
 }
@@ -687,13 +674,9 @@ RTMat InnerModel::getTransformationMatrixS(const std::string &destId, const std:
 	return getTransformationMatrix(QString::fromStdString(destId), QString::fromStdString(origId));
 }
 
-
 QMat InnerModel::getRotationMatrixTo(const QString &to, const QString &from)
 {
 	QMat rret = QMat::identity(3);
-
-	
-
 	if (localHashRot.contains(QPair<QString, QString>(to, from)))
 	{
 		rret = localHashRot[QPair<QString, QString>(to, from)];
@@ -703,16 +686,18 @@ QMat InnerModel::getRotationMatrixTo(const QString &to, const QString &from)
 		setLists(from, to);
 		InnerModelTransform *tf=NULL;
 
-		foreach (InnerModelNode *i, listA)
+		//foreach (InnerModelNode *i, listA)
+		for(int i=0; i<listA.size(); i++)
 		{
-			if ((tf=dynamic_cast<InnerModelTransform *>(i))!=NULL)
+			if ((tf=dynamic_cast<InnerModelTransform *>(listA[i]))!=NULL)
 			{
 				rret = tf->getR() * rret;
 			}
 		}
-		foreach (InnerModelNode *i, listB)
+		for(int i=0; i<listB.size(); i++)
+		//foreach (InnerModelNode *i, listB)
 		{
-			if ((tf=dynamic_cast<InnerModelTransform *>(i))!=NULL)
+			if ((tf=dynamic_cast<InnerModelTransform *>(listB[i]))!=NULL)
 			{
 				rret = tf->getR().transpose() * rret;
 			}
@@ -731,7 +716,6 @@ QVec InnerModel::getTranslationVectorTo(const QString &to, const QString &from)
 
 void InnerModel::setLists(const QString & origId, const QString & destId)
 {
-	
 	InnerModelNode *a=hash[origId], *b=hash[destId];
 	if (!a)
 		throw InnerModelException("Cannot find node: \""+ origId.toStdString()+"\"");

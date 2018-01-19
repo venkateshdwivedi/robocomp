@@ -31,7 +31,7 @@ class InnerModelPrismaticJoint : public InnerModelTransform
 		void update();
 		float getPosition();
 		float setPosition(float v);
-		virtual InnerModelNode *copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
+		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
 
 		float value, offset;
 		float min, max;

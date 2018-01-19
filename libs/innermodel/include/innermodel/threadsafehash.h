@@ -23,16 +23,51 @@
 typedef std::lock_guard<std::recursive_mutex> Lock;
 
 template <typename Val>
+class ThreadSafeList
+{
+	public:
+		ThreadSafeList(){};
+		void clear()
+		{
+			Lock lock(mutex);
+			list.clear();
+		};
+		void push_back(const Val &v)
+		{
+			Lock lock(mutex);
+			list.push_back(v);
+		};
+		void push_front(const Val &v)
+		{
+			Lock lock(mutex);
+			list.push_front(v);
+		};
+		Val operator[](int i)
+		{
+			Lock lock(mutex);
+			return list[i];
+		};
+		bool size()
+		{
+			Lock lock(mutex);
+			return list.size();
+		};
+	private:
+		std::recursive_mutex mutex;
+		QList<Val> list;
+};
+
+template <typename Key, typename Val>
 class ThreadSafeHash
 {
 	public:
 		ThreadSafeHash(){};
-		void put(const QString &key, Val v)
+		void put(const Key &key, Val v)
 		{
 			Lock lock(mutex);
 			hash[key] = v;
 		}
-		Val get(const QString &key)
+		Val get(const Key &key)
 		{
 			Lock lock(mutex);
 			return hash[key];
@@ -42,24 +77,29 @@ class ThreadSafeHash
 			Lock lock(mutex);
 			hash.clear();
 		}
-		QList<QString> keys()
+		QList<Key> keys()
 		{
 			Lock lock(mutex);
 			return hash.keys();
 		}
-		bool contains(const QString &key) 
+		bool contains(const Key &key) 
 		{
 			Lock lock(mutex);
 			return hash.contains(key);
 		}
-		Val operator[](const QString &key)
+		Val operator[](const Key &key)
 		{
 			Lock lock(mutex);
 			return hash[key];
 		}
+		void remove(const Key &key)
+		{
+			Lock lock(mutex);
+			hash.remove(key);
+		}
 	private:
 		std::recursive_mutex mutex;
-		QHash<QString, Val> hash;
+		QHash<Key, Val> hash;
 };
 
 #endif // THREADSAFEHASH_H

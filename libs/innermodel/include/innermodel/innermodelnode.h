@@ -77,7 +77,7 @@ class InnerModelNode : public RTMat
 		virtual void print(bool verbose) = 0;
 		virtual void update() = 0;
 		//virtual InnerModelNode *copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent) = 0;
-		virtual InnerModelNode *copyNode(ThreadSafeHash<InnerModelNode *> &hash, InnerModelNode *parent) = 0;
+		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent) = 0;
 	
 		virtual void save(QTextStream &out, int tabs) = 0;
 		void setParent(InnerModelNode *parent_);

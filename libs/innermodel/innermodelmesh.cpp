@@ -152,14 +152,14 @@ bool InnerModelMesh::wireframeRendering() const {
 	return render == WireframeRendering;
 }
 
-InnerModelNode * InnerModelMesh::copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
+InnerModelNode * InnerModelMesh::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
 {
 	InnerModelMesh *ret = new InnerModelMesh(id, meshPath, scalex, scaley, scalez, render, tx, ty, tz, rx, ry, rz, parent);
 	ret->level = level;
 	ret->fixed = fixed;
 	ret->children.clear();
 	ret->attributes.clear();
-	hash[id] = ret;
+	hash.put(id,ret);
 
 #if FCL_SUPPORT==1
 	// Associate the read vertices and triangles vectors to the FCL collision model object

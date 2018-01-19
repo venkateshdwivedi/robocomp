@@ -152,7 +152,7 @@ class InnerModelMesh : public InnerModelNode
 			void setScale(float x, float y, float z);
 			bool normalRendering() const;
 			bool wireframeRendering() const;
-			virtual InnerModelNode *copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
+			virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
 
 			RenderingModes render;
 			QString meshPath;

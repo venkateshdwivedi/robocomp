@@ -29,7 +29,7 @@ class InnerModelCamera : public InnerModelNode
 		void print(bool verbose);
 		void save(QTextStream &out, int tabs);
 		void update();
-		virtual InnerModelNode *copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
+		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
 
 		Cam camera;
 		float width, height, focal;

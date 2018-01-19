@@ -58,7 +58,7 @@ typedef boost::shared_ptr<FCLModel> FCLModelPtr;
 #include <boost/python/stl_iterator.hpp>
 #endif
 
-
+typedef std::lock_guard<std::recursive_mutex> Lock;
 
 using namespace RMat;
 
@@ -141,7 +141,7 @@ class InnerModel
 		InnerModelPlane *getPlane(const QString &id)                         { return getNode<InnerModelPlane>(id); }
 		InnerModelMesh *getMesh(const QString &id)                           { return getNode<InnerModelMesh>(id); }
 		InnerModelPointCloud *getPointCloud(const QString &id)               { return getNode<InnerModelPointCloud>(id); }
-		QList<QString> getIDKeys() {return hash.keys(); }
+		QList<QString> getIDKeys() 											 { return hash.keys(); }
 		InnerModelNode *getNode(const QString & id) 	 					 { if (hash.contains(id)) return hash.get(id); else return NULL;}
 		template <class N> N* getNode(const QString &id) 
 		{
@@ -256,12 +256,13 @@ class InnerModel
 		QHash<QPair<QString, QString>, RTMat> localHashTr;
 		QHash<QPair<QString, QString>, QMat> localHashRot;
 		*/
-		ThreadSafeHash<InnerModelNode*> hash;
-		ThreadSafeHash<RTMat> localHashRot;
-		ThreadSafeHash<QMat> localHashTr;
+		ThreadSafeHash<QString, InnerModelNode*> hash;
+		ThreadSafeHash<QPair<QString, QString>, RTMat> localHashTr;
+		ThreadSafeHash<QPair<QString, QString>, QMat> localHashRot;
 
 		void setLists(const QString &origId, const QString &destId);
-		QList<InnerModelNode *> listA, listB;
+		//QList<InnerModelNode *> listA, listB;
+		ThreadSafeList<InnerModelNode *> listA, listB;
 };
 
 #endif

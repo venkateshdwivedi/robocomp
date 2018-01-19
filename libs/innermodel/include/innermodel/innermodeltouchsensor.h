@@ -28,7 +28,7 @@ class InnerModelTouchSensor :public InnerModelNode
 		void save(QTextStream &out, int tabs) {}
 		QVec getMeasure() { return value; }
 		void update() {}
-		virtual InnerModelNode *copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
+		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
 
 		float nx, ny, nz;
 		float min, max;

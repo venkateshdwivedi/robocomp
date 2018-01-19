@@ -186,7 +186,7 @@ QVec InnerModelJoint::unitaryAxis()
 	return QVec::zeros(3);
 }
 
-InnerModelNode * InnerModelJoint::copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
+InnerModelNode * InnerModelJoint::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
 {
 	InnerModelJoint *ret;
 	if (axis == "x")
@@ -210,7 +210,7 @@ InnerModelNode * InnerModelJoint::copyNode(QHash<QString, InnerModelNode *> &has
 	ret->fixed = fixed;
 	ret->children.clear();
 	ret->attributes.clear();
-	hash[id] = ret;
+	hash.put(id,ret);
 
 	for (QList<InnerModelNode*>::iterator i=children.begin(); i!=children.end(); i++)
 	{

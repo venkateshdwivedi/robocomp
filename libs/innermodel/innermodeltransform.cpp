@@ -126,7 +126,7 @@ void InnerModelTransform::update(float tx_, float ty_, float tz_, float rx_, flo
 }
 
 
-InnerModelNode* InnerModelTransform::copyNode(ThreadSafeHash<InnerModelNode *> &hash, InnerModelNode *parent)
+InnerModelNode* InnerModelTransform::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
 {
 	Lock lock(mutex);
 	InnerModelTransform *ret = new InnerModelTransform(id, engine, backtX, backtY, backtZ, backrX, backrY, backrZ, mass, parent);
