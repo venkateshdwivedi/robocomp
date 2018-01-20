@@ -82,11 +82,16 @@ class InnerModel
 		~InnerModel();
 
 		/////////////////////////////////
-		//// Aux
+		//// Auxiliary methods
 		/////////////////////////////////
 		bool open(std::string xmlFilePath);
 		bool save(QString path);
 		InnerModel* copy();
+		void print(QString s="")							 { treePrint(s, true); }
+		void treePrint(QString s="", bool verbose=false)	 { root->treePrint(QString(s), verbose); }
+		//Thread safe
+		QString getParentIdentifier(QString id);
+		std::string getParentIdentifierS(const std::string &id);
 
 		///////////////////////
 		/// Tree update methods
@@ -123,7 +128,7 @@ class InnerModel
 		InnerModelPointCloud* newPointCloud(QString id, InnerModelNode *parent);
 
 		////////////////////////////////
-		/// Accessors
+		/// NOT thread safe Accessors. Use template class  getNodeSafeAndLock() below
 		///////////////////////////////
 		InnerModelTransform *getTransform(const QString &id)                 { return getNode<InnerModelTransform>(id); }
 		InnerModelJoint *getJoint(const QString &id)                         { return getNode<InnerModelJoint>(id); }
@@ -142,30 +147,44 @@ class InnerModel
 		InnerModelMesh *getMesh(const QString &id)                           { return getNode<InnerModelMesh>(id); }
 		InnerModelPointCloud *getPointCloud(const QString &id)               { return getNode<InnerModelPointCloud>(id); }
 		QList<QString> getIDKeys() 											 { return hash.keys(); }
-		InnerModelNode *getNode(const QString & id) 	 					 { if (hash.contains(id)) return hash.get(id); else return NULL;}
+		InnerModelNode *getNode(const QString & id) 	 					 { return hash.checkandget(id); }
 		template <class N> N* getNode(const QString &id) 
 		{
-			N* r = dynamic_cast<N *>(getNode(id));
-			if (r == nullptr)
-				throw QString("InnerModel::getNode() error: No such node: " + id);
+			N* r = dynamic_cast<N *>(hash.checkandget(id));
+// 			if (r == nullptr)
+// 				throw InnerModelException("InnerModel::getNode() Error getting non existing node: " + id.toStdString());
 			return r;
 		}
-		///////////////////////////////////
-		/// Kinematic transformation methods
-		////////////////////////////////////
+		// Thread safe node getter. It might be null
+		template <class N> N* getNodeSafe(const QString &id) 
+		{
+			return dynamic_cast<N *>(hash.checkandget(id));
+		}
+		// Thread safe node getter that returns a locked node. 
+		template <class N> N* getNodeSafeAndLock(const QString &id) 
+		{
+			N* r = dynamic_cast<N *>(hash.checkandgetandlock(id));
+// 			if (r == nullptr)
+// 				throw InnerModelException("InnerModel::getNodeSafeAndLock() Error getting non existing node: " + id.toStdString());
+			return r;	
+		}
+		
+		////////////////////////////////////////////////////////////////////////
+		/// Thread safe kinematic transformation methods
+		/// Transformation is guaranteed to occur with existing, stable nodes but the final result might correspond to nodes no longer existing in the tree
+		////////////////////////////////////////////////////////////////////////
 		QVec transform(  const QString & destId, const QVec &origVec, const QString & origId);
-		QVec transform(  const QString &destId, const QString & origId) { return transform(destId, QVec::vec3(0,0,0), origId); };
+		QVec transform(  const QString &destId, const QString & origId) 								{ return transform(destId, QVec::vec3(0,0,0), origId); };
 		QVec transformS( const std::string &destId, const QVec &origVec, const std::string & origId);
-		QVec transformS( const std::string &destId, const std::string &origId) { return transform(QString::fromStdString(destId), QVec::vec3(0,0,0), QString::fromStdString(origId)); }
-		QVec transform6D(const QString &destId, const QVec &origVec, const QString & origId) { Q_ASSERT(origVec.size() == 6); return transform(destId, origVec, origId); }
-		QVec transform6D(const QString &destId, const QString & origId) { return transform(destId, QVec::vec6(0,0,0,0,0,0), origId); }
-		QVec transformS6D(const std::string &destId, const std::string & origId) 
-			{ return transform(QString::fromStdString(destId), QVec::vec6(0,0,0,0,0,0), QString::fromStdString(origId)); }
-		QVec transformS6D(const std::string &destId, const QVec &origVec, const std::string & origId) 
-			{ return transform(QString::fromStdString(destId), origVec, QString::fromStdString(origId)); }
+		QVec transformS( const std::string &destId, const std::string &origId)							{ return transform(QString::fromStdString(destId), QVec::vec3(0,0,0), QString::fromStdString(origId)); }
+		QVec transform6D(const QString &destId, const QVec &origVec, const QString & origId)			{ return transform(destId, origVec, origId); }
+		QVec transform6D(const QString &destId, const QString & origId) 								{ return transform(destId, QVec::vec6(0,0,0,0,0,0), origId); }
+		QVec transformS6D(const std::string &destId, const std::string & origId) 						{ return transform(QString::fromStdString(destId), QVec::vec6(0,0,0,0,0,0), QString::fromStdString(origId)); }
+		QVec transformS6D(const std::string &destId, const QVec &origVec, const std::string & origId)	{ return transform(QString::fromStdString(destId), origVec, QString::fromStdString(origId)); }
 		
 		////////////////////////////////////////////
-		/// Transformation matrix retrieval methods
+		/// Thread safe transformation matrix retrieval methods
+		/// Transformation is guaranteed to occur with existing, stable nodes but the final result might correspond to nodes no longer existing in the tree
 		///////////////////////////////////////////
 		RTMat getTransformationMatrix(const QString &destId, const QString &origId);
 		RTMat getTransformationMatrixS(const std::string &destId, const std::string &origId);
@@ -183,16 +202,14 @@ class InnerModel
 		void getSubTree(InnerModelNode *node, QList<InnerModelNode *> *l);
 		void computeLevels(InnerModelNode *node);
 		InnerModelNode *getRoot() { return root; }
-		QString getParentIdentifier(QString id);
-		std::string getParentIdentifierS(std::string id);
-
+	
 		/////////////////////
 		/// Set debug level
 		/////////////////////
 		int debugLevel(int level=-1) { static int debug_level=0; if (level>-1) debug_level=level; return debug_level; }
 
 		////////////////////////////
-		// FCL related
+		// Thread safe FCL related
 		////////////////////////////
 		bool collidable(const QString &a);
 		bool collide(const QString &a, const QString &b);
@@ -232,12 +249,6 @@ class InnerModel
 			}
 		#endif
 
-		///////////////////////////////////////
-		/// Auxiliary methods
-		//////////////////////////////////////
-		void print(QString s="") { treePrint(s, true); }
-		void treePrint(QString s="", bool verbose=false) { root->treePrint(QString(s), verbose); }
-
 		////////////////
 		/// Laser stuff DEPRECATED
 		////////////////
@@ -252,17 +263,10 @@ class InnerModel
 
 	protected:
 		InnerModelNode *root;
-		/*QHash<QString, InnerModelNode *> hash;
-		QHash<QPair<QString, QString>, RTMat> localHashTr;
-		QHash<QPair<QString, QString>, QMat> localHashRot;
-		*/
 		ThreadSafeHash<QString, InnerModelNode*> hash;
 		ThreadSafeHash<QPair<QString, QString>, RTMat> localHashTr;
 		ThreadSafeHash<QPair<QString, QString>, QMat> localHashRot;
-
-		void setLists(const QString &origId, const QString &destId);
-		//QList<InnerModelNode *> listA, listB;
-		ThreadSafeList<InnerModelNode *> listA, listB;
+		std::pair<QList<InnerModelNode *>, QList<InnerModelNode *>> setLocalLists(const QString & origId, const QString & destId);		
 };
 
 #endif

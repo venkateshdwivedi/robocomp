@@ -20,41 +20,46 @@
 
 #include <mutex>
 
+class InnerModelNode;
 typedef std::lock_guard<std::recursive_mutex> Lock;
 
 template <typename Val>
-class ThreadSafeList
+class ThreadSafeList : QList<Val>
 {
 	public:
-		ThreadSafeList(){};
+		ThreadSafeList()
+		{}
+ 		ThreadSafeList(const ThreadSafeList<Val> &list_) : QList<Val>(list_)
+ 		{
+ 		};
 		void clear()
 		{
 			Lock lock(mutex);
-			list.clear();
+			this->clear();
 		};
 		void push_back(const Val &v)
 		{
 			Lock lock(mutex);
-			list.push_back(v);
+			this->push_back(v);
 		};
 		void push_front(const Val &v)
 		{
 			Lock lock(mutex);
-			list.push_front(v);
+			this->push_front(v);
 		};
 		Val operator[](int i)
 		{
 			Lock lock(mutex);
-			return list[i];
+			return this->operator[](i);
 		};
 		bool size()
 		{
 			Lock lock(mutex);
-			return list.size();
+			return this->size();
 		};
 	private:
 		std::recursive_mutex mutex;
-		QList<Val> list;
+		//QList<Val> list;
 };
 
 template <typename Key, typename Val>
@@ -86,6 +91,27 @@ class ThreadSafeHash
 		{
 			Lock lock(mutex);
 			return hash.contains(key);
+		};
+		Val checkandget(const Key &key)
+		{
+			Lock lock(mutex);
+			if( hash.contains(key) )
+				return hash[key];
+			else 
+				return nullptr;
+		};
+		Val checkandgetandlock(const Key &key)
+		{
+			Lock lock(mutex);
+			if(hash.contains(key))
+			{
+				Val v = hash[key];
+				if(dynamic_cast<InnerModelNode *>(v) != nullptr)
+					v->lock();
+				return v;
+			}
+			else 
+				return nullptr;			
 		}
 		Val operator[](const Key &key)
 		{

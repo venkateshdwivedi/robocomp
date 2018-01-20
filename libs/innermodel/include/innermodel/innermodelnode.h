@@ -65,7 +65,14 @@ class InnerModelNode : public RTMat
 			Lock lock(mutex);
 			id = id_;
 		};
-		
+		void lock()
+		{
+			mutex.lock();
+		}
+		void unlock()
+		{
+			mutex.unlock();
+		}
 		
 		struct AttributeType
 		{

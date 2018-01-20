@@ -146,27 +146,24 @@ InnerModelNode* InnerModelTransform::copyNode(ThreadSafeHash<QString, InnerModel
 
 void InnerModelTransform::transformValues(const RTMat &Tpb, float tx, float ty, float tz, float rx, float ry, float rz, const InnerModelNode *parentNode)
 {
-	if (parentNode != NULL)
-	{
-		RTMat Tbi;
-		Tbi.setTr(tx,ty,tz);
-		Tbi.setR (rx,ry,rz);
+	Lock lock(mutex);
+	RTMat Tbi;
+	Tbi.setTr(tx,ty,tz);
+	Tbi.setR (rx,ry,rz);
 
-		///Tbp Inverse = Tpb. This gets Tpb directly. It's the same
-		
-		///New Tpi
-		RTMat Tpi = Tpb*Tbi;
+	///Tbp Inverse = Tpb. This gets Tpb directly. It's the same
+	
+	///New Tpi
+	RTMat Tpi = Tpb*Tbi;
 
-		QVec angles = Tpi.extractAnglesR();
-		QVec tr = Tpi.getTr();
+	QVec angles = Tpi.extractAnglesR();
+	QVec tr = Tpi.getTr();
 
-		rx = angles.x();
-		ry = angles.y();
-		rz = angles.z();
-		tx = tr.x();
-		ty = tr.y();
-		tz = tr.z();
-	}
-	//always update
+	rx = angles.x();
+	ry = angles.y();
+	rz = angles.z();
+	tx = tr.x();
+	ty = tr.y();
+	tz = tr.z();
 	update(tx,ty,tz,rx,ry,rz);
 }

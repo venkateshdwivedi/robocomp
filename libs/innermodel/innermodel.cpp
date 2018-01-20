@@ -109,9 +109,11 @@ InnerModel::~InnerModel()
 	hash.clear();
 	localHashRot.clear();
 	localHashTr.clear();
-	listA.clear();
-	listB.clear();
 }
+
+/////////////////////////////////////////////////////////////77
+/// Copy and editing methods
+///////////////////////////////////////////////////////////////
 
 InnerModel* InnerModel::copy()
 {
@@ -132,7 +134,6 @@ void InnerModel::removeNode(const QString & id)  ///Que pasa con los hijos y el 
 
 bool InnerModel::open(std::string xmlFilePath)
 {
-	
 	return InnerModelReader::load(QString::fromStdString(xmlFilePath), this);
 }
 
@@ -197,20 +198,16 @@ void InnerModel::moveSubTree(InnerModelNode *nodeSrc, InnerModelNode *nodeDst)
 void InnerModel::computeLevels(InnerModelNode *node)
 {
 	
-	if (node->parent != NULL )
-	{
+	if (node->parent != nullptr )
 		node->level=node->parent->level+1;
-	}
+	
 	QList<InnerModelNode*>::iterator i;
 	for (i=node->children.begin(); i!=node->children.end(); i++)
-	{
 		computeLevels(*i);
-	}
 }
 
 bool InnerModel::save(QString path)
 {
-	
 	QFile file(path);
 	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
 		return false;
@@ -222,9 +219,9 @@ bool InnerModel::save(QString path)
 }
 
 
-///////////////////////
+//////////////////////////////////////////////////////////////////////////
 /// Tree update methods
-///////////////////////
+///////////////////////////////////////////////////////////////////////////
 void InnerModel::update()
 {
 	root->update();
@@ -239,59 +236,23 @@ void InnerModel::cleanupTables()
 
 void InnerModel::updateTransformValues(QString transformId, float tx, float ty, float tz, float rx, float ry, float rz, QString parentId)
 {
+	Lock lock(mutex);
+	
 	cleanupTables();
-	InnerModelTransform *aux = dynamic_cast<InnerModelTransform *>(hash[transformId]);
-	InnerModelTransform *auxParent = dynamic_cast<InnerModelTransform *>(hash[parentId]);
-	if (aux != NULL)
-		aux->transformValues(getTransformationMatrix(hash[transformId]->parent->id,parentId), tx, ty, tz, rx, ry, rz, auxParent);
-	else if (hash[transformId] == NULL)
-		qDebug() << __FUNCTION__ << "There is no such" << transformId << "node";
-}
-
-/*
-void InnerModel::updateTransformValues(QString transformId, float tx, float ty, float tz, float rx, float ry, float rz, QString parentId)
-{
-	cleanupTables();
-	InnerModelTransform *aux = dynamic_cast<InnerModelTransform *>(hash[transformId]);
-	if (aux != NULL)
+	InnerModelTransform *aux = getNode<InnerModelTransform>(transformId);
+	InnerModelTransform *auxParent = getNode<InnerModelTransform>(parentId);
+	if(aux != nullptr)
 	{
-		if (parentId != "")
+		if(auxParent != nullptr)
 		{
-			InnerModelTransform *auxParent = dynamic_cast<InnerModelTransform *>(hash[parentId]);
-			if (auxParent!=NULL)
-			{
-				RTMat Tbi;
-				Tbi.setTr(tx,ty,tz);
-				Tbi.setR (rx,ry,rz);
-
-				///Tbp Inverse = Tpb. This gets Tpb directly. It's the same
-				RTMat Tpb = getTransformationMatrix ( getNode ( transformId)->parent->id,parentId );
-				///New Tpi
-				RTMat Tpi = Tpb*Tbi;
-
-				QVec angles = Tpi.extractAnglesR();
-				QVec tr = Tpi.getTr();
-
-				rx = angles.x();
-				ry = angles.y();
-				rz = angles.z();
-				tx = tr.x();
-				ty = tr.y();
-				tz = tr.z();
-			}
-			else if (hash[parentId] == NULL)
-			{
-				qDebug() << __FUNCTION__ << "There is no such" << parentId << "node";
-			}
+			aux->transformValues(getTransformationMatrix(aux->parent->id,parentId), tx, ty, tz, rx, ry, rz, auxParent);
+			auxParent->unlock();
 		}
-		//always update
-		aux->update(tx,ty,tz,rx,ry,rz);
+		else
+			aux->update(tx,ty,tz,rx,ry,rz);
+		aux->unlock();
 	}
-	else if (hash[transformId] == NULL)
-	{
-		qDebug() << __FUNCTION__ << "There is no such" << transformId << "node";
-	}
-}*/
+}
 
 void InnerModel::updateTransformValuesS(std::string transformId, float tx, float ty, float tz, float rx, float ry, float rz, std::string parentId)
 {
@@ -523,7 +484,6 @@ InnerModelIMU *InnerModel::newIMU(QString id, InnerModelNode *parent, uint32_t p
 
 InnerModelLaser *InnerModel::newLaser(QString id, InnerModelNode *parent, uint32_t port, uint32_t min, uint32_t max, float angle, uint32_t measures, QString ifconfig)
 {
-	
 	if (hash.contains(id))
 	{
 		QString error;
@@ -537,7 +497,6 @@ InnerModelLaser *InnerModel::newLaser(QString id, InnerModelNode *parent, uint32
 
 InnerModelPlane *InnerModel::newPlane(QString id, InnerModelNode *parent, QString texture, float width, float height, float depth, int repeat, float nx, float ny, float nz, float px, float py, float pz, bool collidable)
 {
-	
 	if (hash.contains(id))
 	{
 		QString error;
@@ -551,7 +510,6 @@ InnerModelPlane *InnerModel::newPlane(QString id, InnerModelNode *parent, QStrin
 
 InnerModelMesh *InnerModel::newMesh(QString id, InnerModelNode *parent, QString path, float scalex, float scaley, float scalez, int render, float tx, float ty, float tz, float rx, float ry, float rz, bool collidable)
 {
-	
 	if (hash.contains(id))
 	{
 		QString error;
@@ -565,13 +523,11 @@ InnerModelMesh *InnerModel::newMesh(QString id, InnerModelNode *parent, QString 
 
 InnerModelMesh *InnerModel::newMesh(QString id, InnerModelNode *parent, QString path, float scale, int render, float tx, float ty, float tz, float rx, float ry, float rz, bool collidable)
 {
-	
 	return newMesh(id,parent,path,scale,scale,scale,render,tx,ty,tz,rx,ry,rz, collidable);
 }
 
 InnerModelPointCloud *InnerModel::newPointCloud(QString id, InnerModelNode *parent)
 {
-	
 	if (hash.contains(id))
 	{
 		QString error;
@@ -585,7 +541,6 @@ InnerModelPointCloud *InnerModel::newPointCloud(QString id, InnerModelNode *pare
 
 InnerModelTransform *InnerModel::newTransform(QString id, QString engine, InnerModelNode *parent, float tx, float ty, float tz, float rx, float ry, float rz, float mass)
 {
-	
 	if (hash.contains(id))
 	{
 		QString error;
@@ -598,13 +553,12 @@ InnerModelTransform *InnerModel::newTransform(QString id, QString engine, InnerM
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Information retrieval methods
-/////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 QVec InnerModel::transform(const QString &destId, const QVec &initVec, const QString &origId)
-{
-	
+{	
 	if (initVec.size()==3)
 	{
 		return (getTransformationMatrix(destId, origId) * initVec.toHomogeneousCoordinates()).fromHomogeneousCoordinates();
@@ -626,9 +580,7 @@ QVec InnerModel::transform(const QString &destId, const QVec &initVec, const QSt
 		return ret;
 	}
 	else
-	{
-		throw InnerModelException("InnerModel::transform was called with an unsupported vector size.");
-	}
+		throw InnerModelException("InnerModel::transform was called with an unsupported vector size: " +std::to_string(initVec.size()));
 }
 
 QVec InnerModel::transformS(const std::string & destId, const QVec &origVec, const std::string & origId)
@@ -641,32 +593,35 @@ QVec InnerModel::rotationAngles(const QString & destId, const QString & origId)
 	return getTransformationMatrix(destId, origId).extractAnglesR();
 }
 
-
-/// Matrix transformation retrieval methods
+//////////////////////////////////////////////////////////////////////////////////////
+/// Thread safe Matrix transformation retrieval methods
+/////////////////////////////////////////////////////////////////////////////////////
 RTMat InnerModel::getTransformationMatrix(const QString &to, const QString &from)
 {
 	RTMat ret;
-
 	if (localHashTr.contains(QPair<QString, QString>(to, from)))
-	{
 		ret = localHashTr.get(QPair<QString, QString>(to, from));
-	}
 	else
 	{
-		setLists(from, to);
-		//foreach (InnerModelNode *i, listA)
-		for(int i=0; i<listA.size(); i++)
+		// Get locked list of InnerModelNode pointers. Unlock after using them!
+		std::pair<QList<InnerModelNode *>, QList<InnerModelNode *>> list = setLocalLists(from, to);
+		QList<InnerModelNode *> &listA = list.first;
+		QList<InnerModelNode *> &listB = list.second;
+		
+		foreach (InnerModelNode *i, listA)
 		{
-			ret = ((RTMat)(listA[i])).operator*(ret);
+			ret = (*i).operator*(ret);
+			//i->unlock();
 		}
-		//foreach (InnerModelNode *i, listB)
-		for(int i=0; i<listB.size(); i++)
+		foreach (InnerModelNode *i, listB)
 		{
-			ret = listB[i]->invert() * ret;
+			ret = (*i).invert() * ret;
+			//i->unlock();
 		}
+		
 		localHashTr.put(QPair<QString, QString>(to, from),ret);
 	}
-	return RTMat(ret);
+	return ret;
 }
 
 RTMat InnerModel::getTransformationMatrixS(const std::string &destId, const std::string &origId)
@@ -678,30 +633,29 @@ QMat InnerModel::getRotationMatrixTo(const QString &to, const QString &from)
 {
 	QMat rret = QMat::identity(3);
 	if (localHashRot.contains(QPair<QString, QString>(to, from)))
-	{
 		rret = localHashRot[QPair<QString, QString>(to, from)];
-	}
 	else
 	{
-		setLists(from, to);
-		InnerModelTransform *tf=NULL;
-
-		//foreach (InnerModelNode *i, listA)
-		for(int i=0; i<listA.size(); i++)
-		{
-			if ((tf=dynamic_cast<InnerModelTransform *>(listA[i]))!=NULL)
+		// Get locked list of InnerModelNode pointers. Unlock after using them!
+		std::pair<QList<InnerModelNode *>, QList<InnerModelNode *>> list = setLocalLists(from, to);
+		QList<InnerModelNode *> &listA = list.first;
+		QList<InnerModelNode *> &listB = list.second;
+		
+		InnerModelTransform *tf = nullptr;
+		foreach (InnerModelNode *i, listA)
+			if ((tf=dynamic_cast<InnerModelTransform *>(i)) != nullptr)
 			{
 				rret = tf->getR() * rret;
+				//tf->unlock();
 			}
-		}
-		for(int i=0; i<listB.size(); i++)
-		//foreach (InnerModelNode *i, listB)
-		{
-			if ((tf=dynamic_cast<InnerModelTransform *>(listB[i]))!=NULL)
+			
+		foreach (InnerModelNode *i, listB)
+			if ((tf=dynamic_cast<InnerModelTransform *>(i)) != nullptr)
 			{
 				rret = tf->getR().transpose() * rret;
+				//tf->unlock();
 			}
-		}
+		
 		localHashRot[QPair<QString, QString>(to, from)] = rret;
 	}
 	return rret;
@@ -713,38 +667,34 @@ QVec InnerModel::getTranslationVectorTo(const QString &to, const QString &from)
 	return m.getCol(3);
 }
 
-
-void InnerModel::setLists(const QString & origId, const QString & destId)
+std::pair<QList<InnerModelNode *>, QList<InnerModelNode *>> InnerModel::setLocalLists(const QString & origId, const QString & destId)
 {
-	InnerModelNode *a=hash[origId], *b=hash[destId];
-	if (!a)
-		throw InnerModelException("Cannot find node: \""+ origId.toStdString()+"\"");
-	if (!b)
-		throw InnerModelException("Cannot find node: "+ destId.toStdString()+"\"");
+	InnerModelNode *a = hash.checkandget(origId);
+	InnerModelNode *b = hash.checkandget(destId);
+	
+	if (a == nullptr)
+		throw InnerModelException("InnerModel::setLocalLists: Cannot find node: \""+ origId.toStdString()+"\"");
+	if (b == nullptr)
+		throw InnerModelException("InnerModel::setLocalLists: Cannot find node: "+ destId.toStdString()+"\"");
 
 	int minLevel = a->level<b->level? a->level : b->level;
-	listA.clear();
+	QList<InnerModelNode *> listA;
 	while (a->level >= minLevel)
 	{
 		listA.push_back(a);
-		if(a->parent == NULL)
-		{
-			// 			error.sprintf("InnerModel::setLists: It wouldn't be here!!!!");
+		if(a->parent == nullptr)
 			break;
-		}
 		a=a->parent;
+		//a->lock();
 	}
-
-	listB.clear();
+	QList<InnerModelNode *> listB;
 	while (b->level >= minLevel)
 	{
 		listB.push_front(b);
-		if(b->parent == NULL)
-		{
-			// 			error.sprintf("InnerModel::setLists: It wouldn't be here!!!!");
+		if(b->parent == nullptr)
 			break;
-		}
 		b=b->parent;
+		//b->lock();
 	}
 	while (b!=a)
 	{
@@ -752,49 +702,54 @@ void InnerModel::setLists(const QString & origId, const QString & destId)
 		listB.push_front(b);
 		a = a->parent;
 		b = b->parent;
+		//a->lock();
+		//b->lock();
 	}
+	return std::make_pair(listA, listB);
 }
 
-// ----------------------------------------------------------------------------------------
-// ----------------------------------------------------------------------------------------
-// ----------------------------------------------------------------------------------------
+/////////////////////////////////////////////////////////////////////////////////////////////
+/// Thread safe Auxiliary
+/////////////////////////////////////////////////////////////////////////////////////////////
+QString InnerModel::getParentIdentifier(QString id)
+{
+	InnerModelNode *n = getNodeSafeAndLock<InnerModelNode>(id);
+	QString pi = n->id;
+	n->unlock();
+	return pi;
+}
 
+std::string InnerModel::getParentIdentifierS(const std::string &id)
+{
+	return getParentIdentifier(QString::fromStdString(id)).toStdString();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+/// Thread safe Collision detection
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 bool InnerModel::collidable(const QString &a)
 {
-	
-	InnerModelNode *node;
-	try
-	{
-		node = hash[a];
-	}
-	catch(...)
-	{
-		qDebug() <<__FUNCTION__ << "No node" << a;
-	}
-	if (node)
-	{
-		if (node->collidable)
-			return true;
+	InnerModelNode *n = getNodeSafeAndLock<InnerModelNode>(a);
+	bool s = n->collidable;
+	n->unlock();
+	if(s)
+		return true;
+	else
 		return false;
-	}
-	return false;
 }
 
 bool InnerModel::collide(const QString &a, const QString &b)
 {
-	
 #if FCL_SUPPORT==1
-	InnerModelNode *n1 = getNode(a);
-	if (not n1) throw 1;
+	InnerModelNode *n1 = getNodeSafeAndLock<InnerModelNode>(a);
 	QMat r1q = getRotationMatrixTo("root", a);
 	fcl::Matrix3f R1( r1q(0,0), r1q(0,1), r1q(0,2), r1q(1,0), r1q(1,1), r1q(1,2), r1q(2,0), r1q(2,1), r1q(2,2) );
 	QVec t1v = getTranslationVectorTo("root", a);
 	fcl::Vec3f T1( t1v(0), t1v(1), t1v(2) );
 	n1->collisionObject->setTransform(R1, T1);
 
-	InnerModelNode *n2 = getNode(b);
-	if (not n1) throw 2;
+	InnerModelNode *n2 = getNodeSafeAndLock<InnerModelNode>(b);
 	QMat r2q = getRotationMatrixTo("root", b);
 	fcl::Matrix3f R2( r2q(0,0), r2q(0,1), r2q(0,2), r2q(1,0), r2q(1,1), r2q(1,2), r2q(2,0), r2q(2,1), r2q(2,2) );
 	QVec t2v = getTranslationVectorTo("root", b);
@@ -805,29 +760,17 @@ bool InnerModel::collide(const QString &a, const QString &b)
 	fcl::CollisionResult result;
 
 	n1->collisionObject->computeAABB();
-// 	fcl::AABB a1 = n1->collisionObject->getAABB();
-// 	fcl::Vec3f v1 = a1.center();
-
 	n2->collisionObject->computeAABB();
-// 	fcl::AABB a2 = n2->collisionObject->getAABB();
-// 	fcl::Vec3f v2 = a2.center();
-
-// 	qDebug()<< a;
-// 	printf("- (%f,  %f,  %f) --- (%f,  %f,  %f) [%f , %f , %f]  <<%f %d>>\n", v1[0], v1[1], v1[2], (v1-v2)[0], (v1-v2)[1], (v1-v2)[2], a1.width(), a1.height(), a1.depth(), a1.distance(a2), a1.overlap(a2));
-// 	qDebug()<< b;
-// 	printf("- (%f,  %f,  %f) --- (%f,  %f,  %f) [%f , %f , %f]  <<%f %d>>\n", v2[0], v2[1], v2[2], (v1-v2)[0], (v1-v2)[1], (v1-v2)[2], a2.width(), a2.height(), a2.depth(), a1.distance(a2), a1.overlap(a2));
 
 	// NOTE: Un poco de documentacion nunca esta mal, sabeis --> http://gamma.cs.unc.edu/FCL/fcl_docs/webpage/generated/namespacefcl.html
 	// std::size_t 	collide (const CollisionObject *o1, const CollisionObject *o2, const CollisionRequest &request, CollisionResult &result)
-	fcl::collide(                  n1->collisionObject,       n2->collisionObject,                         request,                  result);
+	fcl::collide(n1->collisionObject, n2->collisionObject, request, result);
 	// return binary collision result --> http://gamma.cs.unc.edu/FCL/fcl_docs/webpage/generated/structfcl_1_1CollisionResult.html#ed599cb31600ec6d0585d9adb4cde946
 	// True if There are collisions, and false if there arent collisions.
+	n1->unlock(); n2->unlock();
 	return result.isCollision();
 #else
-	QString error;
-	error.sprintf("InnerModel was not compiled with collision support");
-	throw error;
-	return false;
+	throw InnerModelException("InnerModel was not compiled with collision support");
 #endif
 }
 
@@ -843,8 +786,7 @@ bool InnerModel::collide(const QString &a, const QString &b)
 bool InnerModel::collide(const QString &a, const fcl::CollisionObject *obj)
 {
 	
-	InnerModelNode *n1 = getNode(a);
-	if (not n1) throw 1;
+	InnerModelNode *n1 = getNodeSafeAndLock<InnerModelNode>(a);
 	QMat r1q = getRotationMatrixTo("root", a);
 	fcl::Matrix3f R1( r1q(0,0), r1q(0,1), r1q(0,2), r1q(1,0), r1q(1,1), r1q(1,2), r1q(2,0), r1q(2,1), r1q(2,2) );
 	QVec t1v = getTranslationVectorTo("root", a);
@@ -856,86 +798,22 @@ bool InnerModel::collide(const QString &a, const fcl::CollisionObject *obj)
 
 	fcl::collide(n1->collisionObject, obj, request, result);
 
+	n1->unlock();
 	return result.isCollision();
 }
 #endif
 
-QMat InnerModel::jacobian(QStringList &listaJoints, const QVec &motores, const QString &endEffector)
-{
-	// La lista de motores define una secuencia contigua de joints, desde la base hasta el extremo.
-	// Inicializamos las filas del Jacobiano al tamaño del punto objetivo que tiene 6 ELEMENTOS [tx, ty, tz, rx, ry, rz]
-	// y las columnas al número de motores (Joints): 6 filas por n columnas. También inicializamos un vector de ceros
-
-	
-	QMat jacob(6, listaJoints.size(), 0.f);  //6 output variables
-	QVec zero = QVec::zeros(3);
-	int j=0; //índice de columnas de la matriz: MOTORES
-
-	foreach(QString linkName, listaJoints)
-	{
-		if(motores[j] == 0)
-		{
-			QString frameBase = listaJoints.last();
-
-			// TRASLACIONES: con respecto al último NO traslada
-			QVec axisTip = getJoint(linkName)->unitaryAxis(); 		//vector de ejes unitarios
-			axisTip = transform(frameBase, axisTip, linkName);
-			QVec axisBase = transform(frameBase, zero, linkName);
-			QVec axis = axisBase - axisTip;
-			QVec toEffector = (axisBase - transform(frameBase, zero, endEffector) );
-			QVec res = toEffector.crossProduct(axis);
-
-			jacob(0,j) = res.x();
-			jacob(1,j) = res.y();
-			jacob(2,j) = res.z();
-
-			// ROTACIONES
-			QVec axisTip2 = getJoint(linkName)->unitaryAxis(); 		//vector de ejes unitarios en el que gira
-			axisTip2 = transform(frameBase, axisTip2, linkName); 	//vector de giro pasado al hombro.
-			QVec axisBase2 = transform(frameBase, zero, linkName); 	//motor al hombro
-			QVec axis2 = axisBase2 - axisTip2; 						//vector desde el eje de giro en el sist. hombro, hasta la punta del eje de giro en el sist. hombro.
-
-			jacob(3,j) = axis2.x();
-			jacob(4,j) = axis2.y();
-			jacob(5,j) = axis2.z();
-		}
-		j++;
-	}
-	return jacob;
-}
-
-QString InnerModel::getParentIdentifier(QString id)
-{
-	
-	InnerModelNode *n = getNode(id);
-	if (n)
-	{
-		if (n->parent)
-			return n->parent->id;
-		else
-			return QString("");
-	}
-	return QString("");
-}
-
-std::string InnerModel::getParentIdentifierS(std::string id)
-{
-	return getParentIdentifier(QString::fromStdString(id)).toStdString();
-}
-
 float InnerModel::distance(const QString &a, const QString &b)
 {
 #if FCL_SUPPORT==1
-	InnerModelNode *n1 = getNode(a);
-	if (not n1) throw 1;
+	InnerModelNode *n1 = getNodeSafeAndLock<InnerModelNode>(a);
 	QMat r1q = getRotationMatrixTo("root", a);
 	fcl::Matrix3f R1( r1q(0,0), r1q(0,1), r1q(0,2), r1q(1,0), r1q(1,1), r1q(1,2), r1q(2,0), r1q(2,1), r1q(2,2) );
 	QVec t1v = getTranslationVectorTo("root", a);
 	fcl::Vec3f T1( t1v(0), t1v(1), t1v(2) );
 	n1->collisionObject->setTransform(R1, T1);
 
-	InnerModelNode *n2 = getNode(b);
-	if (not n1) throw 2;
+	InnerModelNode *n2 = getNodeSafeAndLock<InnerModelNode>(b);
 	QMat r2q = getRotationMatrixTo("root", b);
 	fcl::Matrix3f R2( r2q(0,0), r2q(0,1), r2q(0,2), r2q(1,0), r2q(1,1), r2q(1,2), r2q(2,0), r2q(2,1), r2q(2,2) );
 	QVec t2v = getTranslationVectorTo("root", b);
@@ -949,12 +827,109 @@ float InnerModel::distance(const QString &a, const QString &b)
 	n2->collisionObject->computeAABB();
 
 	fcl::distance(n1->collisionObject, n2->collisionObject, request, result);
+	
+	n1->unlock(); n2->unlock();
 	return result.min_distance;
 #else
-	QString error;
-	error.sprintf("InnerModel was not compiled with collision support");
-	throw error;
-	return -1;
+	throw InnerModelException("InnerModel was not compiled with collision support");
 #endif
 }
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+/// Jacobian
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+QMat InnerModel::jacobian(QStringList &listaJoints, const QVec &motores, const QString &endEffector)
+{
+	// La lista de motores define una secuencia contigua de joints, desde la base hasta el extremo.
+	// Inicializamos las filas del Jacobiano al tamaño del punto objetivo que tiene 6 ELEMENTOS [tx, ty, tz, rx, ry, rz]
+	// y las columnas al número de motores (Joints): 6 filas por n columnas. También inicializamos un vector de ceros
+
+	QMat jacob(6, listaJoints.size(), 0.f);  //6 output variables
+	QVec zero = QVec::zeros(3);
+	int j=0; //índice de columnas de la matriz: MOTORES
+
+	foreach(QString linkName, listaJoints)
+	{
+		if(motores[j] == 0)
+		{
+			QString frameBase = listaJoints.last();
+
+			// TRASLACIONES: con respecto al último NO traslada
+			InnerModelJoint *n = getNode<InnerModelJoint>(linkName); 
+			QVec axisTip = n->unitaryAxis(); //vector de ejes unitarios
+			n->unlock();
+			
+			axisTip = transform(frameBase, axisTip, linkName);
+			QVec axisBase = transform(frameBase, zero, linkName);
+			QVec axis = axisBase - axisTip;
+			QVec toEffector = (axisBase - transform(frameBase, zero, endEffector) );
+			QVec res = toEffector.crossProduct(axis);
+
+			jacob(0,j) = res.x();
+			jacob(1,j) = res.y();
+			jacob(2,j) = res.z();
+
+			// ROTACIONES
+			InnerModelJoint *n2 = getNode<InnerModelJoint>(linkName); 
+			QVec axisTip2 = n2->unitaryAxis(); //vector de ejes unitarios
+			n2->unlock();
+			axisTip2 = transform(frameBase, axisTip2, linkName); 	//vector de giro pasado al hombro.
+			QVec axisBase2 = transform(frameBase, zero, linkName); 	//motor al hombro
+			QVec axis2 = axisBase2 - axisTip2; 						//vector desde el eje de giro en el sist. hombro, hasta la punta del eje de giro en el sist. hombro.
+
+			jacob(3,j) = axis2.x();
+			jacob(4,j) = axis2.y();
+			jacob(5,j) = axis2.z();
+		}
+		j++;
+	}
+	return jacob;
+}
+
+
+/*
+void InnerModel::updateTransformValues(QString transformId, float tx, float ty, float tz, float rx, float ry, float rz, QString parentId)
+{
+	cleanupTables();
+	InnerModelTransform *aux = dynamic_cast<InnerModelTransform *>(hash[transformId]);
+	if (aux != NULL)
+	{
+		if (parentId != "")
+		{
+			InnerModelTransform *auxParent = dynamic_cast<InnerModelTransform *>(hash[parentId]);
+			if (auxParent!=NULL)
+			{
+				RTMat Tbi;
+				Tbi.setTr(tx,ty,tz);
+				Tbi.setR (rx,ry,rz);
+
+				///Tbp Inverse = Tpb. This gets Tpb directly. It's the same
+				RTMat Tpb = getTransformationMatrix ( getNode ( transformId)->parent->id,parentId );
+				///New Tpi
+				RTMat Tpi = Tpb*Tbi;
+
+				QVec angles = Tpi.extractAnglesR();
+				QVec tr = Tpi.getTr();
+
+				rx = angles.x();
+				ry = angles.y();
+				rz = angles.z();
+				tx = tr.x();
+				ty = tr.y();
+				tz = tr.z();
+			}
+			else if (hash[parentId] == NULL)
+			{
+				qDebug() << __FUNCTION__ << "There is no such" << parentId << "node";
+			}
+		}
+		//always update
+		aux->update(tx,ty,tz,rx,ry,rz);
+	}
+	else if (hash[transformId] == NULL)
+	{
+		qDebug() << __FUNCTION__ << "There is no such" << transformId << "node";
+	}
+}*/

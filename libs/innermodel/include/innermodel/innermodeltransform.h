@@ -51,6 +51,32 @@ class InnerModelTransform : public InnerModelNode
 		//virtual InnerModelNode *copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
 		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
 		void transformValues(const RTMat &Tpb, float tx, float ty, float tz, float rx, float ry, float rz, const InnerModelNode *parentNode);
+		
+		QMat getR()
+		{
+			Lock lock(mutex);
+			return InnerModelNode::getR();
+		}
+		QVec getTr()
+		{
+			Lock lock(mutex);
+			return InnerModelNode::getTr();
+		}
+		QMat operator*(const RTMat &rt)
+		{
+			Lock lock(mutex);
+			return InnerModelNode::operator*(rt);
+		}
+		QMat invert()
+		{
+			Lock lock(mutex);
+			return InnerModelNode::invert();
+		}
+		QMat transpose()
+		{
+			Lock lock(mutex);
+			return InnerModelNode::transpose();
+		}
 
 		float *tx, *ty, *tz;
 		float *rx, *ry, *rz;
