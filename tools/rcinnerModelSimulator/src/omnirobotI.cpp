@@ -38,7 +38,7 @@ void OmniRobotI::add(QString id)
 
 	omniIDs << id;
 	node                        = innerModel->getOmniRobot(id);
-	parent                      = innerModel->getTransform(node->parent->id);
+	parent                      = innerModel->getTransform(node->parent->getId());
 	rawOdometryParentNode       = innerModel->newTransform(id+"_raw_odometry_parent\"", "static", parent, 0, 0, 0, 0, 0, 0);
 	rawOdometryNode             = innerModel->newTransform(id+"_raw_odometry\"", "static", rawOdometryParentNode, 0, 0, 0, 0, 0, 0);
 	correctedOdometryParentNode = innerModel->newTransform(id+"_corrected_odometry_parent\"", "static", parent, 0, 0, 0, 0, 0, 0);
@@ -64,14 +64,14 @@ void OmniRobotI::getBaseState(RoboCompGenericBase::TBaseState& state, const Ice:
 	InnerModelMgr::guard gl(innerModel.mutex());
 
 	{
-		QVec retPOSR = innerModel->transform6D(parent->id, node->id+"_raw_odometry\"");
+		QVec retPOSR = innerModel->transform6D(parent->getId(), node->getId()+"_raw_odometry\"");
 		state.x = retPOSR(0);
 		state.z = retPOSR(2);
 		state.alpha = retPOSR(4);
 	}
 	
 	{
-		QVec retPOSC = innerModel->transform6D(parent->id, node->id+"_corrected_odometry\"");
+		QVec retPOSC = innerModel->transform6D(parent->getId(), node->getId()+"_corrected_odometry\"");
 		state.correctedX = retPOSC(0);
 		state.correctedZ = retPOSC(2);
 		state.correctedAlpha = retPOSC(4);
@@ -89,7 +89,7 @@ void OmniRobotI::getBasePose(Ice::Int& x, Ice::Int& z, Ice::Float& alpha, const 
 {
 	InnerModelMgr::guard gl(innerModel.mutex());
 
-	QVec retPOS = innerModel->transform6D(parent->id, node->id+"_raw_odometry\"");
+	QVec retPOS = innerModel->transform6D(parent->getId(), node->getId()+"_raw_odometry\"");
 	x = retPOS(0);
 	z = retPOS(2);
 	alpha = retPOS(4);
@@ -116,32 +116,32 @@ void OmniRobotI::updateInnerModelPose(bool force)
 	QVec estimatedIncrements = QVec::vec6(advVelx, 0,  advVelz, 0, rotVel, 0).operator*(msecs / 1000.);
 
 	// Update raw odometry using estimated pose increments
-	innerModel->updateTransformValues(node->id+"_raw_odometry\"", estimatedIncrements);
-	QVec finalRawPose = innerModel->transform6D(parent->id, node->id+"_raw_odometry\"");
-	innerModel->updateTransformValues(node->id+"_raw_odometry_parent\"", finalRawPose);
-	innerModel->updateTransformValues(node->id+"_raw_odometry\"", QVec::vec6(0,0,0,0,0,0));
+	innerModel->updateTransformValues(node->getId()+"_raw_odometry\"", estimatedIncrements);
+	QVec finalRawPose = innerModel->transform6D(parent->getId(), node->getId()+"_raw_odometry\"");
+	innerModel->updateTransformValues(node->getId()+"_raw_odometry_parent\"", finalRawPose);
+	innerModel->updateTransformValues(node->getId()+"_raw_odometry\"", QVec::vec6(0,0,0,0,0,0));
 
 	// Update corrected odometry using estimated pose increments
-	innerModel->transform6D("root", node->id+"_corrected_odometry_parent\"").print(":updateIMP  correctedP 0");
-	innerModel->transform6D("root", node->id+"_corrected_odometry\"").print(       ":updateIMP  corrected  0");
+	innerModel->transform6D("root", node->getId()+"_corrected_odometry_parent\"").print(":updateIMP  correctedP 0");
+	innerModel->transform6D("root", node->getId()+"_corrected_odometry\"").print(       ":updateIMP  corrected  0");
 	estimatedIncrements.print("estimatedIncrements");
 
-	innerModel->updateTransformValues(node->id+"_corrected_odometry\"", estimatedIncrements);
+	innerModel->updateTransformValues(node->getId()+"_corrected_odometry\"", estimatedIncrements);
 
-	innerModel->transform6D("root", node->id+"_corrected_odometry_parent\"").print(":updateIMP  correctedP 1");
-	innerModel->transform6D("root", node->id+"_corrected_odometry\"").print(       ":updateIMP  corrected  1");
+	innerModel->transform6D("root", node->getId()+"_corrected_odometry_parent\"").print(":updateIMP  correctedP 1");
+	innerModel->transform6D("root", node->getId()+"_corrected_odometry\"").print(       ":updateIMP  corrected  1");
 
-	QVec finalCorrectedPose = innerModel->transform6D(parent->id, node->id+"_corrected_odometry\"");
-	innerModel->updateTransformValues(node->id+"_corrected_odometry_parent\"", finalCorrectedPose);
-	innerModel->updateTransformValues(node->id+"_corrected_odometry\"", QVec::vec6(0,0,0,0,0,0));
+	QVec finalCorrectedPose = innerModel->transform6D(parent->getId(), node->getId()+"_corrected_odometry\"");
+	innerModel->updateTransformValues(node->getId()+"_corrected_odometry_parent\"", finalCorrectedPose);
+	innerModel->updateTransformValues(node->getId()+"_corrected_odometry\"", QVec::vec6(0,0,0,0,0,0));
 
-	innerModel->transform6D("root", node->id+"_corrected_odometry_parent\"").print(":updateIMP  correctedP 2");
-	innerModel->transform6D("root", node->id+"_corrected_odometry\"").print(       ":updateIMP  corrected  2");
+	innerModel->transform6D("root", node->getId()+"_corrected_odometry_parent\"").print(":updateIMP  correctedP 2");
+	innerModel->transform6D("root", node->getId()+"_corrected_odometry\"").print(       ":updateIMP  corrected  2");
 
 	// 	printf("rotvel %f\n", rotVel);
 	
 	// Compute noisy increments
-	const double noise = node->noise;
+	const double noise = node->getNoise();
 	float speed = QVec::vec3(advVelx, 0, advVelz).norm2();
 	QVec rndmPos = QVec::gaussianSamples(2, 0, noise*msecs*(0.000001*speed + 0.00001*rotVel));
 	QVec rndmYaw = QVec::gaussianSamples(1, 0, noise*msecs*(0.00001*speed + 0.00001*rotVel));
@@ -150,17 +150,17 @@ void OmniRobotI::updateInnerModelPose(bool force)
 // 	actualIncrements.print("actualIncrements");
 
 
-	QVec backPose = innerModel->transform6D(parent->id, node->id);
+	QVec backPose = innerModel->transform6D(parent->getId(), node->getId());
 // 	backPose.print("backPose");
-	innerModel->updateTransformValues(node->id+"_move\"", actualIncrements);
-	QVec newPose = innerModel->transform6D(parent->id, node->id+"_move\"");
+	innerModel->updateTransformValues(node->getId()+"_move\"", actualIncrements);
+	QVec newPose = innerModel->transform6D(parent->getId(), node->getId()+"_move\"");
 // 	newPose.print("newPose");
-	innerModel->updateTransformValues(node->id, newPose);
-	if (not canMoveBaseTo(node->id))
+	innerModel->updateTransformValues(node->getId(), newPose);
+	if (not canMoveBaseTo(node->getId()))
 	{
-		innerModel->updateTransformValues(node->id, backPose);
+		innerModel->updateTransformValues(node->getId(), backPose);
 	}
-	innerModel->updateTransformValues(node->id+"_move\"", QVec::vec6(0,0,0,0,0,0));
+	innerModel->updateTransformValues(node->getId()+"_move\"", QVec::vec6(0,0,0,0,0,0));
 	
 }
 
@@ -168,7 +168,7 @@ bool OmniRobotI::canMoveBaseTo(const QString nodeId)
 {
 	InnerModelMgr::guard gl(innerModel.mutex());
 
-	if (not node->collide) return true;
+	if (not node->getCollide()) return true;
 
 	std::vector<QString> robotNodes;
 	std::vector<QString> restNodes;
@@ -193,7 +193,7 @@ void OmniRobotI::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, b
 {
 	InnerModelMgr::guard gl(innerModel.mutex());
 
-	if (node->id == robotId)
+	if (node->getId() == robotId)
 	{
 		inside = true;
 	}
@@ -213,11 +213,11 @@ void OmniRobotI::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, b
 	{
 		if (inside)
 		{
-			in.push_back(node->id);
+			in.push_back(node->getId());
 		}
 		else
 		{
-			out.push_back(node->id);
+			out.push_back(node->getId());
 		}
 	}
 }
@@ -258,17 +258,17 @@ void OmniRobotI::setOdometer(const RoboCompGenericBase::TBaseState &st, const Ic
 void OmniRobotI::setOdometerPose(Ice::Int x, Ice::Int z, Ice::Float alpha, const Ice::Current&)
 {
 	InnerModelMgr::guard gl(innerModel.mutex());
-	innerModel->updateTransformValues(node->id+"_raw_odometry_parent\"", x, 0, z, 0, alpha, 0);
-	innerModel->updateTransformValues(node->id+"_raw_odometry\"", 0, 0, 0,  0, 0, 0);
+	innerModel->updateTransformValues(node->getId()+"_raw_odometry_parent\"", x, 0, z, 0, alpha, 0);
+	innerModel->updateTransformValues(node->getId()+"_raw_odometry\"", 0, 0, 0,  0, 0, 0);
 }
 
 
 void OmniRobotI::correctOdometer(Ice::Int x, Ice::Int z, Ice::Float alpha, const Ice::Current&)
 {
 	InnerModelMgr::guard gl(innerModel.mutex());
-	innerModel->updateTransformValues(node->id+"_corrected_odometry_parent\"", x, 0, z, 0, alpha, 0);
-	innerModel->updateTransformValues(node->id+"_corrected_odometry\"", 0, 0, 0,  0, 0, 0);
-	innerModel->transform6D("root", node->id+"_corrected_odometry_parent\"").print(":correctOd  correctedP");
-	innerModel->transform6D("root", node->id+"_corrected_odometry\"").print(":correctOd  correctedC");
+	innerModel->updateTransformValues(node->getId()+"_corrected_odometry_parent\"", x, 0, z, 0, alpha, 0);
+	innerModel->updateTransformValues(node->getId()+"_corrected_odometry\"", 0, 0, 0,  0, 0, 0);
+	innerModel->transform6D("root", node->getId()+"_corrected_odometry_parent\"").print(":correctOd  correctedP");
+	innerModel->transform6D("root", node->getId()+"_corrected_odometry\"").print(":correctOd  correctedC");
 }
 

@@ -139,15 +139,14 @@ bool InnerModel::open(std::string xmlFilePath)
 
 void InnerModel::removeSubTree(InnerModelNode *node, QStringList *l)
 {
-	
 	QList<InnerModelNode*>::iterator i;
 	for (i=node->children.begin(); i!=node->children.end(); i++)
 	{
 		removeSubTree(*i,l);
 	}
 	node->parent->children.removeOne(node);
-	l->append(node->id);
-	removeNode(node->id);
+	l->append(node->getId());
+	removeNode(node->getId());
 }
 
 /**
@@ -165,7 +164,7 @@ void InnerModel::getSubTree(InnerModelNode *node, QStringList *l)
 	{
 		getSubTree(*i,l);
 	}
-	l->append(node->id);
+	l->append(node->getId());
 }
 
 void InnerModel::getSubTree(InnerModelNode *node, QList<InnerModelNode *> *l)
@@ -188,7 +187,6 @@ void InnerModel::getSubTree(InnerModelNode *node, QList<InnerModelNode *> *l)
  */
 void InnerModel::moveSubTree(InnerModelNode *nodeSrc, InnerModelNode *nodeDst)
 {
-	
 	nodeSrc->parent->children.removeOne(nodeSrc);
 	nodeDst->addChild(nodeSrc);
 	nodeSrc->setParent(nodeDst);
@@ -197,9 +195,8 @@ void InnerModel::moveSubTree(InnerModelNode *nodeSrc, InnerModelNode *nodeDst)
 
 void InnerModel::computeLevels(InnerModelNode *node)
 {
-	
 	if (node->parent != nullptr )
-		node->level=node->parent->level+1;
+		node->setLevel(node->parent->getLevel() + 1);
 	
 	QList<InnerModelNode*>::iterator i;
 	for (i=node->children.begin(); i!=node->children.end(); i++)
@@ -222,6 +219,7 @@ bool InnerModel::save(QString path)
 //////////////////////////////////////////////////////////////////////////
 /// Tree update methods
 ///////////////////////////////////////////////////////////////////////////
+
 void InnerModel::update()
 {
 	root->update();
@@ -236,22 +234,21 @@ void InnerModel::cleanupTables()
 
 void InnerModel::updateTransformValues(QString transformId, float tx, float ty, float tz, float rx, float ry, float rz, QString parentId)
 {
-	Lock lock(mutex);
+	Lock lockHash(localHashTr.mutex);
 	
 	cleanupTables();
+	if(transformId == "root") return;   										///CHECK THIS
 	InnerModelTransform *aux = getNode<InnerModelTransform>(transformId);
-	InnerModelTransform *auxParent = getNode<InnerModelTransform>(parentId);
-	if(aux != nullptr)
-	{
-		if(auxParent != nullptr)
-		{
-			aux->transformValues(getTransformationMatrix(aux->parent->id,parentId), tx, ty, tz, rx, ry, rz, auxParent);
-			auxParent->unlock();
-		}
-		else
-			aux->update(tx,ty,tz,rx,ry,rz);
-		aux->unlock();
-	}
+	if(aux == nullptr) return;
+	//qDebug() << "up2" << aux->parent->id;
+	InnerModelTransform *auxParent = getNode<InnerModelTransform>(aux->parent->getId());
+	if(auxParent == nullptr) return;
+	
+	InnerModelTransform *parent = getNode<InnerModelTransform>(parentId);
+	if(parent != nullptr)
+		aux->transformValues(getTransformationMatrix(aux->parent->getId(),parentId), tx, ty, tz, rx, ry, rz, parent);
+	else
+		aux->update(tx,ty,tz,rx,ry,rz);
 }
 
 void InnerModel::updateTransformValuesS(std::string transformId, float tx, float ty, float tz, float rx, float ry, float rz, std::string parentId)
@@ -271,285 +268,78 @@ void InnerModel::updateTransformValues(QString transformId, QVec v, QString pare
 
 void InnerModel::updatePlaneValues(QString planeId, float nx, float ny, float nz, float px, float py, float pz)
 {
+	Lock lockHash(localHashTr.mutex);
+	
 	cleanupTables();
-
-	InnerModelPlane *plane = dynamic_cast<InnerModelPlane *>(hash[planeId]);
-	if (plane != NULL)
-	{
-		plane->update(nx, ny, nz, px, py, pz);
-	}
-	else if (hash[planeId] == NULL)
-		qDebug() << "There is no such" << planeId << "node";
-	else
-		qDebug() << "?????";
+	InnerModelPlane *plane = getNode<InnerModelPlane>(planeId);
+	//InnerModelPlane *plane = dynamic_cast<InnerModelPlane *>(hash[planeId]);
+	if (plane == nullptr)
+		throw InnerModelException("InnerModel::updatePlaneValues Error: node not found " + planeId.toStdString());
+	
+	plane->update(nx, ny, nz, px, py, pz);
+	
 }
 
 void InnerModel::updateTranslationValues(QString transformId, float tx, float ty, float tz, QString parentId)
-{	
+{
+	Lock lockHash(localHashTr.mutex);
+	
 	cleanupTables();
+	if(transformId == "root") return;   												///CHECK THIS
+	InnerModelTransform *aux = getNode<InnerModelTransform>(transformId);
+	if(aux == nullptr) return;
 
-	InnerModelTransform *aux = dynamic_cast<InnerModelTransform *>(hash[transformId]);
-	if (aux != NULL)
-	{
-		if (parentId!="")
-			updateTransformValues(transformId, tx,ty,tz,0.,0.,0.,parentId);
-		else
-			aux->update(tx,ty,tz,aux->backrX,aux->backrY,aux->backrZ);
-	}
-	else if (hash[transformId] == NULL)
-		qDebug() << "There is no such" << transformId << "node";
+	InnerModelTransform *auxParent = getNode<InnerModelTransform>(aux->parent->getId());
+	if(auxParent == nullptr) return;
+
+	InnerModelTransform *parent = getNode<InnerModelTransform>(parentId);
+	if(parent != nullptr)
+		aux->translateValues(getTransformationMatrix(aux->parent->getId(),parentId), tx, ty, tz, parent);
 	else
-		qDebug() << "?????";
-}
+		aux->updateT(tx,ty,tz);
+} 
 
 void InnerModel::updateRotationValues(QString transformId, float rx, float ry, float rz, QString parentId)
 {
+	Lock lockHash(localHashTr.mutex);
+	
 	cleanupTables();
+	if(transformId == "root") return;   												///CHECK THIS
+	InnerModelTransform *aux = getNode<InnerModelTransform>(transformId);
+	if(aux == nullptr) return;
 
-	InnerModelTransform *aux = dynamic_cast<InnerModelTransform *>(hash[transformId]);
-	if (aux != NULL)
-	{
-		if (parentId!="")
-		{
-			updateTransformValues(transformId,0.,0.,0.,rx,ry,rz,parentId);
-		}
-		else
-			aux->update(aux->backtX,aux->backtY,aux->backtZ,rx,ry,rz);
-	}
-	else if (hash[transformId] == NULL)
-		qDebug() << "There is no such" << transformId << "node";
+	InnerModelTransform *auxParent = getNode<InnerModelTransform>(aux->parent->getId());
+	if(auxParent == nullptr) return;
+	
+	InnerModelTransform *parent = getNode<InnerModelTransform>(parentId);
+	if(parent != nullptr)
+		aux->rotateValues(getTransformationMatrix(aux->parent->getId(),parentId), rx, ry, rz, parent);
 	else
-		qDebug() << "?????";
+		aux->updateR(rx,ry,rz);
 }
 
 void InnerModel::updateJointValue(QString jointId, float angle, bool force)
 {
+	Lock lockHash(localHashTr.mutex);
 	
 	cleanupTables();
-
-	InnerModelJoint *j = dynamic_cast<InnerModelJoint *>(hash[jointId]);
-	if (j != NULL)
-	{
-		j->setAngle(angle, force);
-	}
-	else if (hash[jointId] == NULL)
-		qDebug() << "There is no such" << jointId << "node";
-	else
-		qDebug() << "?????";
-}
+	InnerModelJoint *j = getNode<InnerModelJoint>(jointId);
+	if(j == nullptr) 
+		throw InnerModelException("InnerModel::updateJointValue Error: node not found " + jointId.toStdString());
+	
+	j->setAngle(angle, force);
+ }
 
 void InnerModel::updatePrismaticJointPosition(QString jointId, float pos)
 {
+	Lock lockHash(localHashTr.mutex);
 	
 	cleanupTables();
+	InnerModelPrismaticJoint *j = getNode<InnerModelPrismaticJoint>(jointId);
+	if (j == nullptr)
+		throw InnerModelException("InnerModel::updateJointValue Error: node not found " + jointId.toStdString());
 
-	InnerModelPrismaticJoint *j = dynamic_cast<InnerModelPrismaticJoint *>(hash[jointId]);
-	if (j != NULL)
-	{
-		j->setPosition(pos);
-	}
-	else if (hash[jointId] == NULL)
-		qDebug() << "There is no such" << jointId << "node";
-	else
-		qDebug() << "?????";
-}
-
-/// Model construction methods
-void InnerModel::setRoot(InnerModelNode *node)
-{
-	
-	root = node;
-	hash.put("root", root);
-	root->parent=NULL;
-}
-
-InnerModelJoint *InnerModel::newJoint(QString id, InnerModelTransform *parent,float lx, float ly, float lz,float hx, float hy, float hz, float tx, float ty, float tz, float rx, float ry, float rz, float min, float max, uint32_t port,std::string axis, float home)
-{
-	
-	if (hash.contains(id))
-	{
-		QString error;
-		error.sprintf("InnerModel::newJoint: Error: Trying to insert a node with an already-existing key: %s\n", id.toStdString().c_str());
-		throw error;
-	}
-	InnerModelJoint *newnode = new InnerModelJoint(id,lx,ly,lz,hx,hy,hz, tx, ty, tz, rx, ry, rz, min, max, port, axis, home, parent);
-	hash.put(id,newnode); 
-	return newnode;
-}
-
-InnerModelTouchSensor *InnerModel::newTouchSensor(QString id, InnerModelTransform *parent, QString stype, float nx, float ny, float nz, float min, float max, uint32_t port)
-{
-	
-	if (hash.contains(id))
-	{
-		QString error;
-		error.sprintf("InnerModel::newTouchSensor: Error: Trying to insert a node with an already-existing key: %s\n", id.toStdString().c_str());
-		throw error;
-	}
-	InnerModelTouchSensor *newnode = new InnerModelTouchSensor(id, stype, nx, ny, nz, min, max, port, parent);
-	hash.put(id,newnode);
-	return newnode;
-}
-
-InnerModelPrismaticJoint *InnerModel::newPrismaticJoint(QString id, InnerModelTransform *parent, float min, float max, float value, float offset, uint32_t port,std::string axis, float home)
-{
-	
-	if (hash.contains(id))
-	{
-		QString error;
-		error.sprintf("InnerModel::newPrismaticJoint: Error: Trying to insert a node with an already-existing key: %s\n", id.toStdString().c_str());
-		throw error;
-	}
-	InnerModelPrismaticJoint *newnode = new InnerModelPrismaticJoint(id, min, max, value, offset, port, axis, home, parent);
-	hash.put(id,newnode);
-	return newnode;
-}
-
-InnerModelDifferentialRobot *InnerModel::newDifferentialRobot(QString id, InnerModelTransform *parent, float tx, float ty, float tz, float rx, float ry, float rz, uint32_t port, float noise, bool collide)
-{
-	
-	if (hash.contains(id))
-	{
-		QString error;
-		error.sprintf("InnerModel::newDifferentialRobot: Error: Trying to insert a node with an already-existing key: %s\n", id.toStdString().c_str());
-		throw error;
-	}
-	InnerModelDifferentialRobot *newnode = new InnerModelDifferentialRobot(id, tx, ty, tz, rx, ry, rz, port, noise, collide, parent);
-	hash.put(id,newnode);
-	return newnode;
-}
-
-InnerModelOmniRobot *InnerModel::newOmniRobot(QString id, InnerModelTransform *parent, float tx, float ty, float tz, float rx, float ry, float rz, uint32_t port, float noise, bool collide)
-{
-	
-	if (hash.contains(id))
-	{
-		QString error;
-		error.sprintf("InnerModel::newOmniRobot: Error: Trying to insert a node with an already-existing key: %s\n", id.toStdString().c_str());
-		throw error;
-	}
-	InnerModelOmniRobot *newnode = new InnerModelOmniRobot(id, tx, ty, tz, rx, ry, rz, port, noise, collide, parent);
-	hash.put(id,newnode);
-	return newnode;
-}
-
-InnerModelCamera *InnerModel::newCamera(QString id, InnerModelNode *parent, float width, float height, float focal)
-{
-	
-	if (hash.contains(id))
-	{
-		QString error;
-		error.sprintf("InnerModel::newCamera: Error: Trying to insert a node with an already-existing key: %s\n", id.toStdString().c_str());
-		throw error;
-	}
-	InnerModelCamera *newnode = new InnerModelCamera(id, width, height, focal, this, parent);
-	hash.put(id,newnode);
-	return newnode;
-}
-
-InnerModelRGBD *InnerModel::newRGBD(QString id, InnerModelNode *parent, float width, float height, float focal, float noise, uint32_t port, QString ifconfig)
-{
-	
-	if (noise < 0)
-	{
-		QString error;
-		error.sprintf("InnerModel::newRGBD: noise can't have negative values");
-		throw error;
-	}
-	if (hash.contains(id))
-	{
-		QString error;
-		error.sprintf("InnerModel::newRGBD: Error: Trying to insert a node with an already-existing key: %s\n", id.toStdString().c_str());
-		throw error;
-	}
-	InnerModelRGBD *newnode = new InnerModelRGBD(id, width, height, focal, noise, port, ifconfig, this, parent);
-	hash.put(id,newnode);
-	return newnode;
-}
-
-InnerModelIMU *InnerModel::newIMU(QString id, InnerModelNode *parent, uint32_t port)
-{
-	
-	if (hash.contains(id))
-	{
-		QString error;
-		error.sprintf("InnerModel::newIMU: Error: Trying to insert a node with an already-existing key: %s\n", id.toStdString().c_str());
-		throw error;
-	}
-	// 	printf("newIMU id=%s  parentId=%s port=%d\n", id.toStdString().c_str(), parent->id.toStdString().c_str(), port);
-	InnerModelIMU *newnode = new InnerModelIMU(id, port, parent);
-	hash.put(id,newnode);
-	return newnode;
-}
-
-InnerModelLaser *InnerModel::newLaser(QString id, InnerModelNode *parent, uint32_t port, uint32_t min, uint32_t max, float angle, uint32_t measures, QString ifconfig)
-{
-	if (hash.contains(id))
-	{
-		QString error;
-		error.sprintf("InnerModel::newLaser: Error: Trying to insert a node with an already-existing key: %s\n", id.toStdString().c_str());
-		throw error;
-	}
-	InnerModelLaser *newnode = new InnerModelLaser(id, port, min, max, angle, measures, ifconfig, this, parent);
-	hash.put(id,newnode);
-	return newnode;
-}
-
-InnerModelPlane *InnerModel::newPlane(QString id, InnerModelNode *parent, QString texture, float width, float height, float depth, int repeat, float nx, float ny, float nz, float px, float py, float pz, bool collidable)
-{
-	if (hash.contains(id))
-	{
-		QString error;
-		error.sprintf("InnerModel::newPlane: Error: Trying to insert a node with an already-existing key: %s\n", id.toStdString().c_str());
-		throw error;
-	}
-	InnerModelPlane *newnode = new InnerModelPlane(id, texture, width, height, depth, repeat, nx, ny, nz, px, py, pz, collidable, parent);
-	hash.put(id,newnode);
-	return newnode;
-}
-
-InnerModelMesh *InnerModel::newMesh(QString id, InnerModelNode *parent, QString path, float scalex, float scaley, float scalez, int render, float tx, float ty, float tz, float rx, float ry, float rz, bool collidable)
-{
-	if (hash.contains(id))
-	{
-		QString error;
-		error.sprintf("InnerModel::newMesh: Error: Trying to insert a node with an already-existing key: %s\n", id.toStdString().c_str());
-		throw error;
-	}
-	InnerModelMesh *newnode = new InnerModelMesh(id, path, scalex, scaley, scalez, (InnerModelMesh::RenderingModes)render, tx, ty, tz, rx, ry, rz, collidable, parent);
-	hash.put(id,newnode);
-	return newnode;
-}
-
-InnerModelMesh *InnerModel::newMesh(QString id, InnerModelNode *parent, QString path, float scale, int render, float tx, float ty, float tz, float rx, float ry, float rz, bool collidable)
-{
-	return newMesh(id,parent,path,scale,scale,scale,render,tx,ty,tz,rx,ry,rz, collidable);
-}
-
-InnerModelPointCloud *InnerModel::newPointCloud(QString id, InnerModelNode *parent)
-{
-	if (hash.contains(id))
-	{
-		QString error;
-		error.sprintf("InnerModel::newPointCloud: Error: Trying to insert a node with an already-existing key: %s\n", id.toStdString().c_str());
-		throw error;
-	}
-	InnerModelPointCloud *newnode = new InnerModelPointCloud(id, parent);
-	hash.put(id,newnode);
-	return newnode;
-}
-
-InnerModelTransform *InnerModel::newTransform(QString id, QString engine, InnerModelNode *parent, float tx, float ty, float tz, float rx, float ry, float rz, float mass)
-{
-	if (hash.contains(id))
-	{
-		QString error;
-		error.sprintf("InnerModel::newTransform: Error: Trying to insert a node with an already-existing key: %s\n", id.toStdString().c_str());
-		throw error;
-	}
-	InnerModelTransform *newnode = new InnerModelTransform(id, engine, tx, ty, tz, rx, ry, rz, mass, parent);
-	hash.put(id,newnode);
-	return newnode;
+	j->setPosition(pos);
 }
 
 
@@ -597,30 +387,24 @@ QVec InnerModel::rotationAngles(const QString & destId, const QString & origId)
 /// Thread safe Matrix transformation retrieval methods
 /////////////////////////////////////////////////////////////////////////////////////
 RTMat InnerModel::getTransformationMatrix(const QString &to, const QString &from)
-{
-	RTMat ret;
-	if (localHashTr.contains(QPair<QString, QString>(to, from)))
-		ret = localHashTr.get(QPair<QString, QString>(to, from));
-	else
+{	
+	std::pair<bool, RTMat> r = localHashTr.checkandget(QPair<QString, QString>(to, from));
+	if(r.first) return r.second;
+	
+	RTMat ret;	
+	std::pair<QList<InnerModelNode *>, QList<InnerModelNode *>> list = setLocalLists(from, to);
+	QList<InnerModelNode *> &listA = list.first;
+	QList<InnerModelNode *> &listB = list.second;
+	
+	foreach (InnerModelNode *i, listA)
+		ret = (*i).matrixmultTS(ret);
+	foreach (InnerModelNode *i, listB)
 	{
-		// Get locked list of InnerModelNode pointers. Unlock after using them!
-		std::pair<QList<InnerModelNode *>, QList<InnerModelNode *>> list = setLocalLists(from, to);
-		QList<InnerModelNode *> &listA = list.first;
-		QList<InnerModelNode *> &listB = list.second;
-		
-		foreach (InnerModelNode *i, listA)
-		{
-			ret = (*i).operator*(ret);
-			//i->unlock();
-		}
-		foreach (InnerModelNode *i, listB)
-		{
-			ret = (*i).invert() * ret;
-			//i->unlock();
-		}
-		
-		localHashTr.put(QPair<QString, QString>(to, from),ret);
+// 		QMat inv = (*i).invertTS();
+// 		ret = inv * ret;
+ 		ret = (*i).invertTS() * ret;
 	}
+	localHashTr.put(QPair<QString, QString>(to, from),ret);
 	return ret;
 }
 
@@ -631,70 +415,66 @@ RTMat InnerModel::getTransformationMatrixS(const std::string &destId, const std:
 
 QMat InnerModel::getRotationMatrixTo(const QString &to, const QString &from)
 {
+	std::pair<bool, QMat> r = localHashRot.checkandget(QPair<QString, QString>(to, from));
+	if(r.first) return r.second;
+	
 	QMat rret = QMat::identity(3);
-	if (localHashRot.contains(QPair<QString, QString>(to, from)))
-		rret = localHashRot[QPair<QString, QString>(to, from)];
-	else
-	{
-		// Get locked list of InnerModelNode pointers. Unlock after using them!
-		std::pair<QList<InnerModelNode *>, QList<InnerModelNode *>> list = setLocalLists(from, to);
-		QList<InnerModelNode *> &listA = list.first;
-		QList<InnerModelNode *> &listB = list.second;
+	// Get locked list of InnerModelNode pointers. Unlock after using them!
+	std::pair<QList<InnerModelNode *>, QList<InnerModelNode *>> list = setLocalLists(from, to);
+	QList<InnerModelNode *> &listA = list.first;
+	QList<InnerModelNode *> &listB = list.second;
+	
+	InnerModelTransform *tf = nullptr;
+	foreach (InnerModelNode *i, listA)
+		if ((tf=dynamic_cast<InnerModelTransform *>(i)) != nullptr)
+		{
+			rret = tf->getR() * rret;
+			//tf->unlock();
+		}
 		
-		InnerModelTransform *tf = nullptr;
-		foreach (InnerModelNode *i, listA)
-			if ((tf=dynamic_cast<InnerModelTransform *>(i)) != nullptr)
-			{
-				rret = tf->getR() * rret;
-				//tf->unlock();
-			}
-			
-		foreach (InnerModelNode *i, listB)
-			if ((tf=dynamic_cast<InnerModelTransform *>(i)) != nullptr)
-			{
-				rret = tf->getR().transpose() * rret;
-				//tf->unlock();
-			}
-		
-		localHashRot[QPair<QString, QString>(to, from)] = rret;
-	}
+	foreach (InnerModelNode *i, listB)
+		if ((tf=dynamic_cast<InnerModelTransform *>(i)) != nullptr)
+		{
+			rret = tf->getR().transpose() * rret;
+			//tf->unlock();
+		}
+	
+	localHashRot[QPair<QString, QString>(to, from)] = rret;
 	return rret;
 }
 
 QVec InnerModel::getTranslationVectorTo(const QString &to, const QString &from)
 {
-	QMat m = this->getTransformationMatrix(to, from);
+	QMat m = getTransformationMatrix(to, from);
 	return m.getCol(3);
 }
 
 std::pair<QList<InnerModelNode *>, QList<InnerModelNode *>> InnerModel::setLocalLists(const QString & origId, const QString & destId)
 {
-	InnerModelNode *a = hash.checkandget(origId);
-	InnerModelNode *b = hash.checkandget(destId);
+	InnerModelNode *a = hash.checkandget(origId).second;
+	InnerModelNode *b = hash.checkandget(destId).second;
 	
 	if (a == nullptr)
 		throw InnerModelException("InnerModel::setLocalLists: Cannot find node: \""+ origId.toStdString()+"\"");
 	if (b == nullptr)
 		throw InnerModelException("InnerModel::setLocalLists: Cannot find node: "+ destId.toStdString()+"\"");
 
-	int minLevel = a->level<b->level? a->level : b->level;
+	int minLevel = a->getLevel() < b->getLevel() ? a->getLevel() : b->getLevel();
 	QList<InnerModelNode *> listA;
-	while (a->level >= minLevel)
+	while (a->getLevel() >= minLevel)
 	{
 		listA.push_back(a);
 		if(a->parent == nullptr)
 			break;
 		a=a->parent;
-		//a->lock();
 	}
 	QList<InnerModelNode *> listB;
-	while (b->level >= minLevel)
+	while (b->getLevel() >= minLevel)
 	{
 		listB.push_front(b);
 		if(b->parent == nullptr)
 			break;
 		b=b->parent;
-		//b->lock();
 	}
 	while (b!=a)
 	{
@@ -702,10 +482,157 @@ std::pair<QList<InnerModelNode *>, QList<InnerModelNode *>> InnerModel::setLocal
 		listB.push_front(b);
 		a = a->parent;
 		b = b->parent;
-		//a->lock();
-		//b->lock();
 	}
 	return std::make_pair(listA, listB);
+}
+
+/////////////////////////////////////////////////////////////////
+/// Model construction methods
+/////////////////////////////////////////////////////////////////
+
+void InnerModel::setRoot(InnerModelNode *node)
+{
+	root = node;
+	hash.put("root", root);
+	root->parent = nullptr;
+}
+
+InnerModelJoint *InnerModel::newJoint(QString id, InnerModelTransform *parent,float lx, float ly, float lz,float hx, float hy, float hz, float tx, float ty, float tz, float rx, float ry, float rz, float min, float max, uint32_t port,std::string axis, float home)
+{
+	if (hash.contains(id))
+		throw InnerModelException("InnerModel::newJoint: Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");
+	
+	InnerModelJoint *newnode = new InnerModelJoint(id,lx,ly,lz,hx,hy,hz, tx, ty, tz, rx, ry, rz, min, max, port, axis, home, parent);
+	hash.put(id,newnode); 
+	return newnode;
+}
+
+InnerModelTouchSensor *InnerModel::newTouchSensor(QString id, InnerModelTransform *parent, QString stype, float nx, float ny, float nz, float min, float max, uint32_t port)
+{
+	if (hash.contains(id))
+		throw InnerModelException("InnerModel::newTouchSensor: Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");
+	
+	InnerModelTouchSensor *newnode = new InnerModelTouchSensor(id, stype, nx, ny, nz, min, max, port, parent);
+	hash.put(id,newnode);
+	return newnode;
+}
+
+InnerModelPrismaticJoint *InnerModel::newPrismaticJoint(QString id, InnerModelTransform *parent, float min, float max, float value, float offset, uint32_t port,std::string axis, float home)
+{	
+	if (hash.contains(id))
+		throw InnerModelException("InnerModel::newPrismaticJoint: Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");
+
+	InnerModelPrismaticJoint *newnode = new InnerModelPrismaticJoint(id, min, max, value, offset, port, axis, home, parent);
+	hash.put(id,newnode);
+	return newnode;
+}
+
+InnerModelDifferentialRobot *InnerModel::newDifferentialRobot(QString id, InnerModelTransform *parent, float tx, float ty, float tz, float rx, float ry, float rz, uint32_t port, float noise, bool collide)
+{
+	if (hash.contains(id))
+		throw InnerModelException("InnerModel::newDifferentialRobot: Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");
+	
+	InnerModelDifferentialRobot *newnode = new InnerModelDifferentialRobot(id, tx, ty, tz, rx, ry, rz, port, noise, collide, parent);
+	hash.put(id,newnode);
+	return newnode;
+}
+
+InnerModelOmniRobot *InnerModel::newOmniRobot(QString id, InnerModelTransform *parent, float tx, float ty, float tz, float rx, float ry, float rz, uint32_t port, float noise, bool collide)
+{
+	if (hash.contains(id))
+		throw InnerModelException("InnerModel::newOmniRobot: Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");	
+		
+	InnerModelOmniRobot *newnode = new InnerModelOmniRobot(id, tx, ty, tz, rx, ry, rz, port, noise, collide, parent);
+	hash.put(id,newnode);
+	return newnode;
+}
+
+InnerModelCamera *InnerModel::newCamera(QString id, InnerModelNode *parent, float width, float height, float focal)
+{
+	if (hash.contains(id))
+		throw InnerModelException("InnerModel::newCamera: Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");	
+		
+	InnerModelCamera *newnode = new InnerModelCamera(id, width, height, focal, this, parent);
+	hash.put(id,newnode);
+	return newnode;
+}
+
+InnerModelRGBD *InnerModel::newRGBD(QString id, InnerModelNode *parent, float width, float height, float focal, float noise, uint32_t port, QString ifconfig)
+{
+	if (noise < 0)
+		throw InnerModelException("InnerModel::newRGBD: Error: noise can't have negative values " + std::to_string(noise) + "\n");	
+
+	if (hash.contains(id))
+		throw InnerModelException("InnerModel::newRGBD: Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");	
+		
+	InnerModelRGBD *newnode = new InnerModelRGBD(id, width, height, focal, noise, port, ifconfig, this, parent);
+	hash.put(id,newnode);
+	return newnode;
+}
+
+InnerModelIMU *InnerModel::newIMU(QString id, InnerModelNode *parent, uint32_t port)
+{
+	if (hash.contains(id))
+		throw InnerModelException("InnerModel::newIMU: Error Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");	
+		
+	InnerModelIMU *newnode = new InnerModelIMU(id, port, parent);
+	hash.put(id,newnode);
+	return newnode;
+}
+
+InnerModelLaser *InnerModel::newLaser(QString id, InnerModelNode *parent, uint32_t port, uint32_t min, uint32_t max, float angle, uint32_t measures, QString ifconfig)
+{
+	if (hash.contains(id))
+		throw InnerModelException("InnerModel::newLaser Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");
+		
+	InnerModelLaser *newnode = new InnerModelLaser(id, port, min, max, angle, measures, ifconfig, this, parent);
+	hash.put(id,newnode);
+	return newnode;
+}
+
+InnerModelPlane *InnerModel::newPlane(QString id, InnerModelNode *parent, QString texture, float width, float height, float depth, int repeat, float nx, float ny, float nz, float px, float py, float pz, bool collidable)
+{
+	if (hash.contains(id))
+		throw InnerModelException("InnerModel::newPlane Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");
+		
+	InnerModelPlane *newnode = new InnerModelPlane(id, texture, width, height, depth, repeat, nx, ny, nz, px, py, pz, collidable, parent);
+	hash.put(id,newnode);
+	return newnode;
+}
+
+InnerModelMesh *InnerModel::newMesh(QString id, InnerModelNode *parent, QString path, float scalex, float scaley, float scalez, int render, float tx, float ty, float tz, float rx, float ry, float rz, bool collidable)
+{
+	if (hash.contains(id))
+		throw InnerModelException("InnerModel::newMesh Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");
+		
+	InnerModelMesh *newnode = new InnerModelMesh(id, path, scalex, scaley, scalez, (InnerModelMesh::RenderingModes)render, tx, ty, tz, rx, ry, rz, collidable, parent);
+	hash.put(id,newnode);
+	return newnode;
+}
+
+InnerModelMesh *InnerModel::newMesh(QString id, InnerModelNode *parent, QString path, float scale, int render, float tx, float ty, float tz, float rx, float ry, float rz, bool collidable)
+{
+	return newMesh(id,parent,path,scale,scale,scale,render,tx,ty,tz,rx,ry,rz, collidable);
+}
+
+InnerModelPointCloud *InnerModel::newPointCloud(QString id, InnerModelNode *parent)
+{
+	if (hash.contains(id))
+		throw InnerModelException("InnerModel::newPointCloud Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");
+		
+	InnerModelPointCloud *newnode = new InnerModelPointCloud(id, parent);
+	hash.put(id,newnode);
+	return newnode;
+}
+
+InnerModelTransform *InnerModel::newTransform(QString id, QString engine, InnerModelNode *parent, float tx, float ty, float tz, float rx, float ry, float rz, float mass)
+{
+	if (hash.contains(id))
+		throw InnerModelException("InnerModel::newTransform: Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");
+		
+	InnerModelTransform *newnode = new InnerModelTransform(id, engine, tx, ty, tz, rx, ry, rz, mass, parent);
+	hash.put(id,newnode);
+	return newnode;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -713,10 +640,11 @@ std::pair<QList<InnerModelNode *>, QList<InnerModelNode *>> InnerModel::setLocal
 /////////////////////////////////////////////////////////////////////////////////////////////
 QString InnerModel::getParentIdentifier(QString id)
 {
-	InnerModelNode *n = getNodeSafeAndLock<InnerModelNode>(id);
-	QString pi = n->id;
-	n->unlock();
-	return pi;
+	InnerModelNode *n = getNode<InnerModelNode>(id);
+	if(n != nullptr)
+		return n->getId();
+	else
+		throw InnerModelException("InnerModel::getParentIdentifier Error: non existing node " + id.toStdString() + "\n");
 }
 
 std::string InnerModel::getParentIdentifierS(const std::string &id)
@@ -725,46 +653,44 @@ std::string InnerModel::getParentIdentifierS(const std::string &id)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-/// Thread safe Collision detection
+/// Collision detection
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 bool InnerModel::collidable(const QString &a)
 {
-	InnerModelNode *n = getNodeSafeAndLock<InnerModelNode>(a);
-	bool s = n->collidable;
-	n->unlock();
-	if(s)
-		return true;
+	InnerModelNode *n = getNode<InnerModelNode>(a);
+	if( n != nullptr)
+		return n->getCollidable();
 	else
-		return false;
+		throw InnerModelException("InnerModel::collidable Error: Trying to insert a node with an already-existing key: " + a.toStdString() + "\n");		
 }
 
 bool InnerModel::collide(const QString &a, const QString &b)
 {
 #if FCL_SUPPORT==1
-	InnerModelNode *n1 = getNodeSafeAndLock<InnerModelNode>(a);
+	InnerModelNode *n1 = getNode<InnerModelNode>(a);
 	QMat r1q = getRotationMatrixTo("root", a);
 	fcl::Matrix3f R1( r1q(0,0), r1q(0,1), r1q(0,2), r1q(1,0), r1q(1,1), r1q(1,2), r1q(2,0), r1q(2,1), r1q(2,2) );
 	QVec t1v = getTranslationVectorTo("root", a);
 	fcl::Vec3f T1( t1v(0), t1v(1), t1v(2) );
-	n1->collisionObject->setTransform(R1, T1);
+	n1->getCollisionObject()->setTransform(R1, T1);
 
-	InnerModelNode *n2 = getNodeSafeAndLock<InnerModelNode>(b);
+	InnerModelNode *n2 = getNode<InnerModelNode>(b);
 	QMat r2q = getRotationMatrixTo("root", b);
 	fcl::Matrix3f R2( r2q(0,0), r2q(0,1), r2q(0,2), r2q(1,0), r2q(1,1), r2q(1,2), r2q(2,0), r2q(2,1), r2q(2,2) );
 	QVec t2v = getTranslationVectorTo("root", b);
 	fcl::Vec3f T2( t2v(0), t2v(1), t2v(2) );
-	n2->collisionObject->setTransform(R2, T2);
+	n2->getCollisionObject()->setTransform(R2, T2);
 
 	fcl::CollisionRequest request;
 	fcl::CollisionResult result;
 
-	n1->collisionObject->computeAABB();
-	n2->collisionObject->computeAABB();
+	n1->getCollisionObject()->computeAABB();
+	n2->getCollisionObject()->computeAABB();
 
 	// NOTE: Un poco de documentacion nunca esta mal, sabeis --> http://gamma.cs.unc.edu/FCL/fcl_docs/webpage/generated/namespacefcl.html
 	// std::size_t 	collide (const CollisionObject *o1, const CollisionObject *o2, const CollisionRequest &request, CollisionResult &result)
-	fcl::collide(n1->collisionObject, n2->collisionObject, request, result);
+	fcl::collide(n1->getCollisionObject(), n2->getCollisionObject(), request, result);
 	// return binary collision result --> http://gamma.cs.unc.edu/FCL/fcl_docs/webpage/generated/structfcl_1_1CollisionResult.html#ed599cb31600ec6d0585d9adb4cde946
 	// True if There are collisions, and false if there arent collisions.
 	n1->unlock(); n2->unlock();
@@ -786,17 +712,17 @@ bool InnerModel::collide(const QString &a, const QString &b)
 bool InnerModel::collide(const QString &a, const fcl::CollisionObject *obj)
 {
 	
-	InnerModelNode *n1 = getNodeSafeAndLock<InnerModelNode>(a);
+	InnerModelNode *n1 = getNode<InnerModelNode>(a);
 	QMat r1q = getRotationMatrixTo("root", a);
 	fcl::Matrix3f R1( r1q(0,0), r1q(0,1), r1q(0,2), r1q(1,0), r1q(1,1), r1q(1,2), r1q(2,0), r1q(2,1), r1q(2,2) );
 	QVec t1v = getTranslationVectorTo("root", a);
 	fcl::Vec3f T1( t1v(0), t1v(1), t1v(2) );
-	n1->collisionObject->setTransform(R1, T1);
+	n1->getCollisionObject()->setTransform(R1, T1);
 
 	fcl::CollisionRequest request;
 	fcl::CollisionResult result;
 
-	fcl::collide(n1->collisionObject, obj, request, result);
+	fcl::collide(n1->getCollisionObject(), obj, request, result);
 
 	n1->unlock();
 	return result.isCollision();
@@ -806,27 +732,27 @@ bool InnerModel::collide(const QString &a, const fcl::CollisionObject *obj)
 float InnerModel::distance(const QString &a, const QString &b)
 {
 #if FCL_SUPPORT==1
-	InnerModelNode *n1 = getNodeSafeAndLock<InnerModelNode>(a);
+	InnerModelNode *n1 = getNode<InnerModelNode>(a);
 	QMat r1q = getRotationMatrixTo("root", a);
 	fcl::Matrix3f R1( r1q(0,0), r1q(0,1), r1q(0,2), r1q(1,0), r1q(1,1), r1q(1,2), r1q(2,0), r1q(2,1), r1q(2,2) );
 	QVec t1v = getTranslationVectorTo("root", a);
 	fcl::Vec3f T1( t1v(0), t1v(1), t1v(2) );
-	n1->collisionObject->setTransform(R1, T1);
+	n1->getCollisionObject()->setTransform(R1, T1);
 
-	InnerModelNode *n2 = getNodeSafeAndLock<InnerModelNode>(b);
+	InnerModelNode *n2 = getNode<InnerModelNode>(b);
 	QMat r2q = getRotationMatrixTo("root", b);
 	fcl::Matrix3f R2( r2q(0,0), r2q(0,1), r2q(0,2), r2q(1,0), r2q(1,1), r2q(1,2), r2q(2,0), r2q(2,1), r2q(2,2) );
 	QVec t2v = getTranslationVectorTo("root", b);
 	fcl::Vec3f T2( t2v(0), t2v(1), t2v(2) );
-	n2->collisionObject->setTransform(R2, T2);
+	n2->getCollisionObject()->setTransform(R2, T2);
 
 	fcl::DistanceResult result;
 	fcl::DistanceRequest request;
 
-	n1->collisionObject->computeAABB();
-	n2->collisionObject->computeAABB();
+	n1->getCollisionObject()->computeAABB();
+	n2->getCollisionObject()->computeAABB();
 
-	fcl::distance(n1->collisionObject, n2->collisionObject, request, result);
+	fcl::distance(n1->getCollisionObject(), n2->getCollisionObject(), request, result);
 	
 	n1->unlock(); n2->unlock();
 	return result.min_distance;

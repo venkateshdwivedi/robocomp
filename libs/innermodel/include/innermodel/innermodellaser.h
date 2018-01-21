@@ -38,14 +38,21 @@ class InnerModelLaser : public InnerModelNode
 		* @return 3-vector of x,y,z coordinates un WRS
 		*/
 		QVec laserTo(const QString& dest, float r, float alpha);
-
+		uint32_t getPort() const		{ Lock lock(mutex); return port; }
+		uint32_t getMeasures() const	{ Lock lock(mutex); return measures; }
+		float getAngle() const			{ Lock lock(mutex); return angle; }
+		uint32_t getMin() const			{ Lock lock(mutex); return min; }
+		uint32_t getMax() const			{ Lock lock(mutex); return max; }
+		QString getIfconfig() const		{ Lock lock(mutex); return ifconfig; }
+		
+	private:
 		uint32_t port;
 		uint32_t min, max;
 		float angle;
 		uint32_t measures;
 		QString ifconfig;
 		
-		mutable QMutex mutex;
+		//mutable QMutex mutex;
 	
 private:
 		InnerModel *innermodel;

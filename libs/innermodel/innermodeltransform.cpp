@@ -32,14 +32,13 @@ InnerModelTransform::InnerModelTransform(QString id_, QString engine_, float tx_
 	backrX = rx_;
 	backrY = ry_;
 	backrZ = rz_;
-	rx = ry = rz = tx = ty = tz = NULL;
+	//rx = ry = rz = tx = ty = tz = NULL;
 	gui_translation = gui_rotation = true;
 }
 
 InnerModelTransform::~InnerModelTransform()
 {
 }
-
 
 void InnerModelTransform::print(bool verbose)
 {
@@ -91,18 +90,18 @@ void InnerModelTransform::save(QTextStream &out, int tabs)
 
 void InnerModelTransform::update()
 {
-	Lock lock(mutex);
-	if (!fixed)
-	{
-		if (tx) backtX = *tx;
-		if (ty) backtY = *ty;
-		if (tz) backtZ = *tz;
-		if (rx) backrX = *rx;
-		if (ry) backrY = *ry;
-		if (rz) backrZ = *rz;
-		set(backrX, backrY, backrZ, backtX, backtY, backtZ);
-	}
-	updateChildren();
+// 	Lock lock(mutex);
+// 	if (!fixed)
+// 	{
+// 		if (tx) backtX = *tx;
+// 		if (ty) backtY = *ty;
+// 		if (tz) backtZ = *tz;
+// 		if (rx) backrX = *rx;
+// 		if (ry) backrY = *ry;
+// 		if (rz) backrZ = *rz;
+// 		set(backrX, backrY, backrZ, backtX, backtY, backtZ);
+// 	}
+// 	updateChildren();
 }
 
 /**
@@ -125,7 +124,22 @@ void InnerModelTransform::update(float tx_, float ty_, float tz_, float rx_, flo
 	fixed = true;
 }
 
-
+void InnerModelTransform::updateT(float tx_, float ty_, float tz_)
+{
+	Lock lock(mutex);
+	backtX = tx_; backtY = ty_; backtZ = tz_;
+	set(backrX, backrY, backrZ, backtX, backtY, backtZ);
+	fixed = true;
+}
+	
+void InnerModelTransform::updateR(float rx_, float ry_, float rz_)
+{
+	Lock lock(mutex);
+	backrX = rx_; backrY = ry_; backrZ = rz_;
+	set(backrX, backrY, backrZ, backtX, backtY, backtZ);
+	fixed = true;
+}	
+	
 InnerModelNode* InnerModelTransform::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
 {
 	Lock lock(mutex);
@@ -147,15 +161,11 @@ InnerModelNode* InnerModelTransform::copyNode(ThreadSafeHash<QString, InnerModel
 void InnerModelTransform::transformValues(const RTMat &Tpb, float tx, float ty, float tz, float rx, float ry, float rz, const InnerModelNode *parentNode)
 {
 	Lock lock(mutex);
+	
 	RTMat Tbi;
 	Tbi.setTr(tx,ty,tz);
 	Tbi.setR (rx,ry,rz);
-
-	///Tbp Inverse = Tpb. This gets Tpb directly. It's the same
-	
-	///New Tpi
 	RTMat Tpi = Tpb*Tbi;
-
 	QVec angles = Tpi.extractAnglesR();
 	QVec tr = Tpi.getTr();
 
@@ -166,4 +176,32 @@ void InnerModelTransform::transformValues(const RTMat &Tpb, float tx, float ty, 
 	ty = tr.y();
 	tz = tr.z();
 	update(tx,ty,tz,rx,ry,rz);
+}
+
+void InnerModelTransform::translateValues(const RTMat &Tpb, float tx, float ty, float tz, const InnerModelNode *parentNode)
+{
+	Lock lock(mutex);
+	
+	RTMat Tbi;
+	Tbi.setTr(tx,ty,tz);
+	RTMat Tpi = Tpb*Tbi;
+	QVec tr = Tpi.getTr();
+	tx = tr.x();
+	ty = tr.y();
+	tz = tr.z();
+	updateT(tx,ty,tz);
+}
+
+void InnerModelTransform::rotateValues(const RTMat &Tpb, float rx, float ry, float rz, const InnerModelNode *parentNode)
+{
+	Lock lock(mutex);
+	
+	RTMat Tbi;
+	Tbi.setR (rx,ry,rz);
+	RTMat Tpi = Tpb*Tbi;
+	QVec angles = Tpi.extractAnglesR();
+	rx = angles.x();
+	ry = angles.y();
+	rz = angles.z();
+	updateR(rx,ry,rz);
 }

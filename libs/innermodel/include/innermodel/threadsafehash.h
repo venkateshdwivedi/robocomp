@@ -67,6 +67,7 @@ class ThreadSafeHash
 {
 	public:
 		ThreadSafeHash(){};
+		std::recursive_mutex mutex;
 		void put(const Key &key, Val v)
 		{
 			Lock lock(mutex);
@@ -92,13 +93,13 @@ class ThreadSafeHash
 			Lock lock(mutex);
 			return hash.contains(key);
 		};
-		Val checkandget(const Key &key)
+		std::pair<bool, Val> checkandget(const Key &key)
 		{
 			Lock lock(mutex);
 			if( hash.contains(key) )
-				return hash[key];
+				return std::make_pair(true, hash[key]);
 			else 
-				return nullptr;
+				return std::make_pair(false, Val());
 		};
 		Val checkandgetandlock(const Key &key)
 		{
@@ -123,8 +124,17 @@ class ThreadSafeHash
 			Lock lock(mutex);
 			hash.remove(key);
 		}
+		void lock()
+		{
+			mutex.lock();
+		}
+		void unlock()
+		{
+			mutex.unlock();
+		}
+		
 	private:
-		std::recursive_mutex mutex;
+		
 		QHash<Key, Val> hash;
 };
 

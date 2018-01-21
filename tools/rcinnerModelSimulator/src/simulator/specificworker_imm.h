@@ -85,14 +85,14 @@ bool SpecificWorker::imm_getPoseFromParent(const QString &server, const std::str
 	QString m="RoboCompInnerModelManager::getPoseFromParent()";
 
 	InnerModelTransform *aux = dynamic_cast<InnerModelTransform*>(getNode(QString::fromStdString(item), m));
-	checkOperationInvalidNode(aux, m+aux->id+"can't be use as base because it's not a InnerModelTransform node.");
+	checkOperationInvalidNode(aux, m + aux->getId() + "can't be used as base because it's not a InnerModelTransform node.");
 
-	pose.x = aux->backtX;
-	pose.y = aux->backtY;
-	pose.z = aux->backtZ;
-	pose.rx = aux->backrX;
-	pose.ry = aux->backrY;
-	pose.rz = aux->backrZ;
+	pose.x = aux->getBacktX();
+	pose.y = aux->getBacktY();
+	pose.z = aux->getBacktZ();
+	pose.rx = aux->getBackrX();
+	pose.ry = aux->getBackrY();
+	pose.rz = aux->getBackrZ();
 
 	return true;
 }
@@ -239,33 +239,18 @@ bool SpecificWorker::imm_setScale(const QString &server, const std::string &item
 
 
 bool SpecificWorker::imm_setPlane(const QString &server, const std::string &item, const RoboCompInnerModelManager::Plane3D &plane)
-{
-// 	InnerModelMgr::guard gl(innerModel.mutex());
-
-// 	QString m="RoboCompInnerModelManager::setPlane()";
-// 	printf("SETPLANE %s: %f_%f_%f\n", item.c_str(), plane.px, plane.py, plane.pz);
-// 	printf("SETPLANE %s: %f_%f_%f\n", item.c_str(), plane.px, plane.py, plane.pz);
-// 	printf("SETPLANE %s: %f_%f_%f\n", item.c_str(), plane.px, plane.py, plane.pz);
-// 	printf("SETPLANE %s: %f_%f_%f\n", item.c_str(), plane.px, plane.py, plane.pz);
-// 	InnerModelPlane *aux = dynamic_cast<InnerModelPlane*>(getNode(QString::fromStdString(item), m));
-// 	checkOperationInvalidNode(aux, m + aux->id +"can't be use as base because it's not of the type InnerModelPlane.");
-// 	innerModel->updatePlaneValues(QString::fromStdString(item), plane.nx, plane.ny, plane.nz, plane.px, plane.py, plane.pz);
-// 
-// 	return true;
-	
+{	
 	InnerModelMgr::guard gl(innerModel.mutex());
 
 	QString m="RoboCompInnerModelManager::setPlane()";
-// 	printf("SETPLANE %s: %f_%f_%f\n", item.c_str(), plane.px, plane.py, plane.pz);
 	InnerModelPlane *aux = dynamic_cast<InnerModelPlane*>(getNode(QString::fromStdString(item), m));
-	checkOperationInvalidNode(aux,m + aux->id +"can't be use as base because it's not of the type InnerModelPlane.");
+	checkOperationInvalidNode(aux,m + aux->getId() +"can't be use as base because it's not of the type InnerModelPlane.");
 	innerModel->updatePlaneValues(QString::fromStdString(item), plane.nx, plane.ny, plane.nz, plane.px, plane.py, plane.pz);
 	return true;
 }
 
 bool SpecificWorker::imm_setPlaneTexture(const QString &server, const std::string &item, const std::string &texture)
 {
-	
 	InnerModelMgr::guard gl(innerModel.mutex());
 
 	QString m="RoboCompInnerModelManager::setPlaneTextureº()";
@@ -283,11 +268,11 @@ bool SpecificWorker::imm_setPlaneTexture(const QString &server, const std::strin
 		throw "Couldn't load texture.";
 	}
 	
-	imv->planesHash[aux->id]->image =image;
-	imv->planesHash[aux->id]->texture->setImage(image);
+	imv->planesHash[aux->getId()]->image =image;
+	imv->planesHash[aux->getId()]->texture->setImage(image);
 
 	qDebug()<<"change aux->texture"<<aux->texture;
-// 	checkOperationInvalidNode(aux,m + aux->id +"can't be use as base because it's not of the type InnerModelPlane.");
+// 	checkOperationInvalidNode(aux,m + aux->getId() +"can't be use as base because it's not of the type InnerModelPlane.");
 // 	innerModel->updatePlaneValues(QString::fromStdString(item), plane.nx, plane.ny, plane.nz, plane.px, plane.py, plane.pz);
 	return true;
 }
@@ -355,7 +340,7 @@ bool SpecificWorker::imm_addTransform(const QString &server, const std::string &
 
 	InnerModelTransform *tr = innerModel->newTransform(QString::fromStdString(item), QString::fromStdString("static") ,parent, pose.x, pose.y, pose.z, pose.rx, pose.ry, pose.rz);
 	parent->addChild(tr);
-	imv->recursiveConstructor(tr, imv->mts[parent->id], imv->mts, imv->meshHash); // imv->osgmeshes,imv->osgmeshPats);
+	imv->recursiveConstructor(tr, imv->mts[parent->getId()], imv->mts, imv->meshHash); // imv->osgmeshes,imv->osgmeshPats);
 	
 #ifdef INNERMODELMANAGERDEBUG
 	qDebug()<<"engine"<<qEngine;
@@ -385,10 +370,10 @@ bool SpecificWorker::imm_addJoint(const QString &server, const std::string &item
 	parent->addChild (jN);
 
 	// Create Interface in case the port is not 0
-	if (jN->port != 0)
+	if (jN->getPort() != 0)
 		addJM(jN);
 
-	imv->recursiveConstructor(jN, imv->mts[parent->id], imv->mts, imv->meshHash); // imv->osgmeshes,imv->osgmeshPats);
+	imv->recursiveConstructor(jN, imv->mts[parent->getId()], imv->mts, imv->meshHash); // imv->osgmeshes,imv->osgmeshPats);
 
 	return true;
 }
@@ -428,7 +413,7 @@ bool SpecificWorker::imm_addMesh(const QString &server, const std::string &item,
 	mesh->setScale(m.scaleX, m.scaleY, m.scaleZ);
 	parent->addChild(mesh);
 
-	imv->recursiveConstructor(mesh, imv->mts[parent->id], imv->mts, imv->meshHash); // osgmeshes,imv->osgmeshPats);
+	imv->recursiveConstructor(mesh, imv->mts[parent->getId()], imv->mts, imv->meshHash); // osgmeshes,imv->osgmeshPats);
 	//I think not necessary	
 	//imv->update();
 
@@ -464,7 +449,7 @@ bool SpecificWorker::imm_addPlane(const QString &server, const std::string &item
 // 	                         p.nx, p.ny, p.nz, p.px, p.py, p.pz);
 // 	parent->addChild(plane);
 // 
-// 	imv->recursiveConstructor(plane, imv->mts[parent->id], imv->mts, imv->meshHash);
+// 	imv->recursiveConstructor(plane, imv->mts[parent->getId()], imv->mts, imv->meshHash);
 // 	imv->update();
 	
 	InnerModelMgr::guard gl(innerModel.mutex());
@@ -479,7 +464,7 @@ bool SpecificWorker::imm_addPlane(const QString &server, const std::string &item
 	                         p.nx, p.ny, p.nz, p.px, p.py, p.pz);
 	parent->addChild(plane);
 
-	imv->recursiveConstructor(plane, imv->mts[parent->id], imv->mts, imv->meshHash);
+	imv->recursiveConstructor(plane, imv->mts[parent->getId()], imv->mts, imv->meshHash);
 	//I think not necessary	
 	// 	imv->update();
 
@@ -491,22 +476,21 @@ bool SpecificWorker::imm_addAttribute(const QString &server, const std::string &
 {
 	InnerModelMgr::guard gl(innerModel.mutex());
 
-	QString qIdNode=QString::fromStdString(idNode);
-	QString qName=QString::fromStdString(name);
-	QString qType=QString::fromStdString(type);
-	QString qValue=QString::fromStdString(value);
-	QString m="RoboCompInnerModelManager::addAttribute()";
+	QString qIdNode = QString::fromStdString(idNode);
+	QString qName = QString::fromStdString(name);
+	QString qType = QString::fromStdString(type);
+	QString qValue = QString::fromStdString(value);
+	QString m = "RoboCompInnerModelManager::addAttribute()";
 
 	InnerModelNode *node = getNode(qIdNode, m);
 	AttributeAlreadyExists(node,qName,m);
 
 	InnerModelNode::AttributeType t;
-// 	InnerModelNode::
-// 	AttributeType t;
 	t.type=qType;
 	t.value=qValue;
-	node->attributes.insert(qName,t);
-
+	auto att = node->getAttributes();
+	att.insert(qName,t);
+	node->setAttributes(att);
 	return true;
 }
 
@@ -525,9 +509,11 @@ bool SpecificWorker::imm_setAttribute(const QString &server, const std::string &
 	InnerModelNode *node = getNode(qIdNode, m);
 	NonExistingAttribute(node,qName,m);
 
-	node->attributes[qName].type=qType;
-	node->attributes[qName].value=qValue;
-
+	auto att = node->getAttributes();
+	att[qName].type = qType;
+	att[qName].value = qValue;
+	node->setAttributes(att);
+	
 	return true;
 }
 
@@ -543,8 +529,9 @@ bool SpecificWorker::imm_getAttribute(const QString &server, const std::string &
 	InnerModelNode *node = getNode(qIdNode, m);
 	NonExistingAttribute(node, qName,m);
 
-	type= node->attributes[qName].type.toStdString();
-	value=node->attributes[qName].value.toStdString();
+	auto att = node->getAttributes();
+	type = att[qName].type.toStdString();
+	value = att[qName].value.toStdString();
 
 	return true;
 }
@@ -561,7 +548,9 @@ bool SpecificWorker::imm_removeAttribute(const QString &server, const std::strin
 	InnerModelNode *node = getNode(qIdNode, m);
 	NonExistingAttribute(node, qName,m);
 
-	node->attributes.remove(qName);
+	auto att = node->getAttributes();
+	att.remove(qName);
+	node->setAttributes(att);
 
 	return true;
 }
@@ -605,7 +594,7 @@ bool SpecificWorker::imm_removeNode(const QString &server, const std::string &it
  		qDebug()<<"remove"<<n;
 #endif
 		InnerModelJoint *jN = dynamic_cast<InnerModelJoint *> (innerModel->getNode(n));
-		if (jN!=NULL && jN->port!=0)
+		if (jN!=NULL && jN->getPort() != 0)
 		{
 #ifdef INNERMODELMANAGERDEBUG		
  			qDebug()<<"remove Joint"<<n<<jN->port;
@@ -758,7 +747,7 @@ bool SpecificWorker::imm_moveNode(const QString &server, const std::string &src,
 	foreach(QString n, l) 
 	{
 		
-		imv->recursiveConstructor(innerModel->getNode(n), imv->mts[innerModel->getNode(n)->parent->id], imv->mts, imv->meshHash); // imv->osgmeshes,imv->osgmeshPats);
+		imv->recursiveConstructor(innerModel->getNode(n), imv->mts[innerModel->getNode(n)->parent->getId()], imv->mts, imv->meshHash); // imv->osgmeshes,imv->osgmeshPats);
 	}
 	
 	

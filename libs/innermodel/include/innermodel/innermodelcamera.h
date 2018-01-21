@@ -33,10 +33,10 @@ class InnerModelCamera : public InnerModelNode
 
 		Cam camera;
 		float width, height, focal;
-		float getWidth()  const { return width; }
-		float getHeight() const { return height; }
-		float getFocal()  const { return focal; }
-		float getSize()   const { return getWidth()*getHeight(); }
+		float getWidth()  const 	{ return width; }
+		float getHeight() const 	{ return height; }
+		float getFocal()  const 	{ return focal; }
+		float getSize()   const 	{ return getWidth()*getHeight(); }
 		void updateValues(float width_, float height_, float focal_);
 		
 		QVec project(QString reference, QVec origVec);
@@ -61,7 +61,7 @@ class InnerModelCamera : public InnerModelNode
 		struct TFrustrum { TPlane left; TPlane top; TPlane right; TPlane down; TPlane near; TPlane far;};
 		TFrustrum frustrumLeft, frustrumThird, frustrumRight;
 		
-		mutable QMutex mutex;
+		//mutable QMutex mutex;
 		
 		InnerModel *innermodel;
 };

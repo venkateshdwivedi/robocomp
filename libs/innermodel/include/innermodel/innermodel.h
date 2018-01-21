@@ -147,18 +147,17 @@ class InnerModel
 		InnerModelMesh *getMesh(const QString &id)                           { return getNode<InnerModelMesh>(id); }
 		InnerModelPointCloud *getPointCloud(const QString &id)               { return getNode<InnerModelPointCloud>(id); }
 		QList<QString> getIDKeys() 											 { return hash.keys(); }
-		InnerModelNode *getNode(const QString & id) 	 					 { return hash.checkandget(id); }
+		InnerModelNode *getNode(const QString & id) 	 					 { return hash.checkandget(id).second; }
+		
 		template <class N> N* getNode(const QString &id) 
 		{
-			N* r = dynamic_cast<N *>(hash.checkandget(id));
-// 			if (r == nullptr)
-// 				throw InnerModelException("InnerModel::getNode() Error getting non existing node: " + id.toStdString());
-			return r;
+			return dynamic_cast<N *>(hash.checkandget(id).second);
 		}
+
 		// Thread safe node getter. It might be null
 		template <class N> N* getNodeSafe(const QString &id) 
 		{
-			return dynamic_cast<N *>(hash.checkandget(id));
+			return dynamic_cast<N *>(hash.checkandget(id).second);
 		}
 		// Thread safe node getter that returns a locked node. 
 		template <class N> N* getNodeSafeAndLock(const QString &id) 

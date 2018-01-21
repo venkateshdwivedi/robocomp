@@ -161,7 +161,7 @@ void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, Inne
 				QString ngn = e.attribute("engine", "static");
 				if (ngn != "static" and ngn != "bullet") qFatal("Error in line %d: %s is not a valid physics engine.", domNode.lineNumber(), ngn.toStdString().c_str());
 				InnerModelTransform *tr = model->newTransform(e.attribute("id"), e.attribute("engine", "static"), imNode, 0., 0., 0., e.attribute("rx", "0").toFloat(), e.attribute("ry", "0").toFloat(), e.attribute("rz", "0").toFloat(), e.attribute("mass", "0").toFloat());
-				tr->gui_translation = false;
+				tr->setGuiTranslation(false);
 				imNode->addChild(tr);
                     imNode->innerModel = tr->innerModel = model;
 				node = tr;
@@ -171,7 +171,7 @@ void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, Inne
 				QString ngn = e.attribute("engine", "static");
 				if (ngn != "static" and ngn != "bullet") qFatal("Error in line %d: %s is not a valid physics engine.", domNode.lineNumber(), ngn.toStdString().c_str());
 				InnerModelTransform *tr = model->newTransform(e.attribute("id"), e.attribute("engine", "static"), imNode, e.attribute("tx", "0").toFloat(), e.attribute("ty", "0").toFloat(), e.attribute("tz", "0").toFloat(), 0., 0., 0., e.attribute("mass", "0").toFloat());
-				tr->gui_rotation = false;
+				tr->setGuiRotation(false);
 				imNode->addChild(tr);
                     imNode->innerModel = tr->innerModel = model;
 				node = tr;
@@ -252,7 +252,7 @@ void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, Inne
 			else if (e.tagName().toLower() == "laser")
 			{
 				InnerModelLaser *laser = model->newLaser(e.attribute("id"), imNode, e.attribute("port", "0").toInt(), e.attribute("min").toInt(), e.attribute("max").toInt(), e.attribute("angle").toFloat(), e.attribute("measures").toInt(), e.attribute("ifconfig"));
- 				printf("laser: %s, port %d\n", laser->id.toStdString().c_str(), laser->port);
+ 				printf("laser: %s, port %d\n", laser->id.toStdString().c_str(), laser->getPort());
 				imNode->addChild(laser);
                     imNode->innerModel = laser->innerModel = model;
 				node = laser;

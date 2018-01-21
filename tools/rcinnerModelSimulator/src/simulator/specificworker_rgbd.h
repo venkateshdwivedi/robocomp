@@ -16,7 +16,7 @@ TRGBDParams SpecificWorker::rgbd_getRGBDParams ( const QString& server )
 	rgbdParams.device = server.toStdString();
 	rgbdParams.timerPeriod = timer.interval();
 
-	QStringList cameraConfig = cam.RGBDNode->ifconfig.split ( "," );
+	QStringList cameraConfig = cam.RGBDNode->getIfconfig().split ( "," );
 	if ( cameraConfig.size() > 1 ) {
 		uint32_t basePort  = QString ( cameraConfig[1] ).toUInt();
 		if( dfr_servers.count( basePort ) > 0 )
@@ -84,10 +84,10 @@ void SpecificWorker::rgbd_getImage ( const QString& server, ColorSeq& color, Dep
 
 	IMVCamera &cam = imv->cameras[server];
 
-	QStringList cameraConfig = cam.RGBDNode->ifconfig.split ( "," );
+	QStringList cameraConfig = cam.RGBDNode->getIfconfig().split ( "," );
 	if (cameraConfig.size() > 1)
 	{
-		uint32_t basePort  = QString ( cam.RGBDNode->ifconfig.split ( "," ) [1] ).toUInt();
+		uint32_t basePort  = QString ( cam.RGBDNode->getIfconfig().split ( "," ) [1] ).toUInt();
 		std::map<uint32_t, OmniRobotServer>::iterator base;
 		base = omn_servers.find( basePort );
                 bool bstateUpd = false;
@@ -107,7 +107,7 @@ void SpecificWorker::rgbd_getImage ( const QString& server, ColorSeq& color, Dep
                 {
                     std::cout<<"Error: no base state updated, basePort "<<basePort<<std::endl;
                 }
-		uint32_t jointPort = QString ( cam.RGBDNode->ifconfig.split ( "," ) [0] ).toUInt();
+		uint32_t jointPort = QString ( cam.RGBDNode->getIfconfig().split ( "," ) [0] ).toUInt();
 		std::map<uint32_t, JointMotorServer>::iterator joint;
 		joint = jm_servers.find( jointPort );
 		if ( joint != jm_servers.end() )
@@ -122,8 +122,8 @@ void SpecificWorker::rgbd_getImage ( const QString& server, ColorSeq& color, Dep
 
 	const int width = cam.RGBDNode->width;
 	const int height = cam.RGBDNode->height;
-	const float noise = ( float ) cam.RGBDNode->noise;
-	const float focal = ( float ) cam.RGBDNode->focal;
+	const float noise = ( float ) cam.RGBDNode->getNoise();
+	const float focal = ( float ) cam.RGBDNode->getFocal();
 	double fovy, aspectRatio, Zn, Zf;
 	cam.viewerCamera->getCamera()->getProjectionMatrixAsPerspective ( fovy, aspectRatio, Zn, Zf );
 //	printf("fov: %g, aspect: %g\n", fovy, aspectRatio);

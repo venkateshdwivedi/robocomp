@@ -55,11 +55,13 @@ void InnerModelPrismaticJoint::update()
 
 float InnerModelPrismaticJoint::getPosition()
 {
+	Lock lock(mutex);
 	return value;
 }
 
 float InnerModelPrismaticJoint::setPosition(float v)
 {
+	Lock lock(mutex);
 	float ret;
 	if (v <= max and v >= min)
 	{

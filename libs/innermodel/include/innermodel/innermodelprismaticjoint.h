@@ -32,7 +32,15 @@ class InnerModelPrismaticJoint : public InnerModelTransform
 		float getPosition();
 		float setPosition(float v);
 		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
-
+		uint32_t getPort() const		{ Lock lock(mutex); return port; }
+		float getMin() const			{ Lock lock(mutex); return min; }
+		float getMax() const			{ Lock lock(mutex); return max; }
+		std::string getAxis() const		{ Lock lock(mutex); return axis; }
+		float getValue() const			{ Lock lock(mutex); return value; }
+		float getOffset() const			{ Lock lock(mutex); return offset; }
+		float getHome() const			{ Lock lock(mutex); return home; }
+		
+	private:
 		float value, offset;
 		float min, max;
 		float home;

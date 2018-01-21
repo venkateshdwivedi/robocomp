@@ -40,10 +40,10 @@ void LaserI::add ( QString _id )
 	id = _id;
 	laserNode = innerModel->getLaser ( id );
 	laserConf.staticConf   =  1;
-	laserConf.maxMeasures  =  laserNode->measures;
-	laserConf.maxDegrees   = ( int ) ( 180.f*laserNode->angle/M_PI );
-	laserConf.maxRange     =  laserNode->max;
-	laserConf.minRange     =  laserNode->min;
+	laserConf.maxMeasures  =  laserNode->getMeasures();
+	laserConf.maxDegrees   = ( int ) ( 180.f*laserNode->getAngle() / M_PI );
+	laserConf.maxRange     =  laserNode->getMax();
+	laserConf.minRange     =  laserNode->getMin();
 	laserConf.iniRange     =  -laserConf.maxDegrees/2;
 	laserConf.endRange     =  laserConf.maxDegrees/2;
 	laserConf.sampleRate   =  30;

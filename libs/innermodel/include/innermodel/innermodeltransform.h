@@ -24,62 +24,33 @@
 class InnerModelTransform : public InnerModelNode
 {
 	public:
-		/**
-		 * @brief How to use:  InnerModelTransform *tr = innerModel->newTransform("name", parent, rx, ry, rz, px, py, pz);  parent->addChild(tr);
-		 * 
-		 * @param id_ ...
-		 * @param engine_ ...
-		 * @param tx_ ...
-		 * @param ty_ ...
-		 * @param tz_ ...
-		 * @param rx_ ...
-		 * @param ry_ ...
-		 * @param rz_ ...
-		 * @param mass_ ...
-		 * @param parent_ ...
-		 */
 		InnerModelTransform(QString id_, QString engine_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, float mass_, InnerModelNode *parent_=NULL);
 		virtual ~InnerModelTransform();
 
 		void print(bool verbose);
 		void save(QTextStream &out, int tabs);
-// 		void setUpdatePointers(float *tx_, float *ty_, float *tz_, float *rx_, float *ry_, float *rz_);
-// 		void setUpdateTranslationPointers(float *tx_, float *ty_, float *tz_);
-// 		void setUpdateRotationPointers(float *rx_, float *ry_, float *rz_);
 		void update();
 		void update(float tx_, float ty_, float tz_, float rx_, float ry_, float rz_);
-		//virtual InnerModelNode *copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
+		void updateT(float tx_, float ty_, float tz_);
+		void updateR(float rx_, float ry_, float rz_);
 		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
 		void transformValues(const RTMat &Tpb, float tx, float ty, float tz, float rx, float ry, float rz, const InnerModelNode *parentNode);
+		void translateValues(const RTMat &Tpb, float tx, float ty, float tz, const InnerModelNode *parentNode);
+		void rotateValues(const RTMat &Tpb, float rx, float ry, float rz, const InnerModelNode *parentNode);
+		void setGuiTranslation(bool v)		{ Lock lock(mutex); gui_translation = v; };
+		void setGuiRotation(bool v)			{ Lock lock(mutex); gui_rotation = v; };
+		float getMass() const				{ Lock lock(mutex); return mass;}
+		QString getEngine() const			{ Lock lock(mutex); return engine;}
+		float getBacktX() const				{ Lock lock(mutex); return backtX;}
+		float getBacktY() const				{ Lock lock(mutex); return backtY;}
+		float getBacktZ() const				{ Lock lock(mutex); return backtZ;}
+		float getBackrX() const				{ Lock lock(mutex); return backrX;}
+		float getBackrY() const				{ Lock lock(mutex); return backrY;}
+		float getBackrZ() const				{ Lock lock(mutex); return backrZ;}
 		
-		QMat getR()
-		{
-			Lock lock(mutex);
-			return InnerModelNode::getR();
-		}
-		QVec getTr()
-		{
-			Lock lock(mutex);
-			return InnerModelNode::getTr();
-		}
-		QMat operator*(const RTMat &rt)
-		{
-			Lock lock(mutex);
-			return InnerModelNode::operator*(rt);
-		}
-		QMat invert()
-		{
-			Lock lock(mutex);
-			return InnerModelNode::invert();
-		}
-		QMat transpose()
-		{
-			Lock lock(mutex);
-			return InnerModelNode::transpose();
-		}
-
-		float *tx, *ty, *tz;
-		float *rx, *ry, *rz;
+	protected:
+ 		float *tx, *ty, *tz;
+ 		float *rx, *ry, *rz;
 		float mass;
 		float backtX, backtY, backtZ;
 		float backrX, backrY, backrZ;

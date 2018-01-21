@@ -38,7 +38,7 @@ TLaserData SpecificWorker::laser_getLaserAndBStateData ( const QString& server, 
 	InnerModelMgr::guard gl(innerModel.mutex());
 
 		IMVLaser &las = imv->lasers[server];
-		QString laserConfig = las.laserNode->ifconfig;
+		QString laserConfig = las.laserNode->getIfconfig();
 		uint32_t basePort  = laserConfig.toUInt();
 		
 	// 	for ( uint32_t s=0; s<handlerDifferentialRobots->servers.size(); ++s ) {

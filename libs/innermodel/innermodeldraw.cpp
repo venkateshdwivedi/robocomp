@@ -43,7 +43,7 @@ void InnerModelDraw::addMesh_ignoreExisting(InnerModelViewer *innerViewer, QStri
 	mesh->setScale(scale(0), scale(1), scale(2));
 	parent->addChild(mesh);
 
-	innerViewer->recursiveConstructor(mesh, innerViewer->mts[parent->id], innerViewer->mts, innerViewer->meshHash);
+	innerViewer->recursiveConstructor(mesh, innerViewer->mts[parent->getId()], innerViewer->mts, innerViewer->meshHash);
 }
 
 bool InnerModelDraw::setScale(InnerModelViewer *innerViewer, const QString item, float scaleX, float scaleY, float scaleZ)
@@ -74,7 +74,7 @@ bool InnerModelDraw::addJoint(InnerModelViewer* innerViewer, const QString item,
 				           0,
 				           axis.toStdString() );
 	parent->addChild (jN);
-	innerViewer->recursiveConstructor(jN, innerViewer->mts[parent->id], innerViewer->mts, innerViewer->meshHash);
+	innerViewer->recursiveConstructor(jN, innerViewer->mts[parent->getId()], innerViewer->mts, innerViewer->meshHash);
 	return true;
 }
 
@@ -101,12 +101,12 @@ bool InnerModelDraw::setPlaneTexture(InnerModelViewer *innerViewer, const QStrin
 		{
 			throw "Couldn't load texture.";
 		}
-		innerViewer->planesHash[aux->id]->image =image;
-		innerViewer->planesHash[aux->id]->texture->setImage(image);
+		innerViewer->planesHash[aux->getId()]->image =image;
+		innerViewer->planesHash[aux->getId()]->texture->setImage(image);
 	}
 	else
 	{
-		innerViewer->planesHash[aux->id]->planeDrawable->setColor(htmlStringToOsgVec4(texture));
+		innerViewer->planesHash[aux->getId()]->planeDrawable->setColor(htmlStringToOsgVec4(texture));
 	}
 	return true;
 }
@@ -144,7 +144,7 @@ bool InnerModelDraw::addTransform(InnerModelViewer *innerViewer, QString item, Q
 	{
 		tr = innerViewer->innerModel->newTransform(item, "static", parent, 0,0,0, 0,0,0);
 		parent->addChild(tr);
-		innerViewer->recursiveConstructor(tr, innerViewer->mts[parent->id], innerViewer->mts, innerViewer->meshHash);
+		innerViewer->recursiveConstructor(tr, innerViewer->mts[parent->getId()], innerViewer->mts, innerViewer->meshHash);
 
 		return true;
 	}
@@ -176,7 +176,7 @@ bool InnerModelDraw::addPlane_notExisting(InnerModelViewer *innerViewer, const Q
 	}
 	InnerModelPlane *plane = innerViewer->innerModel->newPlane(item, parent, texture, size(0), size(1), size(2), 1, n(0), n(1), n(2), p(0), p(1), p(2));
 	parent->addChild(plane);
-	innerViewer->recursiveConstructor(plane, innerViewer->mts[parent->id], innerViewer->mts, innerViewer->meshHash);
+	innerViewer->recursiveConstructor(plane, innerViewer->mts[parent->getId()], innerViewer->mts, innerViewer->meshHash);
 	return true;
 }
 

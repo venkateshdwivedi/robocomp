@@ -60,13 +60,13 @@ void JointMotorI::add(QString id)
 	InnerModelNode *node = innerModel->getNode(id);
 	if (dynamic_cast<InnerModelJoint*>(node) != NULL)
 	{
-		param.minPos = dynamic_cast<InnerModelJoint*>(node)->min;
-		param.maxPos = dynamic_cast<InnerModelJoint*>(node)->max;
+		param.minPos = dynamic_cast<InnerModelJoint*>(node)->getMin();
+		param.maxPos = dynamic_cast<InnerModelJoint*>(node)->getMax();
 	}
 	else if (dynamic_cast<InnerModelPrismaticJoint*>(node) != NULL)
 	{
-		param.minPos = dynamic_cast<InnerModelPrismaticJoint *>(node)->min;
-		param.maxPos = dynamic_cast<InnerModelPrismaticJoint *>(node)->max;
+		param.minPos = dynamic_cast<InnerModelPrismaticJoint *>(node)->getMin();
+		param.maxPos = dynamic_cast<InnerModelPrismaticJoint *>(node)->getMax();
 	}
 
 	param.maxVelocity = 10000.;

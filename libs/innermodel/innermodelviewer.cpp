@@ -95,7 +95,7 @@ void InnerModelViewer::recursiveConstructor(InnerModelNode *node, osg::Group* pa
 
 		if (parent) parent->addChild(mt);
 		
- 		mtsHash[transformation->id] = mt;
+ 		mtsHash[transformation->getId()] = mt;
 		
 		mt->setMatrix(QMatToOSGMat4(*transformation));
 		
@@ -106,11 +106,11 @@ void InnerModelViewer::recursiveConstructor(InnerModelNode *node, osg::Group* pa
 	}
 	else if ((rgbd = dynamic_cast<InnerModelRGBD *>(node)))
 	{
-		if ((not ignoreCameras) and rgbd->port)
+		if ((not ignoreCameras) and rgbd->getPort())
 		{
 			IMVCamera cam;
 			// Camera ID
-			cam.id = node->id;
+			cam.id = node->getId();
 			// XML node for the camera
 			cam.RGBDNode = rgbd;
 			
@@ -159,7 +159,7 @@ void InnerModelViewer::recursiveConstructor(InnerModelNode *node, osg::Group* pa
 	else if ((laser = dynamic_cast<InnerModelLaser *>(node)))
 	{
 		IMVLaser iml;
-		iml.id = node->id;
+		iml.id = node->getId();
 		iml.osgNode = new osg::Switch();
 		iml.laserNode = laser;
 		parent->addChild(iml.osgNode);
@@ -169,17 +169,17 @@ void InnerModelViewer::recursiveConstructor(InnerModelNode *node, osg::Group* pa
 	{
 		// Create plane's specific mt
 		osg::ref_ptr<osg::MatrixTransform> mt = new osg::MatrixTransform;
-		planeMts[plane->id] = mt;
+		planeMts[plane->getId()] = mt;
 		IMVPlane *imvplane = new IMVPlane(plane, plane->texture.toStdString(), osg::Vec4(0.8,0.5,0.5,0.5), 0); 
-		planesHash[node->id] = imvplane;
+		planesHash[node->getId()] = imvplane;
 		setOSGMatrixTransformForPlane(mt, plane);
 		if (parent) parent->addChild(mt);
 		mt->addChild(imvplane);
 	}
 	else if ((pointcloud = dynamic_cast<InnerModelPointCloud *>(node)))
 	{
-		IMVPointCloud *imvpc = new IMVPointCloud(node->id.toStdString());
-		pointCloudsHash[node->id] = imvpc;
+		IMVPointCloud *imvpc = new IMVPointCloud(node->getId().toStdString());
+		pointCloudsHash[node->getId()] = imvpc;
 		parent->addChild(imvpc);
 	}
 	else if ((mesh = dynamic_cast<InnerModelMesh *>(node)))
@@ -198,7 +198,7 @@ void InnerModelViewer::recursiveConstructor(InnerModelNode *node, osg::Group* pa
 		
 		smt->setMatrix(osg::Matrix::scale(mesh->scalex,mesh->scaley,mesh->scalez));
 		mt->addChild(smt);
-		meshHash[mesh->id].osgmeshPaths = mt;
+		meshHash[mesh->getId()].osgmeshPaths = mt;
 
 		// Create mesh
 		osg::ref_ptr<osg::Node> osgMesh = osgDB::readNodeFile(mesh->meshPath.toStdString());
@@ -213,9 +213,9 @@ void InnerModelViewer::recursiveConstructor(InnerModelNode *node, osg::Group* pa
 
 		osgMesh->getOrCreateStateSet()->setAttributeAndModes(polygonMode, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
 		osgMesh->getOrCreateStateSet()->setMode( GL_RESCALE_NORMAL, osg::StateAttribute::ON );
-		meshHash[mesh->id].osgmeshes = osgMesh;
-		meshHash[mesh->id].meshMts= mt;
-		osgmeshmodes[mesh->id] = polygonMode;
+		meshHash[mesh->getId()].osgmeshes = osgMesh;
+		meshHash[mesh->getId()].meshMts= mt;
+		osgmeshmodes[mesh->getId()] = polygonMode;
 		smt->addChild(osgMesh);
 	}
 	else if ((touch = dynamic_cast<InnerModelTouchSensor *>(node)))
@@ -266,10 +266,10 @@ void InnerModelViewer::update()
 			((osg::MatrixTransform *)meshHash[key].osgmeshPaths->getChild(0))->setMatrix(osg::Matrix::scale(mesh->scalex,mesh->scaley,mesh->scalez));
 			mt->setMatrix(QMatToOSGMat4(rtmat));
 			
-			osg::Node *osgMesh = meshHash[mesh->id].osgmeshes;
+			osg::Node *osgMesh = meshHash[mesh->getId()].osgmeshes;
 			if (!osgMesh)
 				printf("Could not find %s osg.\n", mesh->meshPath.toStdString().c_str());
-			osg::PolygonMode* polygonMode = osgmeshmodes[mesh->id];
+			osg::PolygonMode* polygonMode = osgmeshmodes[mesh->getId()];
 			if (mesh->render == InnerModelMesh::WireframeRendering) // wireframe
 				polygonMode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
 			else

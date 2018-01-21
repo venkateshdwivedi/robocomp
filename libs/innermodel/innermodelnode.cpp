@@ -80,15 +80,6 @@ void InnerModelNode::addChild(InnerModelNode *child)
 	child->parent = this;
 }
 
-void InnerModelNode::setFixed(bool f)
-{
-	fixed = f;
-}
-
-bool InnerModelNode::isFixed()
-{
-	return fixed;
-}
 
 void InnerModelNode::updateChildren()
 {

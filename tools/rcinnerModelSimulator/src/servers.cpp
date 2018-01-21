@@ -25,25 +25,25 @@ JointMotorServer::JointMotorServer(Ice::CommunicatorPtr communicator, SpecificWo
 void JointMotorServer::add(InnerModelJoint *joint)
 {
 	joints.push_back(joint);
-	interface->add(joint->id);
-	joint->setAngle(joint->home);
+	interface->add(joint->getId());
+	joint->setAngle(joint->getHome());
 }
 
 void JointMotorServer::add(InnerModelPrismaticJoint *joint)
 {
 	joints.push_back(joint);
-	interface->add(joint->id);
+	interface->add(joint->getId());
 }
 
 void JointMotorServer::remove(InnerModelJoint *joint)
 {
-	interface->remove(joint->id);
+	interface->remove(joint->getId());
 	joints.erase(std::remove(joints.begin(), joints.end(), joint), joints.end());
 }
 
 void JointMotorServer::remove(InnerModelPrismaticJoint *joint)
 {
-	interface->remove(joint->id);
+	interface->remove(joint->getId());
 	joints.erase(std::remove(joints.begin(), joints.end(), joint), joints.end());
 }
 
@@ -86,11 +86,11 @@ TouchSensorServer::TouchSensorServer(Ice::CommunicatorPtr communicator, Specific
 void TouchSensorServer::add(InnerModelTouchSensor *sensor)
 {
 	sensors.push_back(sensor);
-	interface->add(sensor->id);
+	interface->add(sensor->getId());
 }
 void TouchSensorServer::remove(InnerModelTouchSensor *sensor)
 {
-	interface->remove(sensor->id);
+	interface->remove(sensor->getId());
 	sensors.erase(std::remove(sensors.begin(), sensors.end(), sensor), sensors.end());
 }
 bool TouchSensorServer::empty()
@@ -131,7 +131,7 @@ LaserServer::LaserServer(Ice::CommunicatorPtr communicator, SpecificWorker *work
 void LaserServer::add(InnerModelLaser *laser)
 {
 	lasers.push_back(laser);
-	interface->add(laser->id);
+	interface->add(laser->getId());
 }
 
 
@@ -152,7 +152,7 @@ RGBDServer::RGBDServer(Ice::CommunicatorPtr communicator, SpecificWorker *worker
 void RGBDServer::add(InnerModelRGBD *rgbd)
 {
 	rgbds.push_back(rgbd);
-	interface->add(rgbd->id);
+	interface->add(rgbd->getId());
 }
 
 IMUServer::IMUServer(Ice::CommunicatorPtr communicator, SpecificWorker *worker, uint32_t _port)
@@ -173,7 +173,7 @@ IMUServer::IMUServer(Ice::CommunicatorPtr communicator, SpecificWorker *worker, 
 void IMUServer::add(InnerModelIMU *imu)
 {
 	imus.push_back(imu);
-	interface->add(imu->id);
+	interface->add(imu->getId());
 }
 
 
@@ -194,7 +194,7 @@ DifferentialRobotServer::DifferentialRobotServer(Ice::CommunicatorPtr communicat
 void DifferentialRobotServer::add(InnerModelDifferentialRobot *differentialrobot)
 {
 	differentialrobots.push_back(differentialrobot);
-	interface->add(differentialrobot->id);
+	interface->add(differentialrobot->getId());
 	interface->start();
 }
 
@@ -226,10 +226,10 @@ OmniRobotServer::OmniRobotServer(Ice::CommunicatorPtr communicator, SpecificWork
 void OmniRobotServer::add(InnerModelOmniRobot *omnirobot)
 {
 	omnirobots.push_back(omnirobot);
-	interface->add(omnirobot->id);
+	interface->add(omnirobot->getId());
 	interface->start();
-	interfaceGB->add(omnirobot->id);
+	interfaceGB->add(omnirobot->getId());
 //	interfaceGB->start();
-// 	interfaceDFR->add(omnirobot->id);
+// 	interfaceDFR->add(omnirobot->getId());
 // 	interfaceDFR->start();
 }

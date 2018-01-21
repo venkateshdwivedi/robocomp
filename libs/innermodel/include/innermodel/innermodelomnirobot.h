@@ -24,13 +24,16 @@ class InnerModelOmniRobot : public InnerModelTransform
 {
 	public:
 		InnerModelOmniRobot(QString id_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, uint32_t port_=0, float noise=0, bool collide=false, InnerModelTransform *parent_=NULL);
-	public:
+	
 		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
-
-public:
-	uint32_t port;
-	float noise;
-	bool collide;
+		uint32_t getPort() const	{ Lock lock(mutex); return port; }
+		float getNoise() const		{ Lock lock(mutex); return noise; }
+		bool getCollide() const		{ Lock lock(mutex); return collide; }
+		
+	private:
+		uint32_t port;
+		float noise;
+		bool collide;
 };
 
 

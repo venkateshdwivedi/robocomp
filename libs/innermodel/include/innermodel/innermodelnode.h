@@ -53,9 +53,27 @@ class InnerModelNode : public RTMat
 		InnerModelNode(QString id_, InnerModelNode *parent_=NULL);
 		virtual ~InnerModelNode();
 	
+		struct AttributeType
+		{
+			QString type;
+			QString value;
+		};
+		
+		void treePrint(QString s, bool verbose=false);
+		virtual void print(bool verbose) = 0;
+		virtual void update() = 0;
+		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent) = 0;
+		virtual void save(QTextStream &out, int tabs) = 0;
+		void setParent(InnerModelNode *parent_);
+		void addChild(InnerModelNode *child);
+		void updateChildren();
+
+		/////////////////////////////////////////
+		/// Thread safe API for InnerModel nodes
+		/////////////////////////////////////////
 		mutable std::recursive_mutex mutex;
 		
-		QString getId()
+		QString getId() const
 		{
 			Lock lock(mutex);
 			return id;
@@ -73,42 +91,90 @@ class InnerModelNode : public RTMat
 		{
 			mutex.unlock();
 		}
-		
-		struct AttributeType
+		QMat getRTS()
 		{
-			QString type;
-			QString value;
-		};
+			Lock lock(mutex);
+			return InnerModelNode::getR();
+		}
+		QVec getTrTS()
+		{
+			Lock lock(mutex);
+			return InnerModelNode::getTr();
+		}
+		RTMat matrixmultTS(const RTMat &rt)
+		{
+			Lock lock(mutex);
+			return this->operator*(rt);
+		}
+		RTMat invertTS()
+		{
+			Lock lock(mutex);
+			return InnerModelNode::invert();
+		}
+		QMat transposeTS()
+		{
+			Lock lock(mutex);
+			return InnerModelNode::transpose();
+		}
+		int getLevel() const
+		{
+			Lock lock(mutex);
+			return level;
+		}
+		void setLevel(int l)
+		{
+			Lock lock(mutex);
+			level = l;
+		}
+		bool isFixed() const
+		{
+			Lock lock(mutex);
+			return fixed;
+		}
+		void setFixed(bool v)
+		{
+			Lock lock(mutex);
+			fixed = v;
+		}
+		QHash<QString, AttributeType> getAttributes() const
+		{
+			Lock lock(mutex);
+			return attributes;
+		}
+		void setAttributes(const QHash<QString, AttributeType> &att)
+		{
+			Lock lock(mutex);
+			attributes = att;
+		}
+		bool getCollidable() const
+		{
+			Lock lock(mutex);
+			return collidable;
+		}
+		fcl::CollisionObject* getCollisionObject()
+		{
+			Lock lock(mutex);
+			return collisionObject;
+		}
 		
-		void treePrint(QString s, bool verbose=false);
-		virtual void print(bool verbose) = 0;
-		virtual void update() = 0;
-		//virtual InnerModelNode *copyNode(QHash<QString, InnerModelNode *> &hash, InnerModelNode *parent) = 0;
-		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent) = 0;
-	
-		virtual void save(QTextStream &out, int tabs) = 0;
-		void setParent(InnerModelNode *parent_);
-		void addChild(InnerModelNode *child);
-		void setFixed(bool f=true);
-		bool isFixed();
-		void updateChildren();
-
-		QString id;
-		int level;
-		bool fixed;
-		QHash<QString, AttributeType> attributes;
-		InnerModel *innerModel;
-		InnerModelNode *parent;
 		QList<InnerModelNode *> children;
-
-		//////////////////////
-		// FCLModel
-		//////////////////////
-		bool collidable;
-		#if FCL_SUPPORT==1
-			FCLModelPtr fclMesh;
-			fcl::CollisionObject *collisionObject;
-		#endif
+		InnerModelNode *parent;
+		InnerModel *innerModel;
+			
+		protected:
+			QString id;
+			int level;
+			bool fixed;
+			QHash<QString, AttributeType> attributes;
+			
+			//////////////////////
+			// FCLModel
+			//////////////////////
+			bool collidable;
+			#if FCL_SUPPORT==1
+				FCLModelPtr fclMesh;
+				fcl::CollisionObject *collisionObject;
+			#endif
 };
 
 #endif // INNERMODELNODE_H

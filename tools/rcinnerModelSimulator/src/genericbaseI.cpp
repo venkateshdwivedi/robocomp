@@ -31,7 +31,7 @@ GenericBaseI::GenericBaseI(SpecificWorker *_worker, QObject *parent) // : QThrea
 void GenericBaseI::add(QString id)
 {
 	node                        = innerModel->getOmniRobot(id);
-	parent                      = innerModel->getTransform(node->parent->id);
+	parent                      = innerModel->getTransform(node->parent->getId());
 }
 
 
@@ -52,7 +52,7 @@ void GenericBaseI::getBaseState(RoboCompGenericBase::TBaseState& state, const Ic
 	printf("%d\n", __LINE__);
 	{
 	printf("%d %p %p %p\n", __LINE__, innerModel, parent, node);
-		QVec retPOSR = innerModel->transform6D(parent->id, node->id+"_raw_odometry\"");
+		QVec retPOSR = innerModel->transform6D(parent->getId(), node->getId()+"_raw_odometry\"");
 	printf("%d\n", __LINE__);
 		state.x = retPOSR(0);
 		state.z = retPOSR(2);
@@ -62,7 +62,7 @@ void GenericBaseI::getBaseState(RoboCompGenericBase::TBaseState& state, const Ic
 	
 	{
 	printf("%d\n", __LINE__);
-		QVec retPOSC = innerModel->transform6D(parent->id, node->id+"_corrected_odometry\"");
+		QVec retPOSC = innerModel->transform6D(parent->getId(), node->getId()+"_corrected_odometry\"");
 	printf("%d\n", __LINE__);
 		state.correctedX = retPOSC(0);
 		state.correctedZ = retPOSC(2);
@@ -80,7 +80,7 @@ void GenericBaseI::getBaseState(RoboCompGenericBase::TBaseState& state, const Ic
 void GenericBaseI::getBasePose(Ice::Int &x, Ice::Int &z, Ice::Float &alpha, const Ice::Current &)
 {
 	InnerModelMgr::guard gl(innerModel.mutex());
-	QVec retPOS = innerModel->transform6D(parent->id, node->id+"_raw_odometry\"");
+	QVec retPOS = innerModel->transform6D(parent->getId(), node->getId()+"_raw_odometry\"");
 	x = retPOS(0);
 	z = retPOS(2);
 	alpha = retPOS(4);

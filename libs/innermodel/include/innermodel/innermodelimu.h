@@ -28,8 +28,9 @@ class InnerModelIMU : public InnerModelNode
 		void print(bool verbose);
 		void update();
 		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
-
-	public:
+		uint32_t getPort() const	{ Lock lock(mutex); return port; }
+	
+	private:
 		uint32_t port;
 };
 

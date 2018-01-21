@@ -29,7 +29,9 @@ class InnerModelTouchSensor :public InnerModelNode
 		QVec getMeasure() { return value; }
 		void update() {}
 		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
+		uint32_t getPort() const	{ Lock lock(mutex); return port; }
 
+	private:
 		float nx, ny, nz;
 		float min, max;
 		float value;

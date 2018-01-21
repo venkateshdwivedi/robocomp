@@ -22,7 +22,7 @@ class InnerModel;
 
 InnerModelJoint::InnerModelJoint() : InnerModelTransform("invalid",QString("static"), 0,0,0, 0,0,0, 0, NULL)
 {
-	throw std::string("Can't actually build InnerModelJoint using the default constructor");
+	throw InnerModelException("Can't actually build InnerModelJoint using the default constructor");
 }
 
 InnerModelJoint::InnerModelJoint(QString id_, float lx_, float ly_, float lz_, float hx_, float hy_, float hz_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, float min_, float max_, uint32_t port_, std::string axis_, float home_, InnerModelTransform *parent_) : InnerModelTransform(id_,QString("static"),tx_,ty_,tz_,rx_,ry_,rz_, 0, parent_)
@@ -31,7 +31,6 @@ InnerModelJoint::InnerModelJoint(QString id_, float lx_, float ly_, float lz_, f
 		collisionObject = NULL;
 	#endif
 
-	// 		set(rx_, ry_, rz_, tx_, ty_, tz_);
 	backlX = lx_;
 	backlY = ly_;
 	backlZ = lz_;
@@ -58,9 +57,7 @@ InnerModelJoint::InnerModelJoint(QString id_, float lx_, float ly_, float lz_, f
 	}
 	else
 	{
-		QString error;
-		error.sprintf("internal error, no such axis %s\n", axis.c_str());
-		throw error;
+		throw InnerModelException("InnerModel constructor error: No such axis " + axis);
 	}
 }
 
@@ -91,31 +88,31 @@ void InnerModelJoint::save(QTextStream &out, int tabs)
 	out << "</joint>\n";
 }
 
-void InnerModelJoint::setUpdatePointers(float *lx_, float *ly_, float *lz_, float *hx_, float *hy_, float *hz_)
-{
-		lx = lx_;
-	ly = ly_;
-	lz = lz_;
-	hx = hx_;
-	hy = hy_;
-	hz = hz_;
-	fixed = false;
-}
+// void InnerModelJoint::setUpdatePointers(float *lx_, float *ly_, float *lz_, float *hx_, float *hy_, float *hz_)
+// {
+// 		lx = lx_;
+// 	ly = ly_;
+// 	lz = lz_;
+// 	hx = hx_;
+// 	hy = hy_;
+// 	hz = hz_;
+// 	fixed = false;
+// }
 
-void InnerModelJoint::update()
-{
-	
-	if (!fixed)
-	{
-		if (lx) backtX = *tx;
-		if (ly) backtY = *ty;
-		if (lz) backtZ = *tz;
-		if (rx) backhX = *hx;
-		if (ry) backhY = *hy;
-		if (rz) backhZ = *hz;
-	}
-	updateChildren();
-}
+// void InnerModelJoint::update()
+// {
+// 	
+// 	if (!fixed)
+// 	{
+// 		if (lx) backtX = *tx;
+// 		if (ly) backtY = *ty;
+// 		if (lz) backtZ = *tz;
+// 		if (rx) backhX = *hx;
+// 		if (ry) backhY = *hy;
+// 		if (rz) backhZ = *hz;
+// 	}
+// 	updateChildren();
+// }
 
 void InnerModelJoint::update(float lx_, float ly_, float lz_, float hx_, float hy_, float hz_)
 {
@@ -127,14 +124,13 @@ void InnerModelJoint::update(float lx_, float ly_, float lz_, float hx_, float h
 
 float InnerModelJoint::getAngle()
 {
-	//printf("getAngle from %p\n", this);
-	
+	Lock lock(mutex);
 	return backrZ;
 }
 
 float InnerModelJoint::setAngle(float angle, bool force)
 {
-	//printf("setAngle from %p\n", this);
+	Lock lock(mutex);
 	
 	float ret;
 	if ((angle <= max and angle >= min) or force)
@@ -170,15 +166,12 @@ float InnerModelJoint::setAngle(float angle, bool force)
 		error.sprintf("internal error, no such axis %s\n", axis.c_str());
 		throw error;
 	}
-
-	//printf("%p %ld\n", innerModel, (long int)innerModel);
-	if (innerModel)
-		innerModel->cleanupTables();
 	return ret;
 }
 
 QVec InnerModelJoint::unitaryAxis()
 {
+	Lock lock(mutex);
 	
 	if( axis == "x") return QVec::vec3(1,0,0);
 	if( axis == "y") return QVec::vec3(0,1,0);
@@ -218,4 +211,27 @@ InnerModelNode * InnerModelJoint::copyNode(ThreadSafeHash<QString, InnerModelNod
 	}
 
 	return ret;
+}
+
+uint32_t InnerModelJoint::getPort()
+{
+	Lock lock(mutex);
+	return port;
+}
+
+float InnerModelJoint::getHome()
+{
+	Lock lock(mutex);
+	return home;
+}
+
+float InnerModelJoint::getMin()
+{
+	Lock lock(mutex);
+	return min;
+}
+float InnerModelJoint::getMax()
+{
+	Lock lock(mutex);
+	return max;
 }
