@@ -81,9 +81,9 @@ void InnerModelNode::addChild(InnerModelNode *child)
 }
 
 
-void InnerModelNode::updateChildren()
-{
-	foreach(InnerModelNode *i, children)
-		i->update();
-}
+// void InnerModelNode::updateChildren()
+// {
+// 	foreach(InnerModelNode *i, children)
+// 		i->update();
+// }
 

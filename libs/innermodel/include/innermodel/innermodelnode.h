@@ -61,12 +61,12 @@ class InnerModelNode : public RTMat
 		
 		void treePrint(QString s, bool verbose=false);
 		virtual void print(bool verbose) = 0;
-		virtual void update() = 0;
+		//virtual void update() = 0;
 		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent) = 0;
 		virtual void save(QTextStream &out, int tabs) = 0;
 		void setParent(InnerModelNode *parent_);
 		void addChild(InnerModelNode *child);
-		void updateChildren();
+		//void updateChildren();
 
 		/////////////////////////////////////////
 		/// Thread safe API for InnerModel nodes

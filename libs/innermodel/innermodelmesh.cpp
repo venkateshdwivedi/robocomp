@@ -115,6 +115,7 @@ InnerModelMesh::InnerModelMesh(QString id_, QString meshPath_, float scalex_, fl
 
 void InnerModelMesh::save(QTextStream &out, int tabs)
 {
+	Lock lock(mutex);
 	for (int i=0; i<tabs; i++) out << "\t";
 	out << "<mesh id=\""<<id<<"\"" <<" file=\"" << meshPath 
 	<< "\" scale=\"" << QString::number(scalex, 'g', 10) << ","<< QString::number(scaley, 'g', 10)<< ","<< QString::number(scalez, 'g', 10) 
@@ -125,19 +126,21 @@ void InnerModelMesh::save(QTextStream &out, int tabs)
 
 void InnerModelMesh::print(bool verbose)
 {
+	Lock lock(mutex);
 	if (verbose) printf("Mesh: %s\n", qPrintable(id));
 }
 
-void InnerModelMesh::update()
-{
-	if (fixed)
-	{
-	}
-	updateChildren();
-}
+// void InnerModelMesh::update()
+// {
+// 	if (fixed)
+// 	{
+// 	}
+// 	updateChildren();
+// }
 
 void InnerModelMesh::setScale(float x, float y, float z)
 {
+	Lock lock(mutex);
 	scalex=x;
 	scaley=y;
 	scalez=z;
@@ -145,15 +148,19 @@ void InnerModelMesh::setScale(float x, float y, float z)
 
 bool InnerModelMesh::normalRendering() const
 {
+	Lock lock(mutex);
 	return render == NormalRendering;
 }
 
-bool InnerModelMesh::wireframeRendering() const {
+bool InnerModelMesh::wireframeRendering() const 
+{
+	Lock lock(mutex);
 	return render == WireframeRendering;
 }
 
 InnerModelNode * InnerModelMesh::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
 {
+	Lock lock(mutex);
 	InnerModelMesh *ret = new InnerModelMesh(id, meshPath, scalex, scaley, scalez, render, tx, ty, tz, rx, ry, rz, parent);
 	ret->level = level;
 	ret->fixed = fixed;

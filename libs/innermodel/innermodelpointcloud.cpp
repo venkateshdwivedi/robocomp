@@ -27,25 +27,28 @@ InnerModelPointCloud::InnerModelPointCloud(QString id_, InnerModelNode *parent_)
 
 void InnerModelPointCloud::save(QTextStream &out, int tabs)
 {
+	Lock lock(mutex);
 	for (int i=0; i<tabs; i++) out << "\t";
 	out << "<pointcloud id=\""<<id<<"\"/>\n";
 }
 
 void InnerModelPointCloud::print(bool verbose)
 {
+	Lock lock(mutex);
 	if (verbose) printf("Point Cloud: %s\n", qPrintable(id));
 }
 
-void InnerModelPointCloud::update()
-{
-	if (fixed)
-	{
-	}
-	updateChildren();
-}
+// void InnerModelPointCloud::update()
+// {
+// 	if (fixed)
+// 	{
+// 	}
+// 	updateChildren();
+// }
 
 InnerModelNode * InnerModelPointCloud::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
 {
+	Lock lock(mutex);
 	InnerModelPointCloud *ret = new InnerModelPointCloud(id, parent);
 	ret->level = level;
 	ret->fixed = fixed;

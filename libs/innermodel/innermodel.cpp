@@ -139,6 +139,7 @@ bool InnerModel::open(std::string xmlFilePath)
 
 void InnerModel::removeSubTree(InnerModelNode *node, QStringList *l)
 {
+	node->lock();
 	QList<InnerModelNode*>::iterator i;
 	for (i=node->children.begin(); i!=node->children.end(); i++)
 	{
@@ -220,11 +221,11 @@ bool InnerModel::save(QString path)
 /// Tree update methods
 ///////////////////////////////////////////////////////////////////////////
 
-void InnerModel::update()
-{
-	root->update();
-	cleanupTables();
-}
+// void InnerModel::update()
+// {
+// 	root->update();
+// 	cleanupTables();
+// }
 
 void InnerModel::cleanupTables()
 {
@@ -246,7 +247,10 @@ void InnerModel::updateTransformValues(QString transformId, float tx, float ty, 
 	
 	InnerModelTransform *parent = getNode<InnerModelTransform>(parentId);
 	if(parent != nullptr)
-		aux->transformValues(getTransformationMatrix(aux->parent->getId(),parentId), tx, ty, tz, rx, ry, rz, parent);
+	{
+		try { aux->transformValues(getTransformationMatrix(aux->parent->getId(),parentId), tx, ty, tz, rx, ry, rz, parent);} 
+		catch(const InnerModelException &e){ throw e;};
+	}
 	else
 		aux->update(tx,ty,tz,rx,ry,rz);
 }
@@ -351,23 +355,31 @@ QVec InnerModel::transform(const QString &destId, const QVec &initVec, const QSt
 {	
 	if (initVec.size()==3)
 	{
-		return (getTransformationMatrix(destId, origId) * initVec.toHomogeneousCoordinates()).fromHomogeneousCoordinates();
+		try 
+		{ 
+			const RTMat rtmat = getTransformationMatrix(destId, origId); 
+			return (rtmat * initVec.toHomogeneousCoordinates()).fromHomogeneousCoordinates();
+		} 
+		catch( const InnerModelException &e){ throw e;};
 	}
 	else if (initVec.size()==6)
 	{
-		const QMat M = getTransformationMatrix(destId, origId);
-		const QVec a = (M * initVec.subVector(0,2).toHomogeneousCoordinates()).fromHomogeneousCoordinates();
-		const Rot3D R(initVec(3), initVec(4), initVec(5));
-
-		const QVec b = (M.getSubmatrix(0,2,0,2)*R).extractAnglesR_min();
-		QVec ret(6);
-		ret(0) = a(0);
-		ret(1) = a(1);
-		ret(2) = a(2);
-		ret(3) = b(0);
-		ret(4) = b(1);
-		ret(5) = b(2);
-		return ret;
+		try 
+		{ 
+			const QMat M = getTransformationMatrix(destId, origId);  
+			const QVec a = (M * initVec.subVector(0,2).toHomogeneousCoordinates()).fromHomogeneousCoordinates();
+			const Rot3D R(initVec(3), initVec(4), initVec(5));
+			const QVec b = (M.getSubmatrix(0,2,0,2)*R).extractAnglesR_min();
+			QVec ret(6);
+			ret(0) = a(0);
+			ret(1) = a(1);
+			ret(2) = a(2);
+			ret(3) = b(0);
+			ret(4) = b(1);
+			ret(5) = b(2);
+			return ret;
+		}
+		catch( const InnerModelException &e){ throw e;};
 	}
 	else
 		throw InnerModelException("InnerModel::transform was called with an unsupported vector size: " +std::to_string(initVec.size()));
@@ -392,7 +404,11 @@ RTMat InnerModel::getTransformationMatrix(const QString &to, const QString &from
 	if(r.first) return r.second;
 	
 	RTMat ret;	
-	std::pair<QList<InnerModelNode *>, QList<InnerModelNode *>> list = setLocalLists(from, to);
+	std::pair<QList<InnerModelNode *>, QList<InnerModelNode *>> list;
+	try 
+	{	list = setLocalLists(from, to);	} 
+	catch(const InnerModelException &e){ throw e; }
+	
 	QList<InnerModelNode *> &listA = list.first;
 	QList<InnerModelNode *> &listB = list.second;
 	
@@ -420,6 +436,7 @@ QMat InnerModel::getRotationMatrixTo(const QString &to, const QString &from)
 	
 	QMat rret = QMat::identity(3);
 	// Get locked list of InnerModelNode pointers. Unlock after using them!
+	
 	std::pair<QList<InnerModelNode *>, QList<InnerModelNode *>> list = setLocalLists(from, to);
 	QList<InnerModelNode *> &listA = list.first;
 	QList<InnerModelNode *> &listB = list.second;
@@ -428,15 +445,13 @@ QMat InnerModel::getRotationMatrixTo(const QString &to, const QString &from)
 	foreach (InnerModelNode *i, listA)
 		if ((tf=dynamic_cast<InnerModelTransform *>(i)) != nullptr)
 		{
-			rret = tf->getR() * rret;
-			//tf->unlock();
+			rret = tf->getRTS() * rret;
 		}
 		
 	foreach (InnerModelNode *i, listB)
 		if ((tf=dynamic_cast<InnerModelTransform *>(i)) != nullptr)
 		{
-			rret = tf->getR().transpose() * rret;
-			//tf->unlock();
+			rret = tf->getRTS().transpose() * rret;
 		}
 	
 	localHashRot[QPair<QString, QString>(to, from)] = rret;

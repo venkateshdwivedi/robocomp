@@ -27,25 +27,28 @@ InnerModelIMU::InnerModelIMU(QString id_, uint32_t _port, InnerModelNode *parent
 
 void InnerModelIMU::save(QTextStream &out, int tabs)
 {
+	Lock lock(mutex);
 	for (int i=0; i<tabs; i++) out << "\t";
 	out << "<imu id=\"" << id << "\" />\n";
 }
 
 void InnerModelIMU::print(bool verbose)
 {
+	Lock lock(mutex);
 	if (verbose) printf("IMU.");
 }
 
-void InnerModelIMU::update()
-{
-	if (fixed)
-	{
-	}
-	updateChildren();
-}
+// void InnerModelIMU::update()
+// {
+// 	if (fixed)
+// 	{
+// 	}
+// 	updateChildren();
+// }
 
 InnerModelNode * InnerModelIMU::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
 {
+	Lock lock(mutex);
 	InnerModelIMU *ret = new InnerModelIMU(id, port, parent);
 	ret->level = level;
 	ret->fixed = fixed;

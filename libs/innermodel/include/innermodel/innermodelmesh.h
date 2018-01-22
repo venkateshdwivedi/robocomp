@@ -153,7 +153,19 @@ class InnerModelMesh : public InnerModelNode
 			bool normalRendering() const;
 			bool wireframeRendering() const;
 			virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
-
+			QString getMeshPath() 		{ Lock lock(mutex); return meshPath;};
+			float getScalex() 			{ Lock lock(mutex); return scalex;};
+			float getScaley() 			{ Lock lock(mutex); return scaley;};
+			float getScalez() 			{ Lock lock(mutex); return scalez;};
+			float getTx() 				{ Lock lock(mutex); return tx;};
+			float getTy() 				{ Lock lock(mutex); return ty;};
+			float getTz() 				{ Lock lock(mutex); return tz;};
+			float getRx() 				{ Lock lock(mutex); return rx;};
+			float getRy() 				{ Lock lock(mutex); return ry;};
+			float getRz() 				{ Lock lock(mutex); return rz;};
+			RenderingModes getRender()  { Lock lock(mutex); return render;};
+	
+	private:
 			RenderingModes render;
 			QString meshPath;
 			float scalex, scaley, scalez;

@@ -195,7 +195,6 @@ class InnerModel
 		/// Graoh editing methods
 		/////////////////////////////////////////////
 		void removeSubTree(InnerModelNode *item, QStringList *l);
-		void removeNode(const QString & id);
 		void moveSubTree(InnerModelNode *nodeSrc, InnerModelNode *nodeDst);
 		void getSubTree(InnerModelNode *node, QStringList *l);
 		void getSubTree(InnerModelNode *node, QList<InnerModelNode *> *l);
@@ -259,13 +258,15 @@ class InnerModel
 
 		//QMutex *mutex;
 		mutable std::recursive_mutex mutex;
-
+		
+		ThreadSafeHash<QString, InnerModelNode*> hash;
 	protected:
 		InnerModelNode *root;
-		ThreadSafeHash<QString, InnerModelNode*> hash;
 		ThreadSafeHash<QPair<QString, QString>, RTMat> localHashTr;
 		ThreadSafeHash<QPair<QString, QString>, QMat> localHashRot;
 		std::pair<QList<InnerModelNode *>, QList<InnerModelNode *>> setLocalLists(const QString & origId, const QString & destId);		
+		
+		void removeNode(const QString & id);
 };
 
 #endif

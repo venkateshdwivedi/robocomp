@@ -88,8 +88,8 @@ void InnerModelTransform::save(QTextStream &out, int tabs)
 	}
 }
 
-void InnerModelTransform::update()
-{
+// void InnerModelTransform::update()
+// {
 // 	Lock lock(mutex);
 // 	if (!fixed)
 // 	{
@@ -102,7 +102,7 @@ void InnerModelTransform::update()
 // 		set(backrX, backrY, backrZ, backtX, backtY, backtZ);
 // 	}
 // 	updateChildren();
-}
+//}
 
 /**
  * @brief Updates the internal values of the node from the values passed in the parameters

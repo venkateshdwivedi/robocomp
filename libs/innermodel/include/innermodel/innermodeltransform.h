@@ -29,7 +29,7 @@ class InnerModelTransform : public InnerModelNode
 
 		void print(bool verbose);
 		void save(QTextStream &out, int tabs);
-		void update();
+		//void update();
 		void update(float tx_, float ty_, float tz_, float rx_, float ry_, float rz_);
 		void updateT(float tx_, float ty_, float tz_);
 		void updateR(float rx_, float ry_, float rz_);
@@ -49,8 +49,8 @@ class InnerModelTransform : public InnerModelNode
 		float getBackrZ() const				{ Lock lock(mutex); return backrZ;}
 		
 	protected:
- 		float *tx, *ty, *tz;
- 		float *rx, *ry, *rz;
+//  		float *tx, *ty, *tz;
+//  		float *rx, *ry, *rz;
 		float mass;
 		float backtX, backtY, backtZ;
 		float backrX, backrY, backrZ;

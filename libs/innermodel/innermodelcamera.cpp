@@ -33,25 +33,20 @@ InnerModelCamera::InnerModelCamera(QString id_, float width_, float height_, flo
 
 void InnerModelCamera::print(bool verbose)
 {
+	Lock lock(mutex);
 	if (verbose) camera.print(QString("Camera: ")+id);
 }
 
 void InnerModelCamera::save(QTextStream &out, int tabs)
 {
+	Lock lock(mutex);
 	for (int i=0; i<tabs; i++) out << "\t";
 	out << "<camera id=\"" << id << "\" width=\"" << QString::number(width, 'g', 10) << "\" height=\"" << QString::number(height, 'g', 10) << "\" focal=\"" << QString::number(camera.getFocal(), 'g', 10) << "\" />\n";
 }
 
-void InnerModelCamera::update()
-{
-	if (fixed)
-	{
-	}
-	updateChildren();
-}
-
 InnerModelNode * InnerModelCamera::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
 {
+	Lock lock(mutex);
 	InnerModelCamera *ret = new InnerModelCamera(id, width, height, focal, innermodel, parent);
 	ret->level = level;
 	ret->fixed = fixed;
@@ -71,12 +66,14 @@ InnerModelNode * InnerModelCamera::copyNode(ThreadSafeHash<QString, InnerModelNo
 
 QVec InnerModelCamera::project(QString reference, QVec origVec)
 {
+	Lock lock(mutex);
 	origVec = innermodel->transform(id, origVec, reference);
 	return project(origVec);
 }
 
 QVec InnerModelCamera::project(const QVec &origVec)
 {
+	Lock lock(mutex);
 	QVec pc = camera.project(origVec);
 	return QVec::vec3(pc(0), pc(1), origVec.norm2());
 }
@@ -91,38 +88,36 @@ QVec InnerModelCamera::project(const QVec &origVec)
  */
 QVec InnerModelCamera::backProject( const QString &cameraId, const QVec &	coord) //const
 {
+	Lock lock(mutex);
 	return camera.getRayHomogeneous(coord);
 }
 
 void InnerModelCamera::imageCoordToAngles(const QString &cameraId, QVec coord, float &pan, float &tilt, const QString & anglesRefS)
 {
+	Lock lock(mutex);
 	QVec ray = backProject(cameraId, coord);
-
 	QVec finalRay = innermodel->getRotationMatrixTo(anglesRefS, cameraId)*ray;
-
 	pan = atan2(finalRay(0), finalRay(2));
 	tilt = atan2(finalRay(1), finalRay(2));
-
 }
 
 QVec InnerModelCamera::anglesToImageCoord(const QString &cameraId, float pan, float tilt, const QString & anglesRefS)
 {
+	Lock lock(mutex);
 	QVec p(3), ray(3);
-
 	p(0) = tan(pan);
 	p(1) = tan(tilt);
 	p(2) = 1;
-
 	ray = innermodel->getRotationMatrixTo(cameraId, anglesRefS) * p;
 	ray(0)=ray(0)/ray(2);
 	ray(1)=ray(1)/ray(2);
 	ray(2)=1;
-
 	return project(cameraId, ray);
 }
 
 QVec InnerModelCamera::imageCoordPlusDepthTo(QString cameraId, QVec coord, float depth, QString reference)
 {
+	Lock lock(mutex);
 	//We obtain a 3D line (a,b,1) in camera reference system that can be parametrized in depth to obtain a point at "depth" from the camera.
 	QVec p = backProject( cameraId, coord ) * depth;
 	//Now we transform it to requested node of the robot.
@@ -133,6 +128,7 @@ QVec InnerModelCamera::imageCoordPlusDepthTo(QString cameraId, QVec coord, float
 
 QVec InnerModelCamera::projectFromCameraToPlane(const QString &to, const QVec &coord, const QString &cameraId, const QVec &vPlane, const float &dist)
 {
+	Lock lock(mutex);
 	QMat mSystem(3,3);
 	QVec tIndep(3);
 	QVec pCam(3);
@@ -166,11 +162,6 @@ QVec InnerModelCamera::projectFromCameraToPlane(const QString &to, const QVec &c
 	return res;
 }
 
-//
-// bool InnerModelCamera::check3DPointInsideFrustrum(QString cameraId, QVec coor)
-// {
-// }
-
 /**
  * \brief Returns a 3D vector (A,B,C) containing the horizon line for the specified camera+plane in the form 'Ax + By + C = 0'.
  *
@@ -188,14 +179,16 @@ QVec InnerModelCamera::projectFromCameraToPlane(const QString &to, const QVec &c
  */
 QVec InnerModelCamera::horizonLine(QString planeId, QString cameraId, float heightOffset)
 {
-	
+	Lock lock(mutex);
+
 	// 	printf("-------------------------------------- cam:%s plane:%s\n", qPrintable(cameraId), qPrintable(planeId));
 	// Get camera and plane pointers
 	InnerModelPlane *plane = innermodel->getNode<InnerModelPlane>(planeId);
 	InnerModelCamera *camera = innermodel->getNode<InnerModelCamera>(cameraId);
 	// Transform rotate plane normal vector to camera reference system
 	QMat rtm = innermodel->getRotationMatrixTo(cameraId, planeId);
-	QVec vec = QVec::vec3(plane->normal(0), plane->normal(1), plane->normal(2));
+	QVec n = plane->getNormal();
+	QVec vec = QVec::vec3(n(0), n(1), n(2));
 	QVec normal = rtm*vec;
 	if (normal(1) <= 0.0000002) throw false;
 
@@ -234,11 +227,11 @@ QVec InnerModelCamera::horizonLine(QString planeId, QString cameraId, float heig
 
 QMat InnerModelCamera::getHomographyMatrix(QString virtualCamera, QString plane, QString sourceCamera)
 {
-	
+	Lock lock(mutex);
 
-	QVec planeN = innermodel->getNode<InnerModelPlane>(plane)->normal;
+	QVec planeN = innermodel->getNode<InnerModelPlane>(plane)->getNormal();
 	planeN = innermodel->getRotationMatrixTo(sourceCamera, plane)*planeN;
-	QVec planePoint = innermodel->transform(sourceCamera, innermodel->getNode<InnerModelPlane>(plane)->point, plane);
+	QVec planePoint = innermodel->transform(sourceCamera, innermodel->getNode<InnerModelPlane>(plane)->getPoint(), plane);
 	QMat R  = innermodel->getRotationMatrixTo(virtualCamera, sourceCamera);
 	QMat t  = innermodel->transform(virtualCamera, QVec::vec3(0,0,0), sourceCamera);
 	QMat n  = QMat(planeN);
@@ -253,10 +246,11 @@ QMat InnerModelCamera::getHomographyMatrix(QString virtualCamera, QString plane,
 QMat InnerModelCamera::getAffineHomographyMatrix(QString virtualCamera, QString plane, QString sourceCamera)
 {
 	
-
-	QVec planeN = innermodel->getNode<InnerModelPlane>(plane)->normal;
+	Lock lock(mutex);
+	
+	QVec planeN = innermodel->getNode<InnerModelPlane>(plane)->getNormal();
 	planeN = innermodel->getRotationMatrixTo(sourceCamera, plane)*planeN;
-	QVec planePoint = innermodel->transform(sourceCamera, innermodel->getNode<InnerModelPlane>(plane)->point, plane);
+	QVec planePoint = innermodel->transform(sourceCamera, innermodel->getNode<InnerModelPlane>(plane)->getPoint(), plane);
 
 	QMat R  = innermodel->getRotationMatrixTo(virtualCamera, sourceCamera);
 	QMat t  = innermodel->transform(virtualCamera, QVec::vec3(0,0,0), sourceCamera);
@@ -274,9 +268,11 @@ QMat InnerModelCamera::getAffineHomographyMatrix(QString virtualCamera, QString 
 QMat InnerModelCamera::getPlaneProjectionMatrix(QString virtualCamera, QString plane, QString sourceCamera)
 {
 	
-	QVec planeN = innermodel->getNode<InnerModelPlane>(plane)->normal;
+	Lock lock(mutex);
+	
+	QVec planeN = innermodel->getNode<InnerModelPlane>(plane)->getNormal();
 	planeN = innermodel->getRotationMatrixTo(sourceCamera, plane)*planeN;
-	QVec planePoint = innermodel->transform(sourceCamera, innermodel->getNode<InnerModelPlane>(plane)->point, plane);
+	QVec planePoint = innermodel->transform(sourceCamera, innermodel->getNode<InnerModelPlane>(plane)->getPoint(), plane);
 
 	QMat R  = innermodel->getRotationMatrixTo(virtualCamera, sourceCamera);
 	QMat t  = innermodel->transform(virtualCamera, QVec::vec3(0,0,0), sourceCamera);
@@ -296,6 +292,7 @@ QMat InnerModelCamera::getPlaneProjectionMatrix(QString virtualCamera, QString p
 
 QVec InnerModelCamera::compute3DPointFromImageCoords(const QString &firstCamera, const QVec &left, const QString &secondCamera, const QVec &right, const QString &refSystem)
 {
+	Lock lock(mutex);
 	
 	QVec pI(3), pD(3), n(3), ray(3), T(3), TI(3), TD(3), pR(0), abc(3);
 	QMat A(3,3);
@@ -333,6 +330,7 @@ QVec InnerModelCamera::compute3DPointFromImageCoords(const QString &firstCamera,
 
 QVec InnerModelCamera::compute3DPointFromImageAngles(const QString &firstCamera , const QVec & left, const QString & secondCamera , const QVec & right, const QString & refSystem)
 {
+	Lock lock(mutex);
 	
 	QVec pI(3), pD(3), n(3), ray(3), T(3), TI(3), TD(3), pR(0), abc(3);
 	QMat A(3,3);
@@ -376,6 +374,8 @@ QVec InnerModelCamera::compute3DPointFromImageAngles(const QString &firstCamera 
 
 void InnerModelCamera::updateValues(float width_, float height_, float focal_)
 {
+	Lock lock(mutex);
+	
 	width = width_;
 	height = height_;
 	focal = focal_;

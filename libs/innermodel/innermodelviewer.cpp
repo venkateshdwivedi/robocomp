@@ -170,7 +170,7 @@ void InnerModelViewer::recursiveConstructor(InnerModelNode *node, osg::Group* pa
 		// Create plane's specific mt
 		osg::ref_ptr<osg::MatrixTransform> mt = new osg::MatrixTransform;
 		planeMts[plane->getId()] = mt;
-		IMVPlane *imvplane = new IMVPlane(plane, plane->texture.toStdString(), osg::Vec4(0.8,0.5,0.5,0.5), 0); 
+		IMVPlane *imvplane = new IMVPlane(plane, plane->getTexture().toStdString(), osg::Vec4(0.8,0.5,0.5,0.5), 0); 
 		planesHash[node->getId()] = imvplane;
 		setOSGMatrixTransformForPlane(mt, plane);
 		if (parent) parent->addChild(mt);
@@ -190,23 +190,23 @@ void InnerModelViewer::recursiveConstructor(InnerModelNode *node, osg::Group* pa
 		if (parent) parent->addChild(mt);
 		
 		RTMat rtmat = RTMat();
-		rtmat.setR (mesh->rx, mesh->ry, mesh->rz);
-		rtmat.setTr(mesh->tx, mesh->ty, mesh->tz);
+		rtmat.setR (mesh->getRx(), mesh->getRy(), mesh->getRz());
+		rtmat.setTr(mesh->getTx(), mesh->getTy(), mesh->getTz());
 		mt->setMatrix(QMatToOSGMat4(rtmat));
 		
 		osg::ref_ptr<osg::MatrixTransform> smt = new osg::MatrixTransform; 		
 		
-		smt->setMatrix(osg::Matrix::scale(mesh->scalex,mesh->scaley,mesh->scalez));
+		smt->setMatrix(osg::Matrix::scale(mesh->getScalex(),mesh->getScaley(),mesh->getScalez()));
 		mt->addChild(smt);
 		meshHash[mesh->getId()].osgmeshPaths = mt;
 
 		// Create mesh
-		osg::ref_ptr<osg::Node> osgMesh = osgDB::readNodeFile(mesh->meshPath.toStdString());
+		osg::ref_ptr<osg::Node> osgMesh = osgDB::readNodeFile(mesh->getMeshPath().toStdString());
 		if (!osgMesh)
-			printf("Could not find %s osg.\n", mesh->meshPath.toStdString().c_str());
+			printf("Could not find %s osg.\n", mesh->getMeshPath().toStdString().c_str());
 		
 		osg::ref_ptr<osg::PolygonMode> polygonMode = new osg::PolygonMode();
-		if (mesh->render == InnerModelMesh::WireframeRendering) // wireframe
+		if (mesh->getRender() == InnerModelMesh::WireframeRendering) // wireframe
 			polygonMode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
 		else
 			polygonMode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);
@@ -261,16 +261,16 @@ void InnerModelViewer::update()
 			osg::MatrixTransform *mt = meshHash[key].meshMts;// meshMts[key];
 			InnerModelMesh *mesh = (InnerModelMesh *)innerModel->getNode(key);
 			RTMat rtmat = RTMat();
-			rtmat.setR (mesh->rx, mesh->ry, mesh->rz);
-			rtmat.setTr(mesh->tx, mesh->ty, mesh->tz);
-			((osg::MatrixTransform *)meshHash[key].osgmeshPaths->getChild(0))->setMatrix(osg::Matrix::scale(mesh->scalex,mesh->scaley,mesh->scalez));
+			rtmat.setR (mesh->getRx(), mesh->getRy(), mesh->getRz());
+			rtmat.setTr(mesh->getTx(), mesh->getTy(), mesh->getTz());
+			((osg::MatrixTransform *)meshHash[key].osgmeshPaths->getChild(0))->setMatrix(osg::Matrix::scale(mesh->getScalex(),mesh->getScaley(),mesh->getScalez()));
 			mt->setMatrix(QMatToOSGMat4(rtmat));
 			
 			osg::Node *osgMesh = meshHash[mesh->getId()].osgmeshes;
 			if (!osgMesh)
-				printf("Could not find %s osg.\n", mesh->meshPath.toStdString().c_str());
+				printf("Could not find %s osg.\n", mesh->getMeshPath().toStdString().c_str());
 			osg::PolygonMode* polygonMode = osgmeshmodes[mesh->getId()];
-			if (mesh->render == InnerModelMesh::WireframeRendering) // wireframe
+			if (mesh->getRender() == InnerModelMesh::WireframeRendering) // wireframe
 				polygonMode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
 			else
 				polygonMode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);
@@ -283,9 +283,11 @@ void InnerModelViewer::update()
 void InnerModelViewer::setOSGMatrixTransformForPlane(osg::MatrixTransform *mt, InnerModelPlane *plane)
 {
 	osg::Matrix r;
-	r.makeRotate(osg::Vec3(0, 0, 1), osg::Vec3(plane->normal(0), plane->normal(1), -plane->normal(2)));
+	QVec p = plane->getNormal();
+	r.makeRotate(osg::Vec3(0, 0, 1), osg::Vec3(p(0), p(1), -p(2)));
 	osg::Matrix t;
-	t.makeTranslate(osg::Vec3(plane->point(0), plane->point(1), -plane->point(2)));
+	QVec po = plane->getPoint();
+	t.makeTranslate(osg::Vec3(po(0), po(1), -po(2)));
 	mt->setMatrix(r*t);
 }
 
@@ -298,15 +300,15 @@ void InnerModelViewer::reloadMesh(QString id)
 		printf("Internal error\n");
 		return;
 	}
-	osg::ref_ptr<osg::Node> osgMesh = osgDB::readNodeFile(mesh->meshPath.toStdString());
+	osg::ref_ptr<osg::Node> osgMesh = osgDB::readNodeFile(mesh->getMeshPath().toStdString());
 	if (not osgMesh)
 	{
-		printf("Could not find %s osg.\n", mesh->meshPath.toStdString().c_str());
+		printf("Could not find %s osg.\n", mesh->getMeshPath().toStdString().c_str());
 		return;
 	}	
 	meshHash[id].osgmeshPaths->removeChild(0, 1);
 	meshHash[id].osgmeshPaths->addChild(osgMesh);
-	((osg::MatrixTransform *)meshHash[id].osgmeshPaths->getChild(0))->setMatrix(osg::Matrix::scale(mesh->scalex,mesh->scaley,mesh->scalez));
+	((osg::MatrixTransform *)meshHash[id].osgmeshPaths->getChild(0))->setMatrix(osg::Matrix::scale(mesh->getScalex(),mesh->getScaley(),mesh->getScalez()));
 	meshHash[id].osgmeshes=osgMesh;
 }
 
@@ -460,7 +462,7 @@ IMVPlane::IMVPlane(InnerModelPlane *plane, std::string imagenEntrada, osg::Vec4 
 
 	//CAUTION
 	//osg::Box* myBox = new osg::Box(QVecToOSGVec(QVec::vec3(0,0,0)), plane->width, -plane->height, plane->depth);
-	osg::ref_ptr<osg::Box> myBox = new osg::Box(QVecToOSGVec(QVec::vec3(0,0,0)), plane->width, -plane->height, plane->depth);
+	osg::ref_ptr<osg::Box> myBox = new osg::Box(QVecToOSGVec(QVec::vec3(0,0,0)), plane->getWidth(), -plane->getHeight(), plane->getDepth());
 // 	osg::Box* myBox = new osg::Box(QVecToOSGVec(QVec::vec3(plane->point(0),-plane->point(1),plane->point(2))), plane->width, -plane->height, plane->depth);
 	planeDrawable = new osg::ShapeDrawable(myBox, hints);
 	planeDrawable->setColor(htmlStringToOsgVec4(QString::fromStdString(imagenEntrada)));

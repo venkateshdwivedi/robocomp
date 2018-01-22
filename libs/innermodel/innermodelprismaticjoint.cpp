@@ -34,6 +34,7 @@ InnerModelPrismaticJoint::InnerModelPrismaticJoint(QString id_, float min_, floa
 
 void InnerModelPrismaticJoint::print(bool verbose)
 {
+	Lock lock(mutex);
 	printf("Prismatic Joint: %s\n", qPrintable(id));
 	if (verbose)
 	{
@@ -44,14 +45,15 @@ void InnerModelPrismaticJoint::print(bool verbose)
 
 void InnerModelPrismaticJoint::save(QTextStream &out, int tabs)
 {
+	Lock lock(mutex);
 	for (int i=0; i<tabs; i++) out << "\t";
 	out << "### joints cannot be saved yet ###\n";
 }
 
-void InnerModelPrismaticJoint::update()
-{
-	updateChildren();
-}
+// void InnerModelPrismaticJoint::update()
+// {
+// 	updateChildren();
+// }
 
 float InnerModelPrismaticJoint::getPosition()
 {
@@ -98,6 +100,7 @@ float InnerModelPrismaticJoint::setPosition(float v)
 
 InnerModelNode * InnerModelPrismaticJoint::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
 {
+	Lock lock(mutex);
 	InnerModelPrismaticJoint *ret = new InnerModelPrismaticJoint(id, min, max, value, offset, port, axis, home, (InnerModelTransform *) parent);
 	ret->level = level;
 	ret->fixed = fixed;

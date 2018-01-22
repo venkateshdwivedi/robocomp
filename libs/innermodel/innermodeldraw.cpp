@@ -84,7 +84,7 @@ bool InnerModelDraw::setPlaneTexture(InnerModelViewer *innerViewer, const QStrin
 	InnerModel *im = innerViewer->innerModel.get();
 	InnerModelPlane *aux = dynamic_cast<InnerModelPlane*>(im->getNode(item));
 
-	aux->texture=texture;
+	aux->setTexture(texture);
 	bool constantColor = false;
 	if (texture.size() == 7)
 	{

@@ -45,19 +45,13 @@ void InnerModelLaser::save(QTextStream &out, int tabs)
 
 void InnerModelLaser::print(bool verbose)
 {
+	Lock lock(mutex);
 	if (verbose) printf("LASER.");
-}
-
-void InnerModelLaser::update()
-{
-	if (fixed)
-	{
-	}
-	updateChildren();
 }
 
 InnerModelNode * InnerModelLaser::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
 {
+	Lock lock(mutex);
 	InnerModelLaser *ret = new InnerModelLaser(id, port, min, max, angle, measures, ifconfig, innermodel, parent);
 	ret->level = level;
 	ret->fixed = fixed;
@@ -75,6 +69,7 @@ InnerModelNode * InnerModelLaser::copyNode(ThreadSafeHash<QString, InnerModelNod
 
 QVec InnerModelLaser::laserTo(const QString &dest, float r, float alpha)
 {
+	Lock lock(mutex);
 	QVec p(3);
 	p(0) = r * sin(alpha);
 	p(1) = 0;
