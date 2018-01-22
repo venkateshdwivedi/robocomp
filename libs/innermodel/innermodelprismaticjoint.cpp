@@ -50,11 +50,6 @@ void InnerModelPrismaticJoint::save(QTextStream &out, int tabs)
 	out << "### joints cannot be saved yet ###\n";
 }
 
-// void InnerModelPrismaticJoint::update()
-// {
-// 	updateChildren();
-// }
-
 float InnerModelPrismaticJoint::getPosition()
 {
 	Lock lock(mutex);
@@ -112,7 +107,6 @@ InnerModelNode * InnerModelPrismaticJoint::copyNode(ThreadSafeHash<QString, Inne
 	{
 		ret->addChild((*i)->copyNode(hash, ret));
 	}
-
 	return ret;
 }
 

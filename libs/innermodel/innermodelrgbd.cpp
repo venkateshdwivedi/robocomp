@@ -33,16 +33,17 @@ InnerModelRGBD::InnerModelRGBD(QString id_, float width, float height, float foc
 
 void InnerModelRGBD::save(QTextStream &out, int tabs)
 {
+	Lock lock(mutex);
 	
-// 	<rgbd id="laser" focal="120" width="160" height="120" port="10097" ifconfig="10068,10004" />
 	for (int i=0; i<tabs; i++) out << "\t";
 	out << "<rgbd id=\"" << id << "\" width=\"" <<QString::number( width, 'g', 10) << "\" height=\"" <<QString::number(  height, 'g', 10)  << "\" focal=\"" << QString::number(camera.getFocal(), 'g', 10)
 	<<"\" port=\""<<port<<"\" ifconfig=\""<<ifconfig<<"\" noise=\""<<QString::number(noise, 'g', 10)<< "\" />\n";
 }
 
-
 InnerModelNode * InnerModelRGBD::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
 {
+	Lock lock(mutex);
+	
 	InnerModelRGBD *ret = new InnerModelRGBD(id, width, height, focal, noise, port, ifconfig, innermodel, parent);
 	ret->level = level;
 	ret->fixed = fixed;
@@ -54,7 +55,6 @@ InnerModelNode * InnerModelRGBD::copyNode(ThreadSafeHash<QString, InnerModelNode
 	{
 		ret->addChild((*i)->copyNode(hash, ret));
 	}
-
 	return ret;
 }
 

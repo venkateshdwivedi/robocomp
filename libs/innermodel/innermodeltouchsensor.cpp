@@ -35,6 +35,8 @@ InnerModelTouchSensor::InnerModelTouchSensor(QString id_, QString stype_, float 
 
 InnerModelNode * InnerModelTouchSensor::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
 {
+	Lock lock(mutex);
+	
 	InnerModelTouchSensor *ret = new InnerModelTouchSensor(id, stype, nx, ny, nz, min, max, port, parent);
 	ret->level = level;
 	ret->fixed = fixed;
@@ -46,10 +48,5 @@ InnerModelNode * InnerModelTouchSensor::copyNode(ThreadSafeHash<QString, InnerMo
 	{
 		ret->addChild((*i)->copyNode(hash, ret));
 	}
-
 	return ret;
 }
-
-
-
-

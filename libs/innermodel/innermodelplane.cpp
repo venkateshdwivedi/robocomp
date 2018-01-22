@@ -22,10 +22,10 @@ InnerModelPlane::InnerModelPlane(QString id_, QString texture_, float width_, fl
 #if FCL_SUPPORT==1
 	collisionObject = NULL;
 #endif
+	qDebug() << "ASDFASDFASDFS";
 	if ( abs(nx_)<0.001 and abs(ny_)<0.001 and abs(nz_)<0.001 ) nz_ = -1;
 	normal = QVec::vec3(nx_, ny_, nz_);
 	point = QVec::vec3(px_, py_, pz_);
-	//nx = ny = nz = px = py = pz = NULL;
 	texture = texture_;
 	width = width_;
 	height = height_;
@@ -98,7 +98,6 @@ InnerModelPlane::InnerModelPlane(QString id_, QString texture_, float width_, fl
 // }
 // outputFile.close();
 
-
 	fclMesh = FCLModelPtr(new FCLModel());
 	fclMesh->beginModel();
 	fclMesh->addSubModel(vertices, triangles);
@@ -123,28 +122,6 @@ void InnerModelPlane::save(QTextStream &out, int tabs)
 	<< QString::number(normal(2), 'g', 10) << "\" px=\"" << QString::number(point(0), 'g', 10) << "\" py=\"" << QString::number(point(1), 'g', 10) 
 	<< "\" pz=\"" << QString::number(point(2), 'g', 10) <<"\" collide=\""<< QString::number(collidable,'g',10)<< "\" />\n";
 }
-
-// void InnerModelPlane::setUpdatePointers(float *nx_, float *ny_, float *nz_, float *px_, float *py_, float *pz_)
-// {
-// 	nx = nx_;
-// 	ny = ny_;
-// 	nz = nz_;
-// 	px = px_;
-// 	py = py_;
-// 	pz = pz_;
-// 	nx = ny = nz = px = py = pz = NULL;
-// 	fixed = false;
-// }
-
-// void InnerModelPlane::update()
-// {
-// 	Lock lock(mutex);
-// 	if (!fixed)
-// 	{
-// 		update(nx!=NULL?*nx:normal(0), ny!=NULL?*ny:normal(1), nz!=NULL?*nz:normal(2), px!=NULL?*px:point(0), py!=NULL?*py:point(1), pz!=NULL?*pz:point(2));
-// 	}
-// 	updateChildren();
-// }
 
 void InnerModelPlane::update(float nx_, float ny_, float nz_, float px_, float py_, float pz_)
 {

@@ -38,14 +38,6 @@ void InnerModelPointCloud::print(bool verbose)
 	if (verbose) printf("Point Cloud: %s\n", qPrintable(id));
 }
 
-// void InnerModelPointCloud::update()
-// {
-// 	if (fixed)
-// 	{
-// 	}
-// 	updateChildren();
-// }
-
 InnerModelNode * InnerModelPointCloud::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
 {
 	Lock lock(mutex);

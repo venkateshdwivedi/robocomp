@@ -30,26 +30,22 @@ class InnerModelPlane : public InnerModelNode
 		InnerModelPlane(QString id_, QString texture_, float width_, float height_,float depth_, int repeat_, float nx_, float ny_, float nz_, float px_, float py_, float pz_, bool collidable, InnerModelNode *parent_=NULL);
 		void print(bool verbose);
 		void save(QTextStream &out, int tabs);
-		//void setUpdatePointers(float *nx_, float *ny_, float *nz_, float *px_, float *py_, float *pz_);
-		void update();
 		void update(float nx_, float ny_, float nz_, float px_, float py_, float pz_);
 		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
-		QVec getNormal() 					{ Lock lock(mutex); return normal;};
-		QVec getPoint() 					{ Lock lock(mutex); return point;};
-		float getWidth() 					{ Lock lock(mutex); return width;};
-		float getHeight() 					{ Lock lock(mutex); return height;};
-		float getDepth() 					{ Lock lock(mutex); return depth;};
-		int getRepeat() 					{ Lock lock(mutex); return repeat;};
-		QString getTexture()				{ Lock lock(mutex); return texture;};
-		void setTexture( const QString &t)  { Lock lock(mutex); texture = t;};
+		QVec getNormal() const 					{ Lock lock(mutex); return normal;};
+		QVec getPoint() const					{ Lock lock(mutex); return point;};
+		float getWidth() const					{ Lock lock(mutex); return width;};
+		float getHeight() const					{ Lock lock(mutex); return height;};
+		float getDepth() const					{ Lock lock(mutex); return depth;};
+		int getRepeat() const					{ Lock lock(mutex); return repeat;};
+		QString getTexture() const				{ Lock lock(mutex); return texture;};
+		void setTexture( const QString &t)		{ Lock lock(mutex); texture = t;};
 		
 	private:
 		QVec normal, point;
 		QString texture;
 		float width, height, depth;
 		int repeat;
-		//float *nx, *ny, *nz;
-		//float *px, *py, *pz;
 };
 
 #endif // INNERMODELPLANE_H
