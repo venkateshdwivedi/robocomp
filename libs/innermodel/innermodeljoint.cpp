@@ -81,7 +81,7 @@ void InnerModelJoint::save(QTextStream &out, int tabs)
 	<<"\" min=\""<< QString::number(min, 'g', 10)<<"\" max=\""<< QString::number(max, 'g', 10)
 	<< "\" tx=\""<< QString::number(backtX, 'g', 10) <<"\" ty=\""<< QString::number(backtY, 'g', 10) <<"\" tz=\""<< QString::number(backtZ, 'g', 10)
 	<<"\"  rx=\""<< QString::number(backrX, 'g', 10) <<"\" ry=\""<< QString::number(backrY, 'g', 10) <<"\" rz=\""<< QString::number(backrZ, 'g', 10) <<"\">\n";
-	for (c=children.begin(); c!=children.end(); c++)
+	for (c=children->begin(); c!=children->end(); c++)
 			(*c)->save(out, tabs+1);
 
 	for (int i=0; i<tabs; i++) out << "\t";
@@ -179,7 +179,7 @@ QVec InnerModelJoint::unitaryAxis()
 	return QVec::zeros(3);
 }
 
-InnerModelNode * InnerModelJoint::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
+InnerModelNode * InnerModelJoint::copyNode(THash hash, InnerModelNode *parent)
 {
 	InnerModelJoint *ret;
 	if (axis == "x")
@@ -201,11 +201,11 @@ InnerModelNode * InnerModelJoint::copyNode(ThreadSafeHash<QString, InnerModelNod
 	}
 	ret->level = level;
 	ret->fixed = fixed;
-	ret->children.clear();
+	ret->children->clear();
 	ret->attributes.clear();
-	hash.put(id,ret);
+	hash->insert(id,ret);
 
-	for (QList<InnerModelNode*>::iterator i=children.begin(); i!=children.end(); i++)
+	for (QList<InnerModelNode*>::iterator i=children->begin(); i!=children->end(); i++)
 	{
 		ret->addChild((*i)->copyNode(hash, ret));
 	}

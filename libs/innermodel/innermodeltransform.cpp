@@ -32,7 +32,6 @@ InnerModelTransform::InnerModelTransform(QString id_, QString engine_, float tx_
 	backrX = rx_;
 	backrY = ry_;
 	backrZ = rz_;
-	//rx = ry = rz = tx = ty = tz = NULL;
 	gui_translation = gui_rotation = true;
 }
 
@@ -61,7 +60,7 @@ void InnerModelTransform::save(QTextStream &out, int tabs)
 	{
 		for (int i=0; i<tabs; i++) out << "\t";
 		out << "<innermodel>\n";
-		for (c=children.begin(); c!=children.end(); c++) (*c)->save(out, tabs+1);
+		for (c=children->begin(); c!=children->end(); c++) (*c)->save(out, tabs+1);
 		for (int i=0; i<tabs; i++) out << "\t";
 		out << "</innermodel>\n";
 	}
@@ -75,7 +74,7 @@ void InnerModelTransform::save(QTextStream &out, int tabs)
 		else
 			out << "<transform id=\"" << id << "\" tx=\""<< QString::number(backtX, 'g', 10) <<"\" ty=\""<< QString::number(backtY, 'g', 10) <<"\" tz=\""<< QString::number(backtZ, 'g', 10) <<"\"  rx=\""<< QString::number(backrX, 'g', 10) <<"\" ry=\""<< QString::number(backrY, 'g', 10) <<"\" rz=\""<< QString::number(backrZ, 'g', 10) <<"\">\n";
 
-		for (c=children.begin(); c!=children.end(); c++)
+		for (c=children->begin(); c!=children->end(); c++)
 			(*c)->save(out, tabs+1);
 
 		for (int i=0; i<tabs; i++) out << "\t";
@@ -87,22 +86,6 @@ void InnerModelTransform::save(QTextStream &out, int tabs)
 			out << "</transform>\n";
 	}
 }
-
-// void InnerModelTransform::update()
-// {
-// 	Lock lock(mutex);
-// 	if (!fixed)
-// 	{
-// 		if (tx) backtX = *tx;
-// 		if (ty) backtY = *ty;
-// 		if (tz) backtZ = *tz;
-// 		if (rx) backrX = *rx;
-// 		if (ry) backrY = *ry;
-// 		if (rz) backrZ = *rz;
-// 		set(backrX, backrY, backrZ, backtX, backtY, backtZ);
-// 	}
-// 	updateChildren();
-//}
 
 /**
  * @brief Updates the internal values of the node from the values passed in the parameters
@@ -140,17 +123,17 @@ void InnerModelTransform::updateR(float rx_, float ry_, float rz_)
 	fixed = true;
 }	
 	
-InnerModelNode* InnerModelTransform::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
+InnerModelNode* InnerModelTransform::copyNode(THash hash, InnerModelNode *parent)
 {
 	Lock lock(mutex);
 	InnerModelTransform *ret = new InnerModelTransform(id, engine, backtX, backtY, backtZ, backrX, backrY, backrZ, mass, parent);
 	ret->level = level;
 	ret->fixed = fixed;
-	ret->children.clear();
+	ret->children->clear();
 	ret->attributes.clear();
-	hash.put(id,ret);
+	hash->insert(id,ret);
 
-	for (QList<InnerModelNode*>::iterator i=children.begin(); i!=children.end(); i++)
+	for (QList<InnerModelNode*>::iterator i=children->begin(); i!=children->end(); i++)
 	{
 		ret->addChild((*i)->copyNode(hash, ret));
 	}
@@ -159,9 +142,7 @@ InnerModelNode* InnerModelTransform::copyNode(ThreadSafeHash<QString, InnerModel
 }
 
 void InnerModelTransform::transformValues(const RTMat &Tpb, float tx, float ty, float tz, float rx, float ry, float rz, const InnerModelNode *parentNode)
-{
-	Lock lock(mutex);
-	
+{	
 	RTMat Tbi;
 	Tbi.setTr(tx,ty,tz);
 	Tbi.setR (rx,ry,rz);
@@ -169,19 +150,11 @@ void InnerModelTransform::transformValues(const RTMat &Tpb, float tx, float ty, 
 	QVec angles = Tpi.extractAnglesR();
 	QVec tr = Tpi.getTr();
 
-	rx = angles.x();
-	ry = angles.y();
-	rz = angles.z();
-	tx = tr.x();
-	ty = tr.y();
-	tz = tr.z();
-	update(tx,ty,tz,rx,ry,rz);
+	update(angles.x(),angles.y(),angles.z(),tr.x(),tr.y(),tr.z());
 }
 
 void InnerModelTransform::translateValues(const RTMat &Tpb, float tx, float ty, float tz, const InnerModelNode *parentNode)
 {
-	Lock lock(mutex);
-	
 	RTMat Tbi;
 	Tbi.setTr(tx,ty,tz);
 	RTMat Tpi = Tpb*Tbi;
@@ -194,8 +167,6 @@ void InnerModelTransform::translateValues(const RTMat &Tpb, float tx, float ty, 
 
 void InnerModelTransform::rotateValues(const RTMat &Tpb, float rx, float ry, float rz, const InnerModelNode *parentNode)
 {
-	Lock lock(mutex);
-	
 	RTMat Tbi;
 	Tbi.setR (rx,ry,rz);
 	RTMat Tpi = Tpb*Tbi;

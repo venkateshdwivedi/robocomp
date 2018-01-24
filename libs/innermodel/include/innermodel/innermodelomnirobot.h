@@ -25,7 +25,7 @@ class InnerModelOmniRobot : public InnerModelTransform
 	public:
 		InnerModelOmniRobot(QString id_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, uint32_t port_=0, float noise=0, bool collide=false, InnerModelTransform *parent_=NULL);
 	
-		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
+		virtual InnerModelNode *copyNode(THash hash, InnerModelNode *parent);
 		uint32_t getPort() const	{ Lock lock(mutex); return port; }
 		float getNoise() const		{ Lock lock(mutex); return noise; }
 		bool getCollide() const		{ Lock lock(mutex); return collide; }

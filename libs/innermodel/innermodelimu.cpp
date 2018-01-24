@@ -46,17 +46,17 @@ void InnerModelIMU::print(bool verbose)
 // 	updateChildren();
 // }
 
-InnerModelNode * InnerModelIMU::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
+InnerModelNode * InnerModelIMU::copyNode(THash hash, InnerModelNode *parent)
 {
 	Lock lock(mutex);
 	InnerModelIMU *ret = new InnerModelIMU(id, port, parent);
 	ret->level = level;
 	ret->fixed = fixed;
-	ret->children.clear();
+	ret->children->clear();
 	ret->attributes.clear();
-	hash.put(id,ret);
+	hash->insert(id,ret);
 
-	for (QList<InnerModelNode*>::iterator i=children.begin(); i!=children.end(); i++)
+	for (QList<InnerModelNode*>::iterator i=children->begin(); i!=children->end(); i++)
 	{
 		ret->addChild((*i)->copyNode(hash, ret));
 	}

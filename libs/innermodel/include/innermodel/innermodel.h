@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <typeinfo>
 
-#include "safe_ptr.h"
+#include <innermodel/safe_ptr.h>
 
 // Qt includes
 #include <QHash>
@@ -14,11 +14,6 @@
 
 // RoboComp includes
 #include <qmat/QMatAll>
-// #include <qmat/qmat.h>
-// #include <qmat/qvec.h>
-// #include <qmat/qcamera.h>
-// #include <qmat/qrtmat.h>
-// #include <qmat/qfundamental.h>
 
 //Derived and auxiliary classes
 #include <innermodel/innermodelconfig.h>
@@ -61,6 +56,8 @@ typedef boost::shared_ptr<FCLModel> FCLModelPtr;
 #endif
 
 typedef std::lock_guard<std::recursive_mutex> Lock;
+//typedef sf::safe_ptr< std::map<std::string, InnerModelNode *> > THash;
+typedef sf::safe_ptr< QHash<QString, InnerModelNode *> > THash;
 
 using namespace RMat;
 
@@ -148,23 +145,23 @@ class InnerModel
 		InnerModelPlane *getPlane(const QString &id)                         { return getNode<InnerModelPlane>(id); }
 		InnerModelMesh *getMesh(const QString &id)                           { return getNode<InnerModelMesh>(id); }
 		InnerModelPointCloud *getPointCloud(const QString &id)               { return getNode<InnerModelPointCloud>(id); }
-		QList<QString> getIDKeys() 											 { return hash.keys(); }
-		InnerModelNode *getNode(const QString & id) 	 					 { return hash.checkandget(id).second; }
+		QList<QString> getIDKeys() 											 { return hash->keys(); }
+		InnerModelNode *getNode(const QString & id) 	 					 { return hash->value(id); }
 		
 		template <class N> N* getNode(const QString &id) 
 		{
-			return dynamic_cast<N *>(hash.checkandget(id).second);
+			return dynamic_cast<N *>(hash->value(id));
 		}
 
 		// Thread safe node getter. It might be null
 		template <class N> N* getNodeSafe(const QString &id) 
 		{
-			return dynamic_cast<N *>(hash.checkandget(id).second);
+			return dynamic_cast<N *>(hash->value(id));
 		}
 		// Thread safe node getter that returns a locked node. 
 		template <class N> N* getNodeSafeAndLock(const QString &id) 
 		{
-			N* r = dynamic_cast<N *>(hash.checkandgetandlock(id));
+			N* r = dynamic_cast<N *>(hash->value(id));
 // 			if (r == nullptr)
 // 				throw InnerModelException("InnerModel::getNodeSafeAndLock() Error getting non existing node: " + id.toStdString());
 			return r;	
@@ -197,6 +194,7 @@ class InnerModel
 		/// Graoh editing methods
 		/////////////////////////////////////////////
 		void removeSubTree(InnerModelNode *item, QStringList *l);
+		void markSubTreeForRemoval(InnerModelNode *node);
 		void moveSubTree(InnerModelNode *nodeSrc, InnerModelNode *nodeDst);
 		void getSubTree(InnerModelNode *node, QStringList *l);
 		void getSubTree(InnerModelNode *node, QList<InnerModelNode *> *l);
@@ -260,14 +258,16 @@ class InnerModel
 
 		//QMutex *mutex;
 		mutable std::recursive_mutex mutex;
-		
-		ThreadSafeHash<QString, InnerModelNode*> hash;
-		sf::safe_ptr< std::map<std::string, InnerModelNode *> > hashS; 
+	
+		//Thread safe hash
+		THash hash; 
 		
 	protected:
 		InnerModelNode *root;
-		ThreadSafeHash<QPair<QString, QString>, RTMat> localHashTr;
-		ThreadSafeHash<QPair<QString, QString>, QMat> localHashRot;
+		//ThreadSafeHash<QPair<QString, QString>, RTMat> localHashTr;
+		//ThreadSafeHash<QPair<QString, QString>, QMat> localHashRot;
+		sf::safe_ptr< QHash<QPair<QString, QString>, QMat> > localHashRot;
+		sf::safe_ptr< QHash<QPair<QString, QString>, RTMat> > localHashTr;
 		std::pair<QList<InnerModelNode *>, QList<InnerModelNode *>> setLocalLists(const QString & origId, const QString & destId);		
 		
 		void removeNode(const QString & id);

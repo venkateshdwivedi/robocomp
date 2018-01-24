@@ -453,7 +453,7 @@ void SpecificWorker::walkTree(InnerModelNode *node)
 	}
 
 	QList<InnerModelNode*>::iterator it;
-	for (it=node->children.begin(); it!=node->children.end(); ++it)
+	for (it=node->children->begin(); it!=node->children->end(); ++it)
 	{
 		//std::cout << "  --> " << (void *)*it << "  " << (uint64_t)*it << std::endl;
 		InnerModelDifferentialRobot *differentialNode = dynamic_cast<InnerModelDifferentialRobot *>(*it);
@@ -752,7 +752,7 @@ void SpecificWorker::getRecursiveNodeInformation(RoboCompInnerModelManager::Node
 
 	/// Recursive call for all children
 	QList<InnerModelNode *>::iterator child;
-	for (child = node->children.begin(); child != node->children.end(); child++)
+	for (child = node->children->begin(); child != node->children->end(); child++)
 	{
 		getRecursiveNodeInformation(nodesInfo, *child);
 	}

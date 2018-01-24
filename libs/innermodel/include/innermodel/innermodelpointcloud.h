@@ -27,7 +27,7 @@ class InnerModelPointCloud : public InnerModelNode
 		void save(QTextStream &out, int tabs);
 		void print(bool verbose);
 		void update();
-		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
+		virtual InnerModelNode *copyNode(THash hash, InnerModelNode *parent);
 };
 
 

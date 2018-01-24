@@ -23,6 +23,8 @@
 #include <innermodel/innermodelconfig.h>
 #include <innermodel/threadsafehash.h>
 #include <mutex>
+#include <innermodel/safe_ptr.h>
+
 
 #if FCL_SUPPORT==1
 	#include <boost/shared_ptr.hpp>
@@ -42,7 +44,8 @@
 class InnerModel;
 	
 typedef std::lock_guard<std::recursive_mutex> Lock;
-	
+typedef sf::safe_ptr< QHash<QString, InnerModelNode *> > THash;
+
 class InnerModelNode : public RTMat
 {
 		friend class InnerModelCamera;
@@ -62,7 +65,7 @@ class InnerModelNode : public RTMat
 		void treePrint(QString s, bool verbose=false);
 		virtual void print(bool verbose) = 0;
 		//virtual void update() = 0;
-		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent) = 0;
+		virtual InnerModelNode *copyNode(THash hash, InnerModelNode *parent) = 0;
 		virtual void save(QTextStream &out, int tabs) = 0;
 		void setParent(InnerModelNode *parent_);
 		void addChild(InnerModelNode *child);
@@ -156,8 +159,12 @@ class InnerModelNode : public RTMat
 			Lock lock(mutex);
 			return collisionObject;
 		}
+		void markForDelete()
+		{
+			markedForDelete = true;
+		}
 		
-		QList<InnerModelNode *> children;
+		sf::safe_ptr<QList<InnerModelNode *>> children;
 		InnerModelNode *parent;
 		InnerModel *innerModel;
 			
@@ -166,6 +173,7 @@ class InnerModelNode : public RTMat
 			int level;
 			bool fixed;
 			QHash<QString, AttributeType> attributes;
+			std::atomic<bool> markedForDelete;
 			
 			//////////////////////
 			// FCLModel

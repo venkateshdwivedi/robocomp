@@ -34,6 +34,7 @@ using namespace RMat;
 QMat::QMat() : cols(1), rows(1)
 {
 	data = new DataBuffer(cols*rows);
+	valid = false;
 }
 /**
  * \brief Copy constructor

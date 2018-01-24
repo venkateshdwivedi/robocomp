@@ -31,7 +31,7 @@ class InnerModelPlane : public InnerModelNode
 		void print(bool verbose);
 		void save(QTextStream &out, int tabs);
 		void update(float nx_, float ny_, float nz_, float px_, float py_, float pz_);
-		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
+		virtual InnerModelNode *copyNode(THash hash, InnerModelNode *parent);
 		QVec getNormal() const 					{ Lock lock(mutex); return normal;};
 		QVec getPoint() const					{ Lock lock(mutex); return point;};
 		float getWidth() const					{ Lock lock(mutex); return width;};

@@ -29,11 +29,10 @@ class InnerModelTransform : public InnerModelNode
 
 		void print(bool verbose);
 		void save(QTextStream &out, int tabs);
-		//void update();
 		void update(float tx_, float ty_, float tz_, float rx_, float ry_, float rz_);
 		void updateT(float tx_, float ty_, float tz_);
 		void updateR(float rx_, float ry_, float rz_);
-		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
+		virtual InnerModelNode *copyNode(THash hash, InnerModelNode *parent);
 		void transformValues(const RTMat &Tpb, float tx, float ty, float tz, float rx, float ry, float rz, const InnerModelNode *parentNode);
 		void translateValues(const RTMat &Tpb, float tx, float ty, float tz, const InnerModelNode *parentNode);
 		void rotateValues(const RTMat &Tpb, float rx, float ry, float rz, const InnerModelNode *parentNode);
@@ -49,8 +48,6 @@ class InnerModelTransform : public InnerModelNode
 		float getBackrZ() const				{ Lock lock(mutex); return backrZ;}
 		
 	protected:
-//  		float *tx, *ty, *tz;
-//  		float *rx, *ry, *rz;
 		float mass;
 		float backtX, backtY, backtZ;
 		float backrX, backrY, backrZ;

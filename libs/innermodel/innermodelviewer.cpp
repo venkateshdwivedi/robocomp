@@ -99,9 +99,9 @@ void InnerModelViewer::recursiveConstructor(InnerModelNode *node, osg::Group* pa
 		
 		mt->setMatrix(QMatToOSGMat4(*transformation));
 		
-		for(int i=0; i<node->children.size(); i++)
+		for(int i=0; i<node->children->size(); i++)
 		{
-			recursiveConstructor(node->children[i], mt, mtsHash, meshHash, ignoreCameras);
+			recursiveConstructor(node->children->value(i), mt, mtsHash, meshHash, ignoreCameras);
 		}
 	}
 	else if ((rgbd = dynamic_cast<InnerModelRGBD *>(node)))

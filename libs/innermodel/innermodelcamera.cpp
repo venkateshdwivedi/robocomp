@@ -44,19 +44,19 @@ void InnerModelCamera::save(QTextStream &out, int tabs)
 	out << "<camera id=\"" << id << "\" width=\"" << QString::number(width, 'g', 10) << "\" height=\"" << QString::number(height, 'g', 10) << "\" focal=\"" << QString::number(camera.getFocal(), 'g', 10) << "\" />\n";
 }
 
-InnerModelNode * InnerModelCamera::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
+InnerModelNode * InnerModelCamera::copyNode(THash hash, InnerModelNode *parent)
 {
 	Lock lock(mutex);
 	InnerModelCamera *ret = new InnerModelCamera(id, width, height, focal, innermodel, parent);
 	ret->level = level;
 	ret->fixed = fixed;
-	ret->children.clear();
+	ret->children->clear();
 	ret->attributes.clear();
-	hash.put(id,ret);
+	hash->insert(id,ret);
 
 	ret->camera = camera;
 
-	for (QList<InnerModelNode*>::iterator i=children.begin(); i!=children.end(); i++)
+	for (QList<InnerModelNode*>::iterator i=children->begin(); i!=children->end(); i++)
 	{
 		ret->addChild((*i)->copyNode(hash, ret));
 	}

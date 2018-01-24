@@ -26,8 +26,9 @@
 
 using namespace RMat;
 
-RTMat::RTMat(bool XCW, bool YCW, bool ZCW) : QMat ( 4,4 )
+RTMat::RTMat(bool XCW, bool YCW, bool ZCW, bool v) : QMat ( 4,4 )
 {
+	valid = v;
 	XC = XCW;
 	YC = YCW;
 	ZC = ZCW;
@@ -406,8 +407,9 @@ QMat RMat::RTMat::invertR()
 
 ///RMatC
 
-RTMatC::RTMatC() : QMat ( 4,4 )
+RTMatC::RTMatC(bool v) : QMat ( 4,4 )
 {
+	valid = v;
 	R = QMat::identity(3);
 	Rx = Rot3DCOX(0);
 	Ry = Rot3DCOY(0);
@@ -415,6 +417,7 @@ RTMatC::RTMatC() : QMat ( 4,4 )
 	Tr = QVec(3);
 	Tr.set(0.);
 	do_inject();
+	valid = false;
 }
 
 RTMatC::RTMatC(const RTMatC & ex) : QMat( ex )

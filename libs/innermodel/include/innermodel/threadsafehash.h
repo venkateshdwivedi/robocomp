@@ -23,45 +23,6 @@
 class InnerModelNode;
 typedef std::lock_guard<std::recursive_mutex> Lock;
 
-template <typename Val>
-class ThreadSafeList : QList<Val>
-{
-	public:
-		ThreadSafeList()
-		{}
- 		ThreadSafeList(const ThreadSafeList<Val> &list_) : QList<Val>(list_)
- 		{
- 		};
-		void clear()
-		{
-			Lock lock(mutex);
-			this->clear();
-		};
-		void push_back(const Val &v)
-		{
-			Lock lock(mutex);
-			this->push_back(v);
-		};
-		void push_front(const Val &v)
-		{
-			Lock lock(mutex);
-			this->push_front(v);
-		};
-		Val operator[](int i)
-		{
-			Lock lock(mutex);
-			return this->operator[](i);
-		};
-		bool size()
-		{
-			Lock lock(mutex);
-			return this->size();
-		};
-	private:
-		std::recursive_mutex mutex;
-		//QList<Val> list;
-};
-
 template <typename Key, typename Val>
 class ThreadSafeHash
 {

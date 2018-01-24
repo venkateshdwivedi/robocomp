@@ -31,7 +31,7 @@ class InnerModelPrismaticJoint : public InnerModelTransform
 		void update();
 		float getPosition();
 		float setPosition(float v);
-		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
+		virtual InnerModelNode *copyNode(THash hash, InnerModelNode *parent);
 		uint32_t getPort() const		{ Lock lock(mutex); return port; }
 		float getMin() const			{ Lock lock(mutex); return min; }
 		float getMax() const			{ Lock lock(mutex); return max; }

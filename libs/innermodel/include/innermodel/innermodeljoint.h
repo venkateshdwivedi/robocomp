@@ -38,7 +38,7 @@ class InnerModelJoint : public InnerModelTransform
 		float getMin();
 		float getMax();
 		QVec unitaryAxis();
-		virtual InnerModelNode *copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent);
+		virtual InnerModelNode *copyNode(THash hash, InnerModelNode *parent);
 
 	private:
 		float *lx, *ly, *lz;

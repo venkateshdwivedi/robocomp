@@ -204,9 +204,9 @@ void OmniRobotI::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, b
 
 	if ((transformation = dynamic_cast<InnerModelTransform *>(node)))
 	{
-		for (int i=0; i<node->children.size(); i++)
+		for (int i=0; i<node->children->size(); i++)
 		{
-			recursiveIncludeMeshes(node->children[i], robotId, inside, in, out);
+			recursiveIncludeMeshes(node->children->value(i), robotId, inside, in, out);
 		}
 	}
 	else if ((mesh = dynamic_cast<InnerModelMesh *>(node)) or (plane = dynamic_cast<InnerModelPlane *>(node)))

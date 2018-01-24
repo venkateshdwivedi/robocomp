@@ -33,18 +33,18 @@ InnerModelTouchSensor::InnerModelTouchSensor(QString id_, QString stype_, float 
 	port = port_;
 }
 
-InnerModelNode * InnerModelTouchSensor::copyNode(ThreadSafeHash<QString, InnerModelNode *> &hash, InnerModelNode *parent)
+InnerModelNode * InnerModelTouchSensor::copyNode(THash hash, InnerModelNode *parent)
 {
 	Lock lock(mutex);
 	
 	InnerModelTouchSensor *ret = new InnerModelTouchSensor(id, stype, nx, ny, nz, min, max, port, parent);
 	ret->level = level;
 	ret->fixed = fixed;
-	ret->children.clear();
+	ret->children->clear();
 	ret->attributes.clear();
-	hash.put(id,ret);
+	hash->insert(id,ret);
 
-	for (QList<InnerModelNode*>::iterator i=children.begin(); i!=children.end(); i++)
+	for (QList<InnerModelNode*>::iterator i=children->begin(); i!=children->end(); i++)
 	{
 		ret->addChild((*i)->copyNode(hash, ret));
 	}

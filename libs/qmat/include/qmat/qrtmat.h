@@ -38,13 +38,13 @@ namespace RMat
 // 	friend class InnerModel;
 // 	friend class InnerModel2::InnerModel;
 	public:
-		RTMat(bool XCW=true, bool YCW=true,bool ZCW=true);
+		RTMat(bool XCW=true, bool YCW=true,bool ZCW=true, bool valid=true);
 		RTMat( const RTMat & ex, bool XCW, bool YCW, bool ZCW);
 		RTMat( T rx, T ry, T rz, const QVec &t, bool XCW=true, bool YCW=true,bool ZCW=true);
 		RTMat( T rx, T ry, T rz, T tx, T ty, T tz, bool XCW=true, bool YCW=true,bool ZCW=true);
-		~RTMat();
 		RTMat(const QMat &ex);
 		RTMat(const RTMat &ex);
+		~RTMat();
 		RTMat operator==(const RTMat &ex)
 		{
 			*this = RTMat(ex);
@@ -76,12 +76,6 @@ namespace RMat
 		T getRzValue() const { return Rz->getAlfa(); }
 		RTMat invert() const;
 		QMat invertR();
-
-// 		QVec direct ( const QVec &p ) const;
-// 		QVec inverse ( const QVec & p ) const;
-// 		QVec directTr ( const QVec &p ) const;
-// 		QVec inverseTr ( const QVec & p ) const;
-
 		void do_inject();
 
 		Rot3DOnAxis * Rx;
@@ -89,6 +83,7 @@ namespace RMat
 		Rot3DOnAxis * Rz;
 		QMat R;
 		QVec Tr;
+		bool valid= true;
 	};
 
 	//not clockwise
@@ -97,7 +92,7 @@ namespace RMat
 // 	friend class InnerModel;
 // 	friend class InnerModel2::InnerModel;
 	public:
-		RTMatC();
+		RTMatC( bool valid = true);
 		RTMatC( const RTMatC & ex);
 		RTMatC( T ox, T oy, T oz, const QVec &t);
 		RTMatC( T ox, T oy, T oz, T x, T y, T z);
@@ -136,6 +131,7 @@ namespace RMat
 		Rot3DCOZ Rz;
 		QMat R;
 		QVec Tr;
+		bool valid = true;
 	};
 
 };
