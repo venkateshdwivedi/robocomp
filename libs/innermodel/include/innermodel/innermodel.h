@@ -6,6 +6,8 @@
 #include <stdint.h>
 #include <typeinfo>
 
+#include "safe_ptr.h"
+
 // Qt includes
 #include <QHash>
 #include <mutex>
@@ -260,6 +262,8 @@ class InnerModel
 		mutable std::recursive_mutex mutex;
 		
 		ThreadSafeHash<QString, InnerModelNode*> hash;
+		sf::safe_ptr< std::map<std::string, InnerModelNode *> > hashS; 
+		
 	protected:
 		InnerModelNode *root;
 		ThreadSafeHash<QPair<QString, QString>, RTMat> localHashTr;
