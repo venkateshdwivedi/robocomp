@@ -48,11 +48,13 @@ InnerModel::InnerModel(std::string xmlFilePath)
 InnerModel::InnerModel()
 {	
 	// Set Root node
-	InnerModelTransform *root = new InnerModelTransform("root", "static", 0, 0, 0, 0, 0, 0, 0);
-	root->parent = NULL;
+	auto root = std::make_shared<InnerModelTransform>(InnerModelTransform("root", "static", 0, 0, 0, 0, 0, 0, 0));
+	//InnerModelTransform *root = new InnerModelTransform("root", "static", 0, 0, 0, 0, 0, 0, 0);
+	//root->parent = NULL;
+	root->parent = nullptr;
 	setRoot(root);
 	root->innerModel = this;
-	hash->insert("root",root);
+	hash->insert("root", root);
 }
 
 InnerModel::InnerModel(const InnerModel &original)
@@ -516,7 +518,7 @@ std::pair<QList<InnerModelNode *>, QList<InnerModelNode *>> InnerModel::setLocal
 /// Model construction methods
 /////////////////////////////////////////////////////////////////
 
-void InnerModel::setRoot(InnerModelNode *node)
+void InnerModel::setRoot(TransformPtr node)
 {
 	root = node;
 	hash->insert("root", root);
@@ -656,7 +658,8 @@ InnerModelTransform *InnerModel::newTransform(QString id, QString engine, InnerM
 	if (hash->contains(id))
 		throw InnerModelException("InnerModel::newTransform: Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");
 		
-	InnerModelTransform *newnode = new InnerModelTransform(id, engine, tx, ty, tz, rx, ry, rz, mass, parent);
+	//InnerModelTransform *newnode = new InnerModelTransform(id, engine, tx, ty, tz, rx, ry, rz, mass, parent);
+	auto newnode = std::make_shared(InnerModelTransform(id, engine, tx, ty, tz, rx, ry, rz, mass, parent));
 	hash->insert(id,newnode);
 	return newnode;
 }

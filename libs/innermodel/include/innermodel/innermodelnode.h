@@ -21,7 +21,7 @@
 // RoboComp includes
 #include <qmat/QMatAll>
 #include <innermodel/innermodelconfig.h>
-#include <innermodel/threadsafehash.h>
+//#include <innermodel/threadsafehash.h>
 #include <mutex>
 #include <innermodel/safe_ptr.h>
 
@@ -44,7 +44,8 @@
 class InnerModel;
 	
 typedef std::lock_guard<std::recursive_mutex> Lock;
-typedef sf::safe_ptr< QHash<QString, InnerModelNode *> > THash;
+
+
 
 class InnerModelNode : public RTMat
 {
@@ -53,6 +54,8 @@ class InnerModelNode : public RTMat
 		friend class InnerModelReader;
 
 	public:
+		using THash = sf::safe_ptr< QHash<QString, InnerModelNode *>>;
+
 		InnerModelNode(QString id_, InnerModelNode *parent_=NULL);
 		virtual ~InnerModelNode();
 	

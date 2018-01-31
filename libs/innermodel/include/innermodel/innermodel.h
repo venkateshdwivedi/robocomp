@@ -33,7 +33,7 @@
 #include <innermodel/innermodelimu.h>
 #include <innermodel/innermodelpointcloud.h>
 #include <innermodel/innermodeltouchsensor.h>
-#include <innermodel/threadsafehash.h>
+//#include <innermodel/threadsafehash.h>
 
 #if FCL_SUPPORT==1
 #include <boost/shared_ptr.hpp>
@@ -57,7 +57,6 @@ typedef boost::shared_ptr<FCLModel> FCLModelPtr;
 
 typedef std::lock_guard<std::recursive_mutex> Lock;
 //typedef sf::safe_ptr< std::map<std::string, InnerModelNode *> > THash;
-typedef sf::safe_ptr< QHash<QString, InnerModelNode *> > THash;
 
 using namespace RMat;
 
@@ -68,8 +67,22 @@ class InnerModel
 	friend InnerModelReader;
 
 	public:
+		using NodePtr = std::shared_ptr<InnerModelNode>;
+		using TransformPtr = std::shared_ptr<InnerModelTransform>;
+		using JointPtr = std::shared_ptr<InnerModelJoint>;
+		using TouchSensorPtr = std::shared_ptr<InnerModelTouchSensor>;
+		using PrismaticJointPtr = std::shared_ptr<InnerModelPrismaticJoint>;
+		using DifferentialRobotPtr = std::shared_ptr<InnerModelDifferentialRobot>;
+		using OmniRobotPtr = std::shared_ptr<InnerModelOmniRobot>;
+		using CameraPtr = std::shared_ptr<InnerModelCamera>;
+		using RGBDPtr = std::shared_ptr<InnerModelRGBD>;
+		using IMUPtr = std::shared_ptr<InnerModelIMU>;
+		using LaserPtr = std::shared_ptr<InnerModelLaser>;
+		using PlanePtr = std::shared_ptr<InnerModelPlane>;
+		using MeshPtr = std::shared_ptr<InnerModelMesh>;
+		using PointCloudPtr = std::shared_ptr<InnerModelPointCloud>;
+		
 		static bool support_fcl();
-
 		/////////////////////////
 		/// (Con/De)structors
 		/////////////////////////
@@ -129,43 +142,46 @@ class InnerModel
 		////////////////////////////////
 		/// NOT thread safe Accessors. Use template class  getNodeSafeAndLock() below
 		///////////////////////////////
-		InnerModelTransform *getTransform(const QString &id)                 { return getNode<InnerModelTransform>(id); }
-		InnerModelJoint *getJoint(const QString &id)                         { return getNode<InnerModelJoint>(id); }
-		InnerModelJoint *getJoint(const std::string &id)                     { return getNode<InnerModelJoint>(QString::fromStdString(id)); }
-		InnerModelJoint *getJointS(const std::string &id)                    { return getNode<InnerModelJoint>(QString::fromStdString(id)); }
-		InnerModelJoint &getJointRef(const std::string &id)                  { return *getNode<InnerModelJoint>(QString::fromStdString(id)); }
-		InnerModelTouchSensor *getTouchSensor(const QString &id)             { return getNode<InnerModelTouchSensor>(id); }
-		InnerModelPrismaticJoint *getPrismaticJoint(const QString &id)       { return getNode<InnerModelPrismaticJoint>(id); }
-		InnerModelDifferentialRobot *getDifferentialRobot(const QString &id) { return getNode<InnerModelDifferentialRobot>(id); }
-		InnerModelOmniRobot *getOmniRobot(const QString &id)                 { return getNode<InnerModelOmniRobot>(id); }
-		InnerModelCamera *getCamera(QString id)                              { return getNode<InnerModelCamera>(id); }
-		InnerModelRGBD *getRGBD(QString id)                                  { return getNode<InnerModelRGBD>(id); }
-		InnerModelIMU *getIMU(QString id)                                    { return getNode<InnerModelIMU>(id); }
-		InnerModelLaser *getLaser(QString id)                                { return getNode<InnerModelLaser>(id); }
-		InnerModelPlane *getPlane(const QString &id)                         { return getNode<InnerModelPlane>(id); }
-		InnerModelMesh *getMesh(const QString &id)                           { return getNode<InnerModelMesh>(id); }
-		InnerModelPointCloud *getPointCloud(const QString &id)               { return getNode<InnerModelPointCloud>(id); }
-		QList<QString> getIDKeys() 											 { return hash->keys(); }
-		InnerModelNode *getNode(const QString & id) 	 					 { return hash->value(id); }
+		TransformPtr getTransform(const QString &id)                 { return getNode<TransformPtr>(id); }
+		JointPtr getJoint(const QString &id)                         { return getNode<JointPtr>(id); }
+		JointPtr getJoint(const std::string &id)                     { return getNode<JointPtr>(QString::fromStdString(id)); }
+		JointPtr getJointS(const std::string &id)                    { return getNode<JointPtr>(QString::fromStdString(id)); }
+		//OJO
+		//JointPtr &getJointRef(const std::string &id)               { return *getNode<InnerModelJoint>(QString::fromStdString(id)); }
+		TouchSensorPtr getTouchSensor(const QString &id)             { return getNode<TouchSensorPtr>(id); }
+		PrismaticJointPtr getPrismaticJoint(const QString &id)       { return getNode<PrismaticJointPtr>(id); }
+		DifferentialRobotPtr getDifferentialRobot(const QString &id) { return getNode<DifferentialRobotPtr>(id); }
+		OmniRobotPtr getOmniRobot(const QString &id)                 { return getNode<OmniRobotPtr>(id); }
+		CameraPtr getCamera(QString id)                              { return getNode<CameraPtr>(id); }
+		RGBDPtr getRGBD(QString id)                                  { return getNode<RGBDPtr>(id); }
+		IMUPtr getIMU(QString id)                                    { return getNode<IMUPtr>(id); }
+		LaserPtr getLaser(QString id)                                { return getNode<LaserPtr>(id); }
+		PlanePtr getPlane(const QString &id)                         { return getNode<PlanePtr>(id); }
+		MeshPtr getMesh(const QString &id)                           { return getNode<MeshPtr>(id); }
+		//PointCloud *getPointCloud(const QString &id)               { return getNode<InnerModelPointCloud>(id); }
+		QList<QString> getIDKeys() 									 { return hash->keys(); }
+		NodePtr getNode(const QString & id) 	 					 { return hash->value(id); }
 		
-		template <class N> N* getNode(const QString &id) 
+		template <typename N> N getNode(const QString &id) 
 		{
-			return dynamic_cast<N *>(hash->value(id));
+			//if( dynamic_cast<N*>(hash->value(id)->get()) )
+			return std::make_shared<decltype(hash->value(id).get())>(hash->value(id));
+			//return std::make_shared<N>(dynamic_cast<N*>(hash->value(id).get()));
 		}
 
 		// Thread safe node getter. It might be null
-		template <class N> N* getNodeSafe(const QString &id) 
-		{
-			return dynamic_cast<N *>(hash->value(id));
-		}
-		// Thread safe node getter that returns a locked node. 
-		template <class N> N* getNodeSafeAndLock(const QString &id) 
-		{
-			N* r = dynamic_cast<N *>(hash->value(id));
-// 			if (r == nullptr)
-// 				throw InnerModelException("InnerModel::getNodeSafeAndLock() Error getting non existing node: " + id.toStdString());
-			return r;	
-		}
+// 		template <class N> N* getNodeSafe(const QString &id) 
+// 		{
+// 			return dynamic_cast<N *>(hash->value(id));
+// 		}
+// 		// Thread safe node getter that returns a locked node. 
+// 		template <class N> N* getNodeSafeAndLock(const QString &id) 
+// 		{
+// 			N* r = dynamic_cast<N *>(hash->value(id));
+// // 			if (r == nullptr)
+// // 				throw InnerModelException("InnerModel::getNodeSafeAndLock() Error getting non existing node: " + id.toStdString());
+// 			return r;	
+// 		}
 		
 		////////////////////////////////////////////////////////////////////////
 		/// Thread safe kinematic transformation methods
@@ -253,13 +269,14 @@ class InnerModel
 		QVec laserTo(const QString &dest, const QString & laserId , float r, float alfa)
 		{
 			qDebug() << __FUNCTION__ << "DEPRECATED. Use getNode<InnerModelLaser>(laserId)->laserTo(dest,laserId, r, alfa) ";
-			return getNode<InnerModelLaser>(laserId)->laserTo(dest, r, alfa);
+			return getNode<LaserPtr>(laserId)->laserTo(dest, r, alfa);
 		};
 
 		//QMutex *mutex;
 		mutable std::recursive_mutex mutex;
 	
 		//Thread safe hash
+		using THash = sf::safe_ptr< QHash<QString, std::shared_ptr<InnerModelNode>>>;
 		THash hash; 
 		
 	protected:
