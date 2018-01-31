@@ -48,7 +48,8 @@ InnerModel::InnerModel(std::string xmlFilePath)
 InnerModel::InnerModel()
 {	
 	// Set Root node
-	auto root = std::make_shared<InnerModelTransform>(InnerModelTransform("root", "static", 0, 0, 0, 0, 0, 0, 0));
+	//auto root = std::make_shared<InnerModelTransform>(InnerModelTransform("root", "static", 0, 0, 0, 0, 0, 0, 0));
+	auto root = newNode<InnerModelTransform>(QString("root"), QString("static"), 0, 0, 0, 0, 0, 0, 0, nullptr);
 	//InnerModelTransform *root = new InnerModelTransform("root", "static", 0, 0, 0, 0, 0, 0, 0);
 	//root->parent = NULL;
 	root->parent = nullptr;
@@ -753,7 +754,6 @@ bool InnerModel::collide(const QString &a, const fcl::CollisionObject *obj)
 
 	fcl::collide(n1->getCollisionObject(), obj, request, result);
 
-	n1->unlock();
 	return result.isCollision();
 }
 #endif
@@ -783,7 +783,6 @@ float InnerModel::distance(const QString &a, const QString &b)
 
 	fcl::distance(n1->getCollisionObject(), n2->getCollisionObject(), request, result);
 	
-	n1->unlock(); n2->unlock();
 	return result.min_distance;
 #else
 	throw InnerModelException("InnerModel was not compiled with collision support");

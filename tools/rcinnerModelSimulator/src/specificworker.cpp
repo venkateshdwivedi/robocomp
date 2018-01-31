@@ -554,7 +554,7 @@ RoboCompLaser::TLaserData SpecificWorker::LASER_createLaserData(const IMVLaser &
 
 	double angle = finAngle;  //variable to iterate angle increments
 	//El punto inicial es el origen del láser
-	const osg::Vec3 P = QVecToOSGVec(innerModel->laserTo("root", id, 0, 0));
+	const osg::Vec3 P = QVecToOSGVec(innerModel->getNode<InnerModelLaser>(id)->laserTo("root", 0, 0));
 	const float incAngle = (fabs(iniAngle)+fabs(finAngle)) / (float)measures;
 	osg::Vec3 Q,R;
 
@@ -568,7 +568,7 @@ RoboCompLaser::TLaserData SpecificWorker::LASER_createLaserData(const IMVLaser &
 		laserDataCartArray[id]->operator[](i) = QVecToOSGVec(QVec::vec3(maxRange*sin(angle), 0, maxRange*cos(angle)));
 
 		//Calculamos el punto destino
-		Q = QVecToOSGVec(innerModel->laserTo("root", id, maxRange, angle));
+		Q = QVecToOSGVec(innerModel->getNode<InnerModelLaser>(id)->laserTo("root", maxRange, angle));
 		//Creamos el segmento de interseccion
 		osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector = new osgUtil::LineSegmentIntersector(osgUtil::Intersector::MODEL, P, Q);
 		osgUtil::IntersectionVisitor visitor(intersector.get());
@@ -589,12 +589,12 @@ RoboCompLaser::TLaserData SpecificWorker::LASER_createLaserData(const IMVLaser &
 			if (dist <= maxRange)
 			{
 				laserData[i].dist = dist;//*1000.;
-				laserDataCartArray[id]->operator[](i) = QVecToOSGVec(innerModel->laserTo(id, id, dist, laserData[i].angle));
+				laserDataCartArray[id]->operator[](i) = QVecToOSGVec(innerModel->getNode<InnerModelLaser>(id)->laserTo(id, dist, laserData[i].angle));
 			}
 		}
 		else
 		{
-			laserDataCartArray[id]->operator[](i) = QVecToOSGVec(innerModel->laserTo(id, id, maxRange, laserData[i].angle));
+			laserDataCartArray[id]->operator[](i) = QVecToOSGVec(innerModel->getNode<InnerModelLaser>(id)->laserTo(id, maxRange, laserData[i].angle));
 		}
 		angle -= incAngle;
 	}

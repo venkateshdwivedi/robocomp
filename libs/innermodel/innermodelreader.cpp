@@ -53,7 +53,8 @@ bool InnerModelReader::load(const QString &file, InnerModel *model)
 	}
 	if (not model->getRoot())
 	{
-		InnerModelTransform *r = new InnerModelTransform(QString("root"), QString("static"), 0, 0, 0, 0, 0, 0, 0);
+		//InnerModelTransform *r = new InnerModelTransform(QString("root"), QString("static"), 0, 0, 0, 0, 0, 0, 0);
+		InnerModel::TransformPtr r = model->newNode<InnerModelTransform>(QString("root"), QString("static"), 0, 0, 0, 0, 0, 0, 0);
 		model->setRoot(r);
 		r->parent = NULL;
 	}
@@ -160,7 +161,9 @@ void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, Inne
 			{
 				QString ngn = e.attribute("engine", "static");
 				if (ngn != "static" and ngn != "bullet") qFatal("Error in line %d: %s is not a valid physics engine.", domNode.lineNumber(), ngn.toStdString().c_str());
-				InnerModelTransform *tr = model->newTransform(e.attribute("id"), e.attribute("engine", "static"), imNode, 0., 0., 0., e.attribute("rx", "0").toFloat(), e.attribute("ry", "0").toFloat(), e.attribute("rz", "0").toFloat(), e.attribute("mass", "0").toFloat());
+				/*InnerModelTransform *tr = model->newTransform(e.attribute("id"), e.attribute("engine", "static"), imNode, 0., 0., 0., e.attribute("rx", "0").toFloat(), e.attribute("ry", "0").toFloat(), e.attribute("rz", "0").toFloat(), e.attribute("mass", "0").toFloat());
+				*/
+				InnerModel::TransformPtr tr = model->newNode<InnerModelTransform>(e.attribute("id"), e.attribute("engine", "static"), 0, 0, 0, e.attribute("rx", "0").toFloat(), e.attribute("ry", "0").toFloat(), e.attribute("rz", "0").toFloat(), e.attribute("mass", "0").toFloat(), imNode);
 				tr->setGuiTranslation(false);
 				imNode->addChild(tr);
                     imNode->innerModel = tr->innerModel = model;

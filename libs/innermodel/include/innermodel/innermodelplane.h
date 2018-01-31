@@ -27,6 +27,7 @@
 class InnerModelPlane : public InnerModelNode
 {
 	public:
+		using PlanePtr = std::shared_ptr<InnerModelPlane>;
 		InnerModelPlane(QString id_, QString texture_, float width_, float height_,float depth_, int repeat_, float nx_, float ny_, float nz_, float px_, float py_, float pz_, bool collidable, InnerModelNode *parent_=NULL);
 		void print(bool verbose);
 		void save(QTextStream &out, int tabs);

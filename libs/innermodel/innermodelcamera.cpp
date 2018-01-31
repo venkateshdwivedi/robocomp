@@ -183,8 +183,11 @@ QVec InnerModelCamera::horizonLine(QString planeId, QString cameraId, float heig
 
 	// 	printf("-------------------------------------- cam:%s plane:%s\n", qPrintable(cameraId), qPrintable(planeId));
 	// Get camera and plane pointers
-	InnerModelPlane *plane = innermodel->getNode<InnerModelPlane>(planeId);
-	InnerModelCamera *camera = innermodel->getNode<InnerModelCamera>(cameraId);
+	//InnerModelPlane *plane = innermodel->getNode<InnerModelPlane>(planeId);
+	InnerModel::PlanePtr plane = innermodel->getNode<InnerModelPlane>(planeId);
+	//InnerModelCamera *camera = innermodel->getNode<InnerModelCamera>(cameraId);
+	CameraPtr camera = innermodel->getNode<InnerModelCamera>(cameraId);
+	
 	// Transform rotate plane normal vector to camera reference system
 	QMat rtm = innermodel->getRotationMatrixTo(cameraId, planeId);
 	QVec n = plane->getNormal();

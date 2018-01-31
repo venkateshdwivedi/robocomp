@@ -25,6 +25,8 @@ class InnerModel;
 class InnerModelCamera : public InnerModelNode
 {
 	public:
+		using CameraPtr = std::shared_ptr<InnerModelCamera>;
+		
 		InnerModelCamera(QString id_, float width_, float height_, float focal_, InnerModel *innermodel_, InnerModelNode *parent_= NULL);
 		void print(bool verbose);
 		void save(QTextStream &out, int tabs);

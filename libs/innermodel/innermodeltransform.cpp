@@ -35,9 +35,9 @@ InnerModelTransform::InnerModelTransform(QString id_, QString engine_, float tx_
 	gui_translation = gui_rotation = true;
 }
 
-InnerModelTransform::~InnerModelTransform()
-{
-}
+// InnerModelTransform::~InnerModelTransform()
+// {
+// }
 
 void InnerModelTransform::print(bool verbose)
 {

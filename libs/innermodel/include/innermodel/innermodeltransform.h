@@ -24,8 +24,8 @@
 class InnerModelTransform : public InnerModelNode
 {
 	public:
-		InnerModelTransform(QString id_, QString engine_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, float mass_, InnerModelNode *parent_=NULL);
-		virtual ~InnerModelTransform();
+		InnerModelTransform(QString id_, QString engine_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, float mass_, InnerModelNode *parent_=nullptr);
+		//virtual ~InnerModelTransform();
 
 		void print(bool verbose);
 		void save(QTextStream &out, int tabs);
