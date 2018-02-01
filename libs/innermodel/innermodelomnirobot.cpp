@@ -17,7 +17,7 @@
 
 #include "innermodelomnirobot.h"
 
-InnerModelOmniRobot::InnerModelOmniRobot(QString id_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, uint32_t port_, float noise_, bool collide_, InnerModelTransform *parent_) : InnerModelTransform(id_,QString("static"),tx_,ty_,tz_,rx_,ry_,rz_, 0, parent_)
+InnerModelOmniRobot::InnerModelOmniRobot(QString id_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, uint32_t port_, float noise_, bool collide_, TransformPtr parent_) : InnerModelTransform(id_,QString("static"),tx_,ty_,tz_,rx_,ry_,rz_, 0, parent_)
 {
 	#if FCL_SUPPORT==1
 		collisionObject = NULL;   //inherited from InnerModelNode
@@ -27,19 +27,21 @@ InnerModelOmniRobot::InnerModelOmniRobot(QString id_, float tx_, float ty_, floa
 	collide = collide_;
 }
 
-InnerModelNode * InnerModelOmniRobot::copyNode(THash hash, InnerModelNode *parent)
+InnerModelNode::NodePtr InnerModelOmniRobot::copyNode(THash hash, InnerModelNode::NodePtr parent)
 {
-	InnerModelOmniRobot *ret = new InnerModelOmniRobot(id, backtX, backtY, backtZ, backrX, backrY, backrZ, port, noise, (InnerModelTransform *)parent);
+	//InnerModelOmniRobot *ret = new InnerModelOmniRobot(id, backtX, backtY, backtZ, backrX, backrY, backrZ, port, noise, (InnerModelTransform *)parent);
+	OmniRobotPtr ret = std::make_shared( new InnerModelOmniRobot(id, backtX, backtY, backtZ, backrX, backrY, backrZ, port, noise, collide, static_pointer_cast<TransformPtr>(parent)));
+	
 	ret->level = level;
 	ret->fixed = fixed;
 	ret->children->clear();
 	ret->attributes.clear();
-	hash->insert(id,ret);
+//	hash->insert(id,ret);
 
-	for (QList<InnerModelNode*>::iterator i=children->begin(); i!=children->end(); i++)
-	{
-		ret->addChild((*i)->copyNode(hash, ret));
-	}
+// 	for (QList<InnerModelNode*>::iterator i=children->begin(); i!=children->end(); i++)
+// 	{
+// 		ret->addChild((*i)->copyNode(hash, ret));
+// 	}
 
 	return ret;
 }

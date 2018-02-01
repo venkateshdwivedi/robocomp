@@ -54,12 +54,12 @@ InnerModelNode * InnerModelIMU::copyNode(THash hash, InnerModelNode *parent)
 	ret->fixed = fixed;
 	ret->children->clear();
 	ret->attributes.clear();
-	hash->insert(id,ret);
-
-	for (QList<InnerModelNode*>::iterator i=children->begin(); i!=children->end(); i++)
-	{
-		ret->addChild((*i)->copyNode(hash, ret));
-	}
+// 	hash->insert(id,ret);
+// 
+// 	for (QList<InnerModelNode*>::iterator i=children->begin(); i!=children->end(); i++)
+// 	{
+// 		ret->addChild((*i)->copyNode(hash, ret));
+// 	}
 
 	return ret;
 }

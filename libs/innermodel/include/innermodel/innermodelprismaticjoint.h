@@ -23,15 +23,16 @@
 class InnerModelPrismaticJoint : public InnerModelTransform
 {
 	public:
-		friend class InnerModel;
-		friend class InnerModelReader;		
+		using PrismaticJointPtr = std::shared_ptr<InnerModelPrismaticJoint>;
+		//friend class InnerModel;
+		//friend class InnerModelReader;		
 		InnerModelPrismaticJoint(QString id_, float min_, float max_, float val_, float offset_, uint32_t port_=0, std::string axis_="z", float home_=0, InnerModelTransform *parent_=NULL);
 		void print(bool verbose);
 		void save(QTextStream &out, int tabs);
 		void update();
 		float getPosition();
 		float setPosition(float v);
-		virtual InnerModelNode *copyNode(THash hash, InnerModelNode *parent);
+		virtual InnerModelNode::NodePtr copyNode(THash hash, InnerModelNode::NodePtr parent);
 		uint32_t getPort() const		{ Lock lock(mutex); return port; }
 		float getMin() const			{ Lock lock(mutex); return min; }
 		float getMax() const			{ Lock lock(mutex); return max; }

@@ -49,14 +49,15 @@ typedef std::lock_guard<std::recursive_mutex> Lock;
 
 class InnerModelNode : public RTMat
 {
-		friend class InnerModelCamera;
-		friend class InnerModelRGBD;
-		friend class InnerModelReader;
+// 		friend class InnerModelCamera;
+// 		friend class InnerModelRGBD;
+// 		friend class InnerModelReader;
 
 	public:
-		using THash = sf::safe_ptr< QHash<QString, InnerModelNode *>>;
-
-		InnerModelNode(QString id_, InnerModelNode *parent_=NULL);
+		using THash = sf::safe_ptr< QHash<QString, std::shared_ptr<InnerModelNode>>>;
+		using NodePtr = std::shared_ptr<InnerModelNode>;
+	
+		InnerModelNode(QString id_, NodePtr parent_= nullptr);
 		virtual ~InnerModelNode();
 	
 		struct AttributeType
@@ -68,10 +69,13 @@ class InnerModelNode : public RTMat
 		void treePrint(QString s, bool verbose=false);
 		virtual void print(bool verbose) = 0;
 		//virtual void update() = 0;
-		virtual InnerModelNode *copyNode(THash hash, InnerModelNode *parent) = 0;
+		virtual NodePtr copyNode(THash hash, NodePtr parent) = 0;
 		virtual void save(QTextStream &out, int tabs) = 0;
-		void setParent(InnerModelNode *parent_);
-		void addChild(InnerModelNode *child);
+		//void setParent(InnerModelNode *parent_);
+		void setParent(NodePtr parent_);
+		//void addChild(InnerModelNode *child);
+		void addChild(NodePtr child);
+		
 		//void updateChildren();
 
 		/////////////////////////////////////////
@@ -167,8 +171,8 @@ class InnerModelNode : public RTMat
 			markedForDelete = true;
 		}
 		
-		sf::safe_ptr<QList<InnerModelNode *>> children;
-		InnerModelNode *parent;
+		sf::safe_ptr<QList<NodePtr>> children;
+		NodePtr parent;
 		InnerModel *innerModel;
 			
 		protected:

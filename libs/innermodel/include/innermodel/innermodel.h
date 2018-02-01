@@ -127,34 +127,34 @@ class InnerModel
 		///////////////////////////////
 
 		template<typename T, typename... Ts>
-		auto newNode(Ts&&... params)
+		std::shared_ptr<T> newNode(Ts&&... params)
 		{
 			std::shared_ptr<InnerModelNode> node(nullptr);
 			if(std::is_same<T, InnerModelTransform>::value)
 			{	node.reset(new InnerModelTransform(std::forward<Ts>(params)...)); }
-			else if(std::is_same<T, InnerModelJoint>::value)
+			if(std::is_same<T, InnerModelJoint>::value)
 			{ 	node.reset(new InnerModelJoint(std::forward<Ts>(params)...)); }
-			else if(std::is_same<T, InnerModelTouchSensor>::value)
+			if(std::is_same<T, InnerModelTouchSensor>::value)
 			{ 	node.reset(new InnerModelTouchSensor(std::forward<Ts>(params)...)); }
-			else if(std::is_same<T, InnerModelPrismaticJoint>::value)
+			if(std::is_same<T, InnerModelPrismaticJoint>::value)
 			{ 	node.reset(new InnerModelPrismaticJoint(std::forward<Ts>(params)...)); }
-			else if(std::is_same<T, InnerModelDifferentialRobot>::value)
+			if(std::is_same<T, InnerModelDifferentialRobot>::value)
 			{ 	node.reset(new InnerModelDifferentialRobot(std::forward<Ts>(params)...));} 
-			else if(std::is_same<T, InnerModelOmniRobot>::value)
+			if(std::is_same<T, InnerModelOmniRobot>::value)
 			{ 	node.reset(new InnerModelOmniRobot(std::forward<Ts>(params)...)); }
-			else if(std::is_same<T, InnerModelCamera>::value)
+			if(std::is_same<T, InnerModelCamera>::value)
 			{ 	node.reset(new InnerModelCamera(std::forward<Ts>(params)...));} 
-			else if(std::is_same<T, InnerModelIMU>::value)
+			if(std::is_same<T, InnerModelIMU>::value)
 			{ 	node.reset(new InnerModelIMU(std::forward<Ts>(params)...)); }
-			else if(std::is_same<T, InnerModelRGBD>::value)
+			if(std::is_same<T, InnerModelRGBD>::value)
 			{ 	node.reset(new InnerModelRGBD(std::forward<Ts>(params)...)); }
-			else if(std::is_same<T, InnerModelLaser>::value)
+			if(std::is_same<T, InnerModelLaser>::value)
 			{ 	node.reset(new InnerModelLaser(std::forward<Ts>(params)...)); }
-			else if(std::is_same<T, InnerModelPlane>::value)
+			if(std::is_same<T, InnerModelPlane>::value)
 			{ 	node.reset(new InnerModelPlane(std::forward<Ts>(params)...)); }
-			else if(std::is_same<T, InnerModelMesh>::value)
+			if(std::is_same<T, InnerModelMesh>::value)
 			{ 	node.reset(new InnerModelMesh(std::forward<Ts>(params)...)); }
-			else if(std::is_same<T, InnerModelPointCloud>::value)
+			if(std::is_same<T, InnerModelPointCloud>::value)
 			{ 	node.reset(new InnerModelPointCloud(std::forward<Ts>(params)...)); }
 			return node;
 		}
@@ -199,9 +199,9 @@ class InnerModel
 		//NodePtr getNode(const QString & id) 	 					 { return hash->value(id); }
 		
 		template <typename N> 
-		auto getNode(const QString &id) 
+		std::shared_ptr<N> getNode(const QString &id) 
 		{
-			N* r = dynamic_cast<N *>(hash->value(id).get());
+			N* r = dynamic_cast<N*>(hash->value(id).get());
 			return std::shared_ptr<N>(r);
 		}
 
@@ -251,7 +251,7 @@ class InnerModel
 		void getSubTree(InnerModelNode *node, QStringList *l);
 		void getSubTree(InnerModelNode *node, QList<InnerModelNode *> *l);
 		void computeLevels(InnerModelNode *node);
-		InnerModelNode *getRoot() { return root; }
+		NodePtr getRoot() { return root; }
 	
 		/////////////////////
 		/// Set debug level
@@ -303,11 +303,11 @@ class InnerModel
 		mutable std::recursive_mutex mutex;
 	
 		//Thread safe hash
-		using THash = sf::safe_ptr< QHash<QString, std::unique_ptr<InnerModelNode>>>;
+		using THash = sf::safe_ptr< QHash<QString, std::shared_ptr<InnerModelNode>>>;
 		THash hash; 
 		
 	protected:
-		InnerModelNode *root;
+		NodePtr root;
 		//ThreadSafeHash<QPair<QString, QString>, RTMat> localHashTr;
 		//ThreadSafeHash<QPair<QString, QString>, QMat> localHashRot;
 		sf::safe_ptr< QHash<QPair<QString, QString>, QMat> > localHashRot;

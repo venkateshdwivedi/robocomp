@@ -24,7 +24,9 @@
 class InnerModelTransform : public InnerModelNode
 {
 	public:
-		InnerModelTransform(QString id_, QString engine_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, float mass_, InnerModelNode *parent_=nullptr);
+		using TransformPtr = std::shared_ptr<InnerModelTransform>;
+		
+		InnerModelTransform(QString id_, QString engine_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, float mass_, NodePtr parent_ = nullptr);
 		//virtual ~InnerModelTransform();
 
 		void print(bool verbose);
@@ -32,10 +34,11 @@ class InnerModelTransform : public InnerModelNode
 		void update(float tx_, float ty_, float tz_, float rx_, float ry_, float rz_);
 		void updateT(float tx_, float ty_, float tz_);
 		void updateR(float rx_, float ry_, float rz_);
-		virtual InnerModelNode *copyNode(THash hash, InnerModelNode *parent);
-		void transformValues(const RTMat &Tpb, float tx, float ty, float tz, float rx, float ry, float rz, const InnerModelNode *parentNode);
-		void translateValues(const RTMat &Tpb, float tx, float ty, float tz, const InnerModelNode *parentNode);
-		void rotateValues(const RTMat &Tpb, float rx, float ry, float rz, const InnerModelNode *parentNode);
+		//virtual InnerModelNode *copyNode(THash hash, InnerModelNode *parent);
+		virtual InnerModelNode::NodePtr copyNode(THash hash, NodePtr parent);
+		void transformValues(const RTMat &Tpb, float tx, float ty, float tz, float rx, float ry, float rz, const NodePtr parentNode);
+		void translateValues(const RTMat &Tpb, float tx, float ty, float tz, const NodePtr parentNode);
+		void rotateValues(const RTMat &Tpb, float rx, float ry, float rz, const NodePtr parentNode);
 		void setGuiTranslation(bool v)		{ Lock lock(mutex); gui_translation = v; };
 		void setGuiRotation(bool v)			{ Lock lock(mutex); gui_rotation = v; };
 		float getMass() const				{ Lock lock(mutex); return mass;}

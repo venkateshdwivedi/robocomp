@@ -93,20 +93,20 @@ float InnerModelPrismaticJoint::setPosition(float v)
 	return ret;
 }
 
-InnerModelNode * InnerModelPrismaticJoint::copyNode(THash hash, InnerModelNode *parent)
+InnerModelNode::NodePtr  InnerModelPrismaticJoint::copyNode(THash hash, InnerModelNode::NodePtr parent)
 {
 	Lock lock(mutex);
-	InnerModelPrismaticJoint *ret = new InnerModelPrismaticJoint(id, min, max, value, offset, port, axis, home, (InnerModelTransform *) parent);
+	PrismaticJointPtr ret = std::make_shared( new InnerModelPrismaticJoint(id, min, max, value, offset, port, axis, home, (InnerModelTransform *)parent.get()));
 	ret->level = level;
 	ret->fixed = fixed;
 	ret->children->clear();
 	ret->attributes.clear();
-	hash->insert(id,ret);
-
-	for (QList<InnerModelNode*>::iterator i=children->begin(); i!=children->end(); i++)
-	{
-		ret->addChild((*i)->copyNode(hash, ret));
-	}
+// 	hash->insert(id,ret);
+// 
+// 	for (QList<InnerModelNode*>::iterator i=children->begin(); i!=children->end(); i++)
+// 	{
+// 		ret->addChild((*i)->copyNode(hash, ret));
+// 	}
 	return ret;
 }
 

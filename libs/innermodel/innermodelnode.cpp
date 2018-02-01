@@ -17,7 +17,7 @@
 
 #include "innermodelnode.h"
 
-InnerModelNode::InnerModelNode(QString id_, InnerModelNode *parent_) : RTMat()
+InnerModelNode::InnerModelNode(QString id_, NodePtr parent_) : RTMat()
 {
 	collidable = false;
 	#if FCL_SUPPORT==1
@@ -48,37 +48,32 @@ InnerModelNode::~InnerModelNode()
 
 void InnerModelNode::treePrint(QString s, bool verbose)
 {
-	printf("%s%s l(%d) [%d]\n", qPrintable(s), qPrintable(id), level, children->size());
-	QList<InnerModelNode*>::iterator i;
-	for (i=children->begin(); i!=children->end(); i++)
-	{
-		if (verbose)
-			(*i)->print(verbose);
-		(*i)->treePrint(s+QString("  "), verbose);
-
-	}
+// 	printf("%s%s l(%d) [%d]\n", qPrintable(s), qPrintable(id), level, children->size());
+// 	QList<InnerModelNode*>::iterator i;
+// 	for (i=children->begin(); i!=children->end(); i++)
+// 	{
+// 		if (verbose)
+// 			(*i)->print(verbose);
+// 		(*i)->treePrint(s+QString("  "), verbose);
+// 
+// 	}
 }
 
-void InnerModelNode::setParent(InnerModelNode *parent_)
+void InnerModelNode::setParent(NodePtr parent_)
 {
 	parent = parent_;
 	level = parent->level + 1;
 }
 
-void InnerModelNode::addChild(InnerModelNode *child)
+void InnerModelNode::addChild(NodePtr child)
 {
-	if (child->parent != this and child->parent != NULL)
-	{
-		//printf("InnerModelNode::addChild this is weird\n");
-	}
-
 	child->innerModel = innerModel;
 	
 	if (not children->contains(child))
 	{
 		children->append(child);
 	}
-	child->parent = this;
+	child->parent.reset(this);  //MIRAR
 }
 
 

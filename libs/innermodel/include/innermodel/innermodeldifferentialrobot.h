@@ -23,8 +23,9 @@
 class InnerModelDifferentialRobot : public InnerModelTransform
 {
 	public:
-		InnerModelDifferentialRobot(QString id_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, uint32_t port_=0, float noise=0, bool collide=false, InnerModelTransform *parent_=NULL);
-		virtual InnerModelNode *copyNode(THash hash, InnerModelNode *parent);
+		using DifferentialRobotPtr = std::shared_ptr<InnerModelDifferentialRobot>;
+		InnerModelDifferentialRobot(QString id_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, uint32_t port_=0, float noise=0, bool collide=false, TransformPtr parent_ = nullptr);
+		virtual InnerModelNode::NodePtr copyNode(THash hash, InnerModelNode::NodePtr parent);
 		uint32_t getPort() const	{ Lock lock(mutex); return port; }
 		bool getCollide() const		{ Lock lock(mutex); return collide; }
 		float getNoise() const		{ Lock lock(mutex); return noise; }

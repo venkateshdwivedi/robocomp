@@ -60,55 +60,58 @@ InnerModel::InnerModel()
 
 InnerModel::InnerModel(const InnerModel &original)
 {
-	root = new InnerModelTransform("root", "static", 0, 0, 0, 0, 0, 0, 0);
+	//root = new InnerModelTransform("root", "static", 0, 0, 0, 0, 0, 0, 0);
+	auto root = newNode<InnerModelTransform>(QString("root"), QString("static"), 0, 0, 0, 0, 0, 0, 0, nullptr);
 	setRoot(root);
 	root->innerModel = this;
 	hash->insert("root",root);
 	
-	QList<InnerModelNode *>::iterator i;
-	for (i=original.root->children->begin(); i!=original.root->children->end(); i++)
-	{
-		root->addChild((*i)->copyNode(hash, root));
-	}
+// 	QList<InnerModelNode *>::iterator i;
+// 	for (i=original.root->children->begin(); i!=original.root->children->end(); i++)
+// 	{
+// 		root->addChild((*i)->copyNode(hash, root));
+// 	}
 }
 
 InnerModel::InnerModel(InnerModel &original)
 {
 	
-	root = new InnerModelTransform("root", "static", 0, 0, 0, 0, 0, 0, 0);
+	//root = new InnerModelTransform("root", "static", 0, 0, 0, 0, 0, 0, 0);
+	auto root = newNode<InnerModelTransform>(QString("root"), QString("static"), 0, 0, 0, 0, 0, 0, 0, nullptr);
 	setRoot(root);
 	root->innerModel = this;
 	hash->insert("root", root);
 
-	QList<InnerModelNode *>::iterator i;
-	for (i=original.root->children->begin(); i!=original.root->children->end(); i++)
-	{
-		root->addChild((*i)->copyNode(hash, root));
-	}
+// 	QList<InnerModelNode *>::iterator i;
+// 	for (i=original.root->children->begin(); i!=original.root->children->end(); i++)
+// 	{
+// 		root->addChild((*i)->copyNode(hash, root));
+// 	}
 }
 
 InnerModel::InnerModel(InnerModel *original)
 {
+	//root = new InnerModelTransform("root", "static", 0, 0, 0, 0, 0, 0, 0);
+	auto root = newNode<InnerModelTransform>(QString("root"), QString("static"), 0, 0, 0, 0, 0, 0, 0, nullptr);
 	
-	root = new InnerModelTransform("root", "static", 0, 0, 0, 0, 0, 0, 0);
 	setRoot(root);
 	root->innerModel = this;
 	hash->insert("root", root);
 
-	QList<InnerModelNode *>::iterator i;
-	for (i=original->root->children->begin(); i!=original->root->children->end(); i++)
-	{
-		root->addChild((*i)->copyNode(hash, root));
-	}
+// 	QList<InnerModelNode *>::iterator i;
+// 	for (i=original->root->children->begin(); i!=original->root->children->end(); i++)
+// 	{
+// 		root->addChild((*i)->copyNode(hash, root));
+// 	}
 }
 
 InnerModel::~InnerModel()
 {
-	foreach (QString id, getIDKeys())
-	{
-		InnerModelNode *dd = hash->value(id);
-		delete dd;
-	}
+// 	foreach (QString id, getIDKeys())
+// 	{
+// 		NodePtr dd = hash->value(id);
+// 		delete dd.get();
+// 	}
 	hash->clear();
 	localHashRot->clear();
 	localHashTr->clear();
@@ -130,8 +133,8 @@ InnerModel* InnerModel::copy()
 
 void InnerModel::removeNode(const QString & id)  ///Que pasa con los hijos y el padre?
 {
-	InnerModelNode *dd = hash->value(id);
-	delete dd;
+	//InnerModelNode *dd = hash->value(id);
+	//delete dd;
 	hash->remove(id);
 }
 
@@ -253,13 +256,13 @@ void InnerModel::updateTransformValues(QString transformId, float tx, float ty, 
 	cleanupTables();
 	if(transformId == "root") return;   										///CHECK THIS
 	
-	InnerModelTransform *aux = getNode<InnerModelTransform>(transformId);
+	TransformPtr aux = getNode<InnerModelTransform>(transformId);
 	if(aux == nullptr) return;
 	
-	InnerModelTransform *auxParent = getNode<InnerModelTransform>(aux->parent->getId());
+	TransformPtr auxParent = getNode<InnerModelTransform>(aux->parent->getId());
 	if(auxParent == nullptr) return;
 	
-	InnerModelTransform *parent = getNode<InnerModelTransform>(parentId);
+	TransformPtr parent = getNode<InnerModelTransform>(parentId);
 	if(parent != nullptr)
 	{
 		try { aux->transformValues(getTransformationMatrix(aux->parent->getId(),parentId), tx, ty, tz, rx, ry, rz, parent);} 

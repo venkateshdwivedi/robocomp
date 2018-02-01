@@ -17,7 +17,7 @@
 
 #include "innermodeldifferentialrobot.h"
 
-InnerModelDifferentialRobot::InnerModelDifferentialRobot(QString id_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, uint32_t port_, float noise_, bool collide_, InnerModelTransform *parent_) : InnerModelTransform(id_,QString("static"),tx_,ty_,tz_,rx_,ry_,rz_, 0, parent_)
+InnerModelDifferentialRobot::InnerModelDifferentialRobot(QString id_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, uint32_t port_, float noise_, bool collide_, TransformPtr parent_) : InnerModelTransform(id_,QString("static"),tx_,ty_,tz_,rx_,ry_,rz_, 0, parent_)
 {
 #if FCL_SUPPORT==1
 	collisionObject = NULL;
@@ -27,19 +27,19 @@ InnerModelDifferentialRobot::InnerModelDifferentialRobot(QString id_, float tx_,
 	collide = collide_;
 }
 
-InnerModelNode * InnerModelDifferentialRobot::copyNode(THash hash, InnerModelNode *parent)
+InnerModelNode::NodePtr InnerModelDifferentialRobot::copyNode(THash hash, InnerModelNode::NodePtr parent)
 {
-	InnerModelDifferentialRobot *ret = new InnerModelDifferentialRobot(id, backtX, backtY, backtZ, backrX, backrY, backrZ, port, noise, (InnerModelTransform *)parent);
+	DifferentialRobotPtr ret = new InnerModelDifferentialRobot(id, backtX, backtY, backtZ, backrX, backrY, backrZ, port, noise, collide, std::static_pointer_cast<TransformPtr>(parent));
 	ret->level = level;
 	ret->fixed = fixed;
 	ret->children->clear();
 	ret->attributes.clear();
-	hash->insert(id,ret);
-
-	for (QList<InnerModelNode*>::iterator i=children->begin(); i!=children->end(); i++)
-	{
-		ret->addChild((*i)->copyNode(hash, ret));
-	}
+// 	hash->insert(id,ret);
+// 
+// 	for (QList<InnerModelNode*>::iterator i=children->begin(); i!=children->end(); i++)
+// 	{
+// 		ret->addChild((*i)->copyNode(hash, ret));
+// 	}
 
 	return ret;
 }

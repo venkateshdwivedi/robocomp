@@ -64,7 +64,7 @@ bool InnerModelReader::load(const QString &file, InnerModel *model)
 	return true;
 }
 
-bool InnerModelReader::include(const QString &file, InnerModel *model, InnerModelNode *node)
+bool InnerModelReader::include(const QString &file, InnerModel *model, NodePtr node)
 {
  	printf("InnerModelReader: reading include %s\n", file.toStdString().c_str());
 	QDomDocument doc("mydocument");
@@ -105,7 +105,7 @@ InnerModelReader::~InnerModelReader()
 }
 
 
-void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, InnerModelNode *imNode)
+void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, InnerModel::NodePtr imNode)
 {
 	QMap<QString, QStringList> nodeAttributes;
 
