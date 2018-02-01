@@ -29,7 +29,7 @@ InnerModelDifferentialRobot::InnerModelDifferentialRobot(QString id_, float tx_,
 
 InnerModelNode::NodePtr InnerModelDifferentialRobot::copyNode(THash hash, InnerModelNode::NodePtr parent)
 {
-	DifferentialRobotPtr ret = new InnerModelDifferentialRobot(id, backtX, backtY, backtZ, backrX, backrY, backrZ, port, noise, collide, std::static_pointer_cast<TransformPtr>(parent));
+	std::shared_ptr<InnerModelDifferentialRobot> ret( new InnerModelDifferentialRobot(id, backtX, backtY, backtZ, backrX, backrY, backrZ, port, noise, collide, 																							std::static_pointer_cast<InnerModelTransform>(parent)));
 	ret->level = level;
 	ret->fixed = fixed;
 	ret->children->clear();

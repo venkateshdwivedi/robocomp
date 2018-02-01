@@ -17,7 +17,7 @@
 
 #include "innermodeltransform.h"
 
-InnerModelTransform::InnerModelTransform(QString id_, QString engine_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, float mass_, NodePtr parent_) : InnerModelNode(id_, parent_)
+InnerModelTransform::InnerModelTransform(QString id_, QString engine_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, float mass_, NodePtr parent_) : InnerModelNode(id_, std::static_pointer_cast<InnerModelNode>(parent_))
 {
 #if FCL_SUPPORT==1
 	collisionObject = NULL;
@@ -125,7 +125,9 @@ void InnerModelTransform::updateR(float rx_, float ry_, float rz_)
 InnerModelNode::NodePtr InnerModelTransform::copyNode(THash hash, NodePtr parent)
 {
 	Lock lock(mutex);
-	TransformPtr ret = std::make_shared( new InnerModelTransform(id, engine, backtX, backtY, backtZ, backrX, backrY, backrZ, mass, parent));
+	//auto ret = std::make_shared( new InnerModelTransform(id, engine, backtX, backtY, backtZ, backrX, backrY, backrZ, mass, parent));
+	std::shared_ptr<InnerModelTransform> ret( new InnerModelTransform(id, engine, backtX, backtY, backtZ, backrX, backrY, backrZ, mass, parent));
+	
 	ret->level = level;
 	ret->fixed = fixed;
 	ret->children->clear();
@@ -137,7 +139,7 @@ InnerModelNode::NodePtr InnerModelTransform::copyNode(THash hash, NodePtr parent
 // 		ret->addChild((*i)->copyNode(hash, ret));
 // 	}
 
-	return ret;
+	return std::static_pointer_cast<InnerModelNode>(ret);
 }
 
 void InnerModelTransform::transformValues(const RTMat &Tpb, float tx, float ty, float tz, float rx, float ry, float rz, const NodePtr parentNode)

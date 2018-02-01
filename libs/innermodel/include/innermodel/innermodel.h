@@ -245,12 +245,12 @@ class InnerModel
 		/////////////////////////////////////////////
 		/// Graoh editing methods
 		/////////////////////////////////////////////
-		void removeSubTree(InnerModelNode *item, QStringList *l);
-		void markSubTreeForRemoval(InnerModelNode *node);
-		void moveSubTree(InnerModelNode *nodeSrc, InnerModelNode *nodeDst);
-		void getSubTree(InnerModelNode *node, QStringList *l);
-		void getSubTree(InnerModelNode *node, QList<InnerModelNode *> *l);
-		void computeLevels(InnerModelNode *node);
+		void removeSubTree(NodePtr item, QStringList *l);
+		void markSubTreeForRemoval(NodePtr node);
+		void moveSubTree(NodePtr nodeSrc, NodePtr nodeDst);
+		void getSubTree(NodePtr node, QStringList *l);
+		void getSubTree(NodePtr node, QList<NodePtr> *l);
+		void computeLevels(NodePtr node);
 		NodePtr getRoot() { return root; }
 	
 		/////////////////////

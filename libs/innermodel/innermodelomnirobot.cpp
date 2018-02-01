@@ -30,7 +30,12 @@ InnerModelOmniRobot::InnerModelOmniRobot(QString id_, float tx_, float ty_, floa
 InnerModelNode::NodePtr InnerModelOmniRobot::copyNode(THash hash, InnerModelNode::NodePtr parent)
 {
 	//InnerModelOmniRobot *ret = new InnerModelOmniRobot(id, backtX, backtY, backtZ, backrX, backrY, backrZ, port, noise, (InnerModelTransform *)parent);
-	OmniRobotPtr ret = std::make_shared( new InnerModelOmniRobot(id, backtX, backtY, backtZ, backrX, backrY, backrZ, port, noise, collide, static_pointer_cast<TransformPtr>(parent)));
+	/*OmniRobotPtr ret = std::make_shared( new InnerModelOmniRobot(id, backtX, backtY, backtZ, backrX, backrY, backrZ, port, noise, 
+																 collide, std::static_pointer_cast<InnerModelTransform>(parent)));
+	*/
+	std::shared_ptr<InnerModelOmniRobot> ret( new InnerModelOmniRobot(id, backtX, backtY, backtZ, backrX, backrY, backrZ, port, noise, 
+																 collide, std::static_pointer_cast<InnerModelTransform>(parent)));
+	
 	
 	ret->level = level;
 	ret->fixed = fixed;

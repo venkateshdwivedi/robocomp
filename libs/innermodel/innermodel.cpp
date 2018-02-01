@@ -124,7 +124,7 @@ InnerModel::~InnerModel()
 InnerModel* InnerModel::copy()
 {
 	InnerModel *inner = new InnerModel();
-	QList<InnerModelNode *>::iterator i;
+	QList<NodePtr>::iterator i;
 	for (i=root->children->begin(); i!=root->children->end(); i++)
 		inner->root->addChild((*i)->copyNode(inner->hash, inner->root));
 
@@ -143,9 +143,9 @@ bool InnerModel::open(std::string xmlFilePath)
 	return InnerModelReader::load(QString::fromStdString(xmlFilePath), this);
 }
 
-void InnerModel::markSubTreeForRemoval(InnerModelNode *node)
+void InnerModel::markSubTreeForRemoval(NodePtr node)
 {
-	QList<InnerModelNode*>::iterator i;
+	QList<NodePtr>::iterator i;
 	for (i=node->children->begin(); i!=node->children->end(); i++)
 	{
 		markSubTreeForRemoval(*i);
@@ -153,9 +153,9 @@ void InnerModel::markSubTreeForRemoval(InnerModelNode *node)
 	node->markForDelete();
 }
 
-void InnerModel::removeSubTree(InnerModelNode *node, QStringList *l)
+void InnerModel::removeSubTree(NodePtr node, QStringList *l)
 {
-	QList<InnerModelNode*>::iterator i;
+	QList<NodePtr>::iterator i;
 	for (i=node->children->begin(); i!=node->children->end(); i++)
 	{
 		removeSubTree(*i,l);
@@ -172,10 +172,10 @@ void InnerModel::removeSubTree(InnerModelNode *node, QStringList *l)
  * @param l pointer to QStringList
  * @return void
  */
-void InnerModel::getSubTree(InnerModelNode *node, QStringList *l)
+void InnerModel::getSubTree(NodePtr node, QStringList *l)
 {
 	
-	QList<InnerModelNode*>::iterator i;
+	QList<NodePtr>::iterator i;
 	for (i=node->children->begin(); i!=node->children->end(); i++)
 	{
 		getSubTree(*i,l);
@@ -183,10 +183,10 @@ void InnerModel::getSubTree(InnerModelNode *node, QStringList *l)
 	l->append(node->getId());
 }
 
-void InnerModel::getSubTree(InnerModelNode *node, QList<InnerModelNode *> *l)
+void InnerModel::getSubTree(NodePtr node, QList<NodePtr> *l)
 {
 	
-	QList<InnerModelNode*>::iterator i;
+	QList<NodePtr>::iterator i;
 	for (i=node->children->begin(); i!=node->children->end(); i++)
 	{
 		l->append((*i));
@@ -201,7 +201,7 @@ void InnerModel::getSubTree(InnerModelNode *node, QList<InnerModelNode *> *l)
  * @param l pointer to QStringList
  * @return void
  */
-void InnerModel::moveSubTree(InnerModelNode *nodeSrc, InnerModelNode *nodeDst)
+void InnerModel::moveSubTree(NodePtr nodeSrc, NodePtr nodeDst)
 {
 	nodeSrc->parent->children->removeOne(nodeSrc);
 	nodeDst->addChild(nodeSrc);
@@ -209,12 +209,12 @@ void InnerModel::moveSubTree(InnerModelNode *nodeSrc, InnerModelNode *nodeDst)
 	computeLevels(nodeDst);
 }
 
-void InnerModel::computeLevels(InnerModelNode *node)
+void InnerModel::computeLevels(NodePtr node)
 {
 	if (node->parent != nullptr )
 		node->setLevel(node->parent->getLevel() + 1);
 	
-	QList<InnerModelNode*>::iterator i;
+	QList<NodePtr>::iterator i;
 	for (i=node->children->begin(); i!=node->children->end(); i++)
 		computeLevels(*i);
 }
@@ -292,7 +292,7 @@ void InnerModel::updatePlaneValues(QString planeId, float nx, float ny, float nz
 	Lock lock(mutex);
 	
 	cleanupTables();
-	InnerModelPlane *plane = getNode<InnerModelPlane>(planeId);
+	PlanePtr plane = getNode<InnerModelPlane>(planeId);
 	//InnerModelPlane *plane = dynamic_cast<InnerModelPlane *>(hash[planeId]);
 	if (plane == nullptr)
 		throw InnerModelException("InnerModel::updatePlaneValues Error: node not found " + planeId.toStdString());

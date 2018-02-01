@@ -24,7 +24,7 @@ class InnerModelJoint : public InnerModelTransform
 {
 	public:
 		InnerModelJoint();
-		InnerModelJoint(QString id_, float lx_, float ly_, float lz_, float hx_, float hy_, float hz_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, float min_=-INFINITY, float max_=INFINITY, uint32_t port_=0, std::string axis_="z", float home_=0, InnerModelTransform *parent_=NULL);
+		InnerModelJoint(QString id_, float lx_, float ly_, float lz_, float hx_, float hy_, float hz_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, float min_=-INFINITY, float max_=INFINITY, uint32_t port_=0, std::string axis_="z", float home_=0, TransformPtr parent_ = nullptr);
 
 		void print(bool verbose);
 		void save(QTextStream &out, int tabs);
@@ -38,7 +38,7 @@ class InnerModelJoint : public InnerModelTransform
 		float getMin();
 		float getMax();
 		QVec unitaryAxis();
-		virtual InnerModelNode *copyNode(THash hash, InnerModelNode *parent);
+		virtual NodePtr copyNode(THash hash, NodePtr parent);
 
 	private:
 		float *lx, *ly, *lz;

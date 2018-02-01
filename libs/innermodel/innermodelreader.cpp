@@ -64,7 +64,7 @@ bool InnerModelReader::load(const QString &file, InnerModel *model)
 	return true;
 }
 
-bool InnerModelReader::include(const QString &file, InnerModel *model, NodePtr node)
+bool InnerModelReader::include(const QString &file, InnerModel *model, InnerModelNode::NodePtr node)
 {
  	printf("InnerModelReader: reading include %s\n", file.toStdString().c_str());
 	QDomDocument doc("mydocument");
@@ -105,7 +105,7 @@ InnerModelReader::~InnerModelReader()
 }
 
 
-void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, InnerModel::NodePtr imNode)
+void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, InnerModelNode::NodePtr imNode)
 {
 	QMap<QString, QStringList> nodeAttributes;
 
@@ -122,7 +122,8 @@ void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, Inne
 		if (not parentDomNode.firstChild().isNull())
 			qFatal("Only <innerModel>, <transform>, <translation>, <rotation> <prismaticjoint> or <joint> nodes may have childs. Line %d (%s)", parentDomNode.lineNumber(), qPrintable(parentDomNode.toElement().tagName()));
 
-	InnerModelNode *node;
+	//InnerModelNode *node;
+	InnerModelNode::NodePtr node;
 	QDomElement e;
 	for (QDomNode domNode = parentDomNode.firstChild(); not domNode.isNull(); domNode = domNode.nextSibling())
 	{

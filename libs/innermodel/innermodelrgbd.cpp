@@ -18,7 +18,7 @@
 #include "innermodelrgbd.h"
 #include <innermodel/innermodel.h>
 
-InnerModelRGBD::InnerModelRGBD(QString id_, float width, float height, float focal, float _noise, uint32_t _port, QString _ifconfig, InnerModel *innermodel_, InnerModelNode *parent_) 
+InnerModelRGBD::InnerModelRGBD(QString id_, float width, float height, float focal, float _noise, uint32_t _port, QString _ifconfig, InnerModel *innermodel_, NodePtr parent_) 
 : InnerModelCamera(id_, width, height, focal, innermodel_, parent_)
 {
 #if FCL_SUPPORT==1
@@ -40,11 +40,13 @@ void InnerModelRGBD::save(QTextStream &out, int tabs)
 	<<"\" port=\""<<port<<"\" ifconfig=\""<<ifconfig<<"\" noise=\""<<QString::number(noise, 'g', 10)<< "\" />\n";
 }
 
-InnerModelNode * InnerModelRGBD::copyNode(THash hash, InnerModelNode *parent)
+InnerModelNode::NodePtr InnerModelRGBD::copyNode(THash hash, NodePtr parent)
 {
 	Lock lock(mutex);
 	
-	InnerModelRGBD *ret = new InnerModelRGBD(id, width, height, focal, noise, port, ifconfig, innermodel, parent);
+	//InnerModelRGBD *ret = new InnerModelRGBD(id, width, height, focal, noise, port, ifconfig, innermodel, parent);
+	std::shared_ptr<InnerModelRGBD> ret( new InnerModelRGBD(id, width, height, focal, noise, port, ifconfig, innermodel, parent));
+	
 	ret->level = level;
 	ret->fixed = fixed;
 	ret->children->clear();

@@ -17,12 +17,11 @@
 
 #include "innermodelplane.h"
 
-InnerModelPlane::InnerModelPlane(QString id_, QString texture_, float width_, float height_,float depth_, int repeat_, float nx_, float ny_, float nz_, float px_, float py_, float pz_, bool collidable_, InnerModelNode *parent_) : InnerModelNode(id_, parent_)
+InnerModelPlane::InnerModelPlane(QString id_, QString texture_, float width_, float height_,float depth_, int repeat_, float nx_, float ny_, float nz_, float px_, float py_, float pz_, bool collidable_, NodePtr parent_) : InnerModelNode(id_, parent_)
 {
 #if FCL_SUPPORT==1
 	collisionObject = NULL;
 #endif
-	qDebug() << "ASDFASDFASDFS";
 	if ( abs(nx_)<0.001 and abs(ny_)<0.001 and abs(nz_)<0.001 ) nz_ = -1;
 	normal = QVec::vec3(nx_, ny_, nz_);
 	point = QVec::vec3(px_, py_, pz_);
@@ -136,11 +135,11 @@ void InnerModelPlane::update(float nx_, float ny_, float nz_, float px_, float p
 	fixed = true;
 }
 
-InnerModelNode * InnerModelPlane::copyNode(THash hash, InnerModelNode *parent)
+InnerModelNode::NodePtr InnerModelPlane::copyNode(THash hash, NodePtr parent)
 {
 	Lock lock(mutex);
 	
-	InnerModelPlane *ret = new InnerModelPlane(id, texture, width, height, depth, repeat, normal(0), normal(1), normal(2), point(0), point(1), point(2), parent);
+	std::shared_ptr<InnerModelPlane> ret( new InnerModelPlane(id, texture, width, height, depth, repeat, normal(0), normal(1), normal(2), point(0), point(1), 																		point(2), collidable, parent));
 	ret->level = level;
 	ret->fixed = fixed;
 	ret->children->clear();

@@ -25,7 +25,7 @@ InnerModelJoint::InnerModelJoint() : InnerModelTransform("invalid",QString("stat
 	throw InnerModelException("Can't actually build InnerModelJoint using the default constructor");
 }
 
-InnerModelJoint::InnerModelJoint(QString id_, float lx_, float ly_, float lz_, float hx_, float hy_, float hz_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, float min_, float max_, uint32_t port_, std::string axis_, float home_, InnerModelTransform *parent_) : InnerModelTransform(id_,QString("static"),tx_,ty_,tz_,rx_,ry_,rz_, 0, parent_)
+InnerModelJoint::InnerModelJoint(QString id_, float lx_, float ly_, float lz_, float hx_, float hy_, float hz_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, float min_, float max_, uint32_t port_, std::string axis_, float home_, TransformPtr parent_) : InnerModelTransform(id_,QString("static"),tx_,ty_,tz_,rx_,ry_,rz_, 0, parent_)
 {
 	#if FCL_SUPPORT==1
 		collisionObject = NULL;
@@ -74,14 +74,15 @@ void InnerModelJoint::print(bool verbose)
 
 void InnerModelJoint::save(QTextStream &out, int tabs)
 {
-		QList<InnerModelNode*>::iterator c;
+	QList<NodePtr>::iterator c;
 	//<joint id="head_yaw_joint" port="10067" axis="z" home="0" min="-1" max="1">
 	for (int i=0; i<tabs; i++) out << "\t";
 	out << "<joint id=\"" << id << "\" port=\"" << port << "\" axis=\"" <<QString::fromStdString( axis)<<"\" home=\""<< QString::number(home, 'g', 10)
 	<<"\" min=\""<< QString::number(min, 'g', 10)<<"\" max=\""<< QString::number(max, 'g', 10)
 	<< "\" tx=\""<< QString::number(backtX, 'g', 10) <<"\" ty=\""<< QString::number(backtY, 'g', 10) <<"\" tz=\""<< QString::number(backtZ, 'g', 10)
 	<<"\"  rx=\""<< QString::number(backrX, 'g', 10) <<"\" ry=\""<< QString::number(backrY, 'g', 10) <<"\" rz=\""<< QString::number(backrZ, 'g', 10) <<"\">\n";
-	for (c=children->begin(); c!=children->end(); c++)
+	
+	for (c = children->begin(); c != children->end(); c++)
 			(*c)->save(out, tabs+1);
 
 	for (int i=0; i<tabs; i++) out << "\t";

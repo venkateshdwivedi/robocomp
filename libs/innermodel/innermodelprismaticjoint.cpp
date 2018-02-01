@@ -17,7 +17,7 @@
 
 #include "innermodelprismaticjoint.h"
 
-InnerModelPrismaticJoint::InnerModelPrismaticJoint(QString id_, float min_, float max_, float val_, float offset_, uint32_t port_, std::string axis_, float home_, InnerModelTransform *parent_) : InnerModelTransform(id_,QString("static"),0,0,0,0,0,0, 0, parent_)
+InnerModelPrismaticJoint::InnerModelPrismaticJoint(QString id_, float min_, float max_, float val_, float offset_, uint32_t port_, std::string axis_, float home_, TransformPtr parent_) : InnerModelTransform(id_,QString("static"),0,0,0,0,0,0, 0, parent_)
 {
 	#if FCL_SUPPORT==1
 		collisionObject = NULL;
@@ -96,7 +96,8 @@ float InnerModelPrismaticJoint::setPosition(float v)
 InnerModelNode::NodePtr  InnerModelPrismaticJoint::copyNode(THash hash, InnerModelNode::NodePtr parent)
 {
 	Lock lock(mutex);
-	PrismaticJointPtr ret = std::make_shared( new InnerModelPrismaticJoint(id, min, max, value, offset, port, axis, home, (InnerModelTransform *)parent.get()));
+	std::shared_ptr<InnerModelPrismaticJoint> ret( new InnerModelPrismaticJoint(id, min, max, value, offset, port, axis, home, 
+																				std::static_pointer_cast<InnerModelTransform>(parent)));
 	ret->level = level;
 	ret->fixed = fixed;
 	ret->children->clear();
