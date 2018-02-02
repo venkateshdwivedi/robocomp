@@ -23,12 +23,12 @@
 class InnerModelTouchSensor :public InnerModelNode
 {
 	public:
-		InnerModelTouchSensor(QString id_, QString stype, float nx_, float ny_, float nz_, float min_=-INFINITY, float max_=INFINITY, uint32_t port_=0, InnerModelNode *parent_=NULL);
+		InnerModelTouchSensor(QString id_, QString stype, float nx_, float ny_, float nz_, float min_=-INFINITY, float max_=INFINITY, uint32_t port_=0, NodePtr parent_ = nullptr);
 		void print(bool verbose) {}
 		void save(QTextStream &out, int tabs) {}
 		QVec getMeasure() { return value; }
 		//void update() {}
-		virtual InnerModelNode *copyNode(THash hash, InnerModelNode *parent);
+		virtual NodePtr copyNode(THash hash, NodePtr parent);
 		uint32_t getPort() const			{ Lock lock(mutex); return port;}
 		float getNx()						{ Lock lock(mutex); return nx;}
 		float getNy()						{ Lock lock(mutex); return ny;}

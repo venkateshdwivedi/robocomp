@@ -17,7 +17,7 @@
 
 #include "innermodelpointcloud.h"
 
-InnerModelPointCloud::InnerModelPointCloud(QString id_, InnerModelNode *parent_) : InnerModelNode(id_, parent_)
+InnerModelPointCloud::InnerModelPointCloud(QString id_, NodePtr parent_) : InnerModelNode(id_, parent_)
 {
 #if FCL_SUPPORT==1
 	collisionObject = NULL;
@@ -38,10 +38,12 @@ void InnerModelPointCloud::print(bool verbose)
 	if (verbose) printf("Point Cloud: %s\n", qPrintable(id));
 }
 
-InnerModelNode * InnerModelPointCloud::copyNode(THash hash, InnerModelNode *parent)
+InnerModelNode::NodePtr InnerModelPointCloud::copyNode(THash hash, NodePtr parent)
 {
 	Lock lock(mutex);
-	InnerModelPointCloud *ret = new InnerModelPointCloud(id, parent);
+	//InnerModelPointCloud *ret = new InnerModelPointCloud(id, parent);
+	std::shared_ptr<InnerModelPointCloud> ret( new InnerModelPointCloud(id, parent));
+	
 	ret->level = level;
 	ret->fixed = fixed;
 	ret->children->clear();

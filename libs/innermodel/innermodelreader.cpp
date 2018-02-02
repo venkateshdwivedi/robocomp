@@ -54,7 +54,7 @@ bool InnerModelReader::load(const QString &file, InnerModel *model)
 	if (not model->getRoot())
 	{
 		//InnerModelTransform *r = new InnerModelTransform(QString("root"), QString("static"), 0, 0, 0, 0, 0, 0, 0);
-		InnerModel::TransformPtr r = model->newNode<InnerModelTransform>(QString("root"), QString("static"), 0, 0, 0, 0, 0, 0, 0);
+		auto r = std::static_pointer_cast<InnerModelTransform>(model->newNode<InnerModelTransform>(QString("root"), QString("static"), 0, 0, 0, 0, 0, 0, 0));
 		model->setRoot(r);
 		r->parent = NULL;
 	}
@@ -174,7 +174,7 @@ void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, Inne
 			{
 				QString ngn = e.attribute("engine", "static");
 				if (ngn != "static" and ngn != "bullet") qFatal("Error in line %d: %s is not a valid physics engine.", domNode.lineNumber(), ngn.toStdString().c_str());
-				InnerModelTransform *tr = model->newTransform(e.attribute("id"), e.attribute("engine", "static"), imNode, e.attribute("tx", "0").toFloat(), e.attribute("ty", "0").toFloat(), e.attribute("tz", "0").toFloat(), 0., 0., 0., e.attribute("mass", "0").toFloat());
+				InnerModel::TransformPtr tr = model->newNode<InnerModelTransform>(e.attribute("id"), e.attribute("engine", "static"), imNode, e.attribute("tx", "0").toFloat(), e.attribute("ty", "0").toFloat(), e.attribute("tz", "0").toFloat(), 0., 0., 0., e.attribute("mass", "0").toFloat());
 				tr->setGuiRotation(false);
 				imNode->addChild(tr);
                     imNode->innerModel = tr->innerModel = model;
@@ -184,23 +184,23 @@ void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, Inne
 			{
 				QString ngn = e.attribute("engine", "static");
 				if (ngn != "static" and ngn != "bullet") qFatal("Error in line %d: %s is not a valid physics engine.", domNode.lineNumber(), ngn.toStdString().c_str());
-				InnerModelTransform *tr = model->newTransform(e.attribute("id"), e.attribute("engine", "static"),  imNode, e.attribute("tx", "0").toFloat(), e.attribute("ty", "0").toFloat(), e.attribute("tz", "0").toFloat(), e.attribute("rx", "0").toFloat(), e.attribute("ry", "0").toFloat(), e.attribute("rz", "0").toFloat(), e.attribute("mass", "0").toFloat());
+				InnerModel::TransformPtr tr = model->newNode<InnerModelTransform>(e.attribute("id"), e.attribute("engine", "static"),  imNode, e.attribute("tx", "0").toFloat(), e.attribute("ty", "0").toFloat(), e.attribute("tz", "0").toFloat(), e.attribute("rx", "0").toFloat(), e.attribute("ry", "0").toFloat(), e.attribute("rz", "0").toFloat(), e.attribute("mass", "0").toFloat());
 				imNode->addChild(tr);
                     imNode->innerModel = tr->innerModel = model;
 				node = tr;
 			}
 			else if (e.tagName().toLower() == "touchsensor")
 			{
-				InnerModelTransform * im = dynamic_cast<InnerModelTransform *>(imNode);
-				InnerModelTouchSensor *ts = model->newTouchSensor(e.attribute("id"), im, e.attribute("type", "0"), e.attribute("nx", "0").toFloat(), e.attribute("ny", "0").toFloat(), e.attribute("nz", "0").toFloat(), e.attribute("min", "-inf").toFloat(), e.attribute("max", "inf").toFloat(), e.attribute("port", "0").toInt());
+				InnerModel::TransformPtr im = std::dynamic_pointer_cast<InnerModelTransform>(imNode);
+				InnerModel::TouchSensorPtr ts = model->newNode<InnerModelTouchSensor>(e.attribute("id"), im, e.attribute("type", "0"), e.attribute("nx", "0").toFloat(), e.attribute("ny", "0").toFloat(), e.attribute("nz", "0").toFloat(), e.attribute("min", "-inf").toFloat(), e.attribute("max", "inf").toFloat(), e.attribute("port", "0").toInt());
 				imNode->addChild(ts);
                     imNode->innerModel = ts->innerModel = model;
 				node = ts;
 			}
 			else if (e.tagName().toLower() == "joint")
 			{
-				InnerModelTransform * im = dynamic_cast<InnerModelTransform *>(imNode);
-				InnerModelJoint *jr = model->newJoint(e.attribute("id"),im, e.attribute("lx", "0").toFloat(), e.attribute("ly", "0").toFloat(), e.attribute("lz", "0").toFloat(),
+				InnerModel::TransformPtr im = std::dynamic_pointer_cast<InnerModelTransform>(imNode);
+				InnerModel::JointPtr jr = model->newNode<InnerModelJoint>(e.attribute("id"),im, e.attribute("lx", "0").toFloat(), e.attribute("ly", "0").toFloat(), e.attribute("lz", "0").toFloat(),
 				  e.attribute("hx", "0").toFloat(), e.attribute("hy", "0").toFloat(), e.attribute("hz", "0").toFloat(),
 				  e.attribute("tx", "0").toFloat(), e.attribute("ty", "0").toFloat(), e.attribute("tz", "0").toFloat(), e.attribute("rx", "0").toFloat(), e.attribute("ry", "0").toFloat(), e.attribute("rz", "0").toFloat(), e.attribute("min", "-inf").toDouble(), e.attribute("max", "inf").toDouble(), e.attribute("port", "0").toInt(),e.attribute("axis","z").toStdString(), e.attribute("home", "0").toDouble());
 				imNode->addChild(jr);
@@ -209,54 +209,53 @@ void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, Inne
 			}
 			else if (e.tagName().toLower() == "prismaticjoint")
 			{
-				InnerModelTransform * im = dynamic_cast<InnerModelTransform *>(imNode );
-				InnerModelPrismaticJoint *jr = model->newPrismaticJoint(e.attribute("id"),im, e.attribute("min", "-inf").toDouble(), e.attribute("max", "inf").toDouble(), e.attribute("position", "0").toDouble(), e.attribute("offset", "0").toDouble(), e.attribute("port", "0").toInt(),e.attribute("axis","z").toStdString(), e.attribute("home", "0").toDouble());
+				InnerModel::TransformPtr im = std::dynamic_pointer_cast<InnerModelTransform>(imNode );
+				InnerModel::PrismaticJointPtr jr = model->newNode<InnerModelPrismaticJoint>(e.attribute("id"),im, e.attribute("min", "-inf").toDouble(), e.attribute("max", "inf").toDouble(), e.attribute("position", "0").toDouble(), e.attribute("offset", "0").toDouble(), e.attribute("port", "0").toInt(),e.attribute("axis","z").toStdString(), e.attribute("home", "0").toDouble());
 				imNode->addChild(jr);
                     imNode->innerModel = jr->innerModel = model;
 				node = jr;
 			}
 			else if (e.tagName().toLower() == "differentialrobot")
 			{
-				InnerModelTransform * im = dynamic_cast<InnerModelTransform *>(imNode );
-				InnerModelDifferentialRobot *dr = model->newDifferentialRobot(e.attribute("id"), im, e.attribute("tx", "0").toFloat(), e.attribute("ty", "0").toFloat(), e.attribute("tz", "0").toFloat(), e.attribute("rx", "0").toFloat(), e.attribute("ry", "0").toFloat(), e.attribute("rz", "0").toFloat(), e.attribute("port", "0").toInt(), e.attribute("noise", "0").toFloat(), e.attribute("collide", "0").toInt()>0);
+				InnerModel::TransformPtr im = std::dynamic_pointer_cast<InnerModelTransform>(imNode );
+				InnerModel::DifferentialRobotPtr dr = model->newNode<InnerModelDifferentialRobot>(e.attribute("id"), im, e.attribute("tx", "0").toFloat(), e.attribute("ty", "0").toFloat(), e.attribute("tz", "0").toFloat(), e.attribute("rx", "0").toFloat(), e.attribute("ry", "0").toFloat(), e.attribute("rz", "0").toFloat(), e.attribute("port", "0").toInt(), e.attribute("noise", "0").toFloat(), e.attribute("collide", "0").toInt()>0);
 				imNode->addChild(dr);
                     imNode->innerModel = dr->innerModel = model;
 				node = dr;
 			}
 			else if (e.tagName().toLower() == "omnirobot")
 			{
-				InnerModelTransform * im = dynamic_cast<InnerModelTransform *>(imNode );
-				InnerModelOmniRobot *dr = model->newOmniRobot(e.attribute("id"), im, e.attribute("tx", "0").toFloat(), e.attribute("ty", "0").toFloat(), e.attribute("tz", "0").toFloat(), e.attribute("rx", "0").toFloat(), e.attribute("ry", "0").toFloat(), e.attribute("rz", "0").toFloat(), e.attribute("port", "0").toInt(), e.attribute("noise", "0").toFloat(), e.attribute("collide", "0").toInt()>0);
+				InnerModel::TransformPtr im = std::dynamic_pointer_cast<InnerModelTransform>(imNode );
+				InnerModel::OmniRobotPtr dr = model->newNode<InnerModelOmniRobot>(e.attribute("id"), im, e.attribute("tx", "0").toFloat(), e.attribute("ty", "0").toFloat(), e.attribute("tz", "0").toFloat(), e.attribute("rx", "0").toFloat(), e.attribute("ry", "0").toFloat(), e.attribute("rz", "0").toFloat(), e.attribute("port", "0").toInt(), e.attribute("noise", "0").toFloat(), e.attribute("collide", "0").toInt()>0);
 				imNode->addChild(dr);
                     imNode->innerModel = dr->innerModel = model;
 				node = dr;
 			}
 			else if (e.tagName().toLower() == "camera")
 			{
-				InnerModelCamera *cam = model->newCamera(e.attribute("id"), imNode, e.attribute("width", "0").toFloat(), e.attribute("height", "0").toFloat(), e.attribute("focal", "0").toFloat());
+				InnerModel::CameraPtr cam = model->newNode<InnerModelCamera>(e.attribute("id"), imNode, e.attribute("width", "0").toFloat(), e.attribute("height", "0").toFloat(), e.attribute("focal", "0").toFloat());
 				imNode->addChild(cam);
                     imNode->innerModel = cam->innerModel = model;
 				node = cam;
 			}
 			else if (e.tagName().toLower() == "rgbd")
 			{
-				InnerModelRGBD *cam = model->newRGBD(e.attribute("id"), imNode, e.attribute("width", "0").toFloat(), e.attribute("height", "0").toFloat(), e.attribute("focal", "0").toFloat(), e.attribute("noise", "0").toFloat(), e.attribute("port", "0").toInt(), e.attribute("ifconfig", ""));
+				InnerModel::RGBDPtr cam = model->newNode<InnerModelRGBD>(e.attribute("id"), imNode, e.attribute("width", "0").toFloat(), e.attribute("height", "0").toFloat(), e.attribute("focal", "0").toFloat(), e.attribute("noise", "0").toFloat(), e.attribute("port", "0").toInt(), e.attribute("ifconfig", ""));
 				imNode->addChild(cam);
                     imNode->innerModel = cam->innerModel = model;
 				node = cam;
 			}
 			else if (e.tagName().toLower() == "imu")
 			{
-				InnerModelIMU *imu = model->newIMU(e.attribute("id"), imNode, e.attribute("port", "0").toInt());
-// 				printf("IMU: %s, port %d\n", imu->id.toStdString().c_str(), imu->port);
+				InnerModel::IMUPtr imu = model->newNode<InnerModelIMU>(e.attribute("id"), imNode, e.attribute("port", "0").toInt());
 				imNode->addChild(imu);
                     imNode->innerModel = imu->innerModel = model;
 				node = imu;
 			}
 			else if (e.tagName().toLower() == "laser")
 			{
-				InnerModelLaser *laser = model->newLaser(e.attribute("id"), imNode, e.attribute("port", "0").toInt(), e.attribute("min").toInt(), e.attribute("max").toInt(), e.attribute("angle").toFloat(), e.attribute("measures").toInt(), e.attribute("ifconfig"));
- 				printf("laser: %s, port %d\n", laser->id.toStdString().c_str(), laser->getPort());
+				InnerModel::LaserPtr laser = model->newNode<InnerModelLaser>(e.attribute("id"), imNode, e.attribute("port", "0").toInt(), e.attribute("min").toInt(), e.attribute("max").toInt(), e.attribute("angle").toFloat(), e.attribute("measures").toInt(), e.attribute("ifconfig"));
+ 				printf("laser: %s, port %d\n", laser->getId().toStdString().c_str(), laser->getPort());
 				imNode->addChild(laser);
                     imNode->innerModel = laser->innerModel = model;
 				node = laser;
@@ -286,14 +285,14 @@ void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, Inne
 					qFatal("too many numbers in mesh definition");
 					return;
 				}
-				InnerModelMesh *mesh = model->newMesh(e.attribute("id"), imNode, e.attribute("file"), scalex, scaley, scalez, render, e.attribute("tx").toFloat(), e.attribute("ty").toFloat(), e.attribute("tz").toFloat(), e.attribute("rx").toFloat(), e.attribute("ry").toFloat(), e.attribute("rz").toFloat(), e.attribute("collide", "0").toInt()>0);
+				InnerModel::MeshPtr mesh = model->newNode<InnerModelMesh>(e.attribute("id"), imNode, e.attribute("file"), scalex, scaley, scalez, render, e.attribute("tx").toFloat(), e.attribute("ty").toFloat(), e.attribute("tz").toFloat(), e.attribute("rx").toFloat(), e.attribute("ry").toFloat(), e.attribute("rz").toFloat(), e.attribute("collide", "0").toInt()>0);
 				imNode->addChild(mesh);
                     imNode->innerModel = mesh->innerModel = model;
 				node = mesh;
 			}
 			else if (e.tagName().toLower() == "pointcloud")
 			{
-				InnerModelPointCloud *pointcloud = model->newPointCloud(e.attribute("id"), imNode);
+				InnerModel::PointCloudPtr pointcloud = model->newNode<InnerModelPointCloud>(e.attribute("id"), imNode);
 				imNode->addChild(pointcloud);
                     imNode->innerModel = pointcloud->innerModel = model;
 				node = pointcloud;
@@ -313,7 +312,7 @@ void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, Inne
 					qFatal("too many numbers in plane definition");
 					return;
 				}
-				InnerModelPlane *plane = model->newPlane(e.attribute("id"), imNode, e.attribute("texture", ""), width, height, depth, e.attribute("repeat", "1000").toInt(), e.attribute("nx", "0").toFloat(), e.attribute("ny", "0").toFloat(), e.attribute("nz", "0").toFloat(), e.attribute("px", "0").toFloat(), e.attribute("py", "0").toFloat(), e.attribute("pz", "0").toFloat(), e.attribute("collide", "0").toInt()>0);
+				InnerModel::PlanePtr plane = model->newNode<InnerModelPlane>(e.attribute("id"), imNode, e.attribute("texture", ""), width, height, depth, e.attribute("repeat", "1000").toInt(), e.attribute("nx", "0").toFloat(), e.attribute("ny", "0").toFloat(), e.attribute("nz", "0").toFloat(), e.attribute("px", "0").toFloat(), e.attribute("py", "0").toFloat(), e.attribute("pz", "0").toFloat(), e.attribute("collide", "0").toInt()>0);
 				imNode->addChild(plane);
                     imNode->innerModel = plane->innerModel = model;
 				node = plane;
@@ -354,18 +353,18 @@ void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, Inne
 				float zWidth = e.attribute("zwidth", "-1").toFloat();
 				if (zWidth>0) widths[2]=zWidth;
 
-				InnerModelPlane *plane;
+				InnerModel::PlanePtr plane;
 
-				plane = model->newPlane(e.attribute("id")+"x", imNode, "#ff0000", widths[0], widths[0], lengths[0], 1,   1,0,0,   lengths[0]/2,0,0,  false);
+				plane = model->newNode<InnerModelPlane>(e.attribute("id")+"x", imNode, "#ff0000", widths[0], widths[0], lengths[0], 1,   1,0,0,   lengths[0]/2,0,0,  false);
 				imNode->addChild(plane);
                     imNode->innerModel = plane->innerModel = model;
-				plane = model->newPlane(e.attribute("id")+"y", imNode, "#00ff00", widths[1], lengths[1], widths[1], 1,   1,0,0,   0,lengths[1]/2,0,  false);
+				plane = model->newNode<InnerModelPlane>(e.attribute("id")+"y", imNode, "#00ff00", widths[1], lengths[1], widths[1], 1,   1,0,0,   0,lengths[1]/2,0,  false);
 				imNode->addChild(plane);
                     imNode->innerModel = plane->innerModel = model;
-				plane = model->newPlane(e.attribute("id")+"z", imNode, "#0000ff", lengths[2], widths[2], widths[2], 1,   1,0,0,   0,0,lengths[2]/2,  false);
+				plane = model->newNode<InnerModelPlane>(e.attribute("id")+"z", imNode, "#0000ff", lengths[2], widths[2], widths[2], 1,   1,0,0,   0,0,lengths[2]/2,  false);
 				imNode->addChild(plane);
                     imNode->innerModel = plane->innerModel = model;
-				plane = model->newPlane(e.attribute("id")+"c", imNode, "#ffffff", widths[0]*1.3, widths[1]*1.3, widths[2]*1.3,                       1,   1,0,0,   0,0,0,  false);
+				plane = model->newNode<InnerModelPlane>(e.attribute("id")+"c", imNode, "#ffffff", widths[0]*1.3, widths[1]*1.3, widths[2]*1.3,                       1,   1,0,0,   0,0,0,  false);
 				imNode->addChild(plane);
                     imNode->innerModel = plane->innerModel = model;
 

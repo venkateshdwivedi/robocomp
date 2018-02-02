@@ -131,31 +131,37 @@ class InnerModel
 		{
 			std::shared_ptr<InnerModelNode> node(nullptr);
 			if(std::is_same<T, InnerModelTransform>::value)
-			{	node.reset(new InnerModelTransform(std::forward<Ts>(params)...)); }
-			if(std::is_same<T, InnerModelJoint>::value)
+			{	
+				node.reset(new InnerModelTransform(std::forward<Ts>(params)...)); 
+				if (hash->contains(node->getId()))
+					throw InnerModelException("InnerModel::newTransform: Error: Trying to insert a node with an already-existing key: " + node->getId().toStdString() + "\n");
+				hash->insert(node->getId(),node);
+			}
+			else if(std::is_same<T, InnerModelJoint>::value)
 			{ 	node.reset(new InnerModelJoint(std::forward<Ts>(params)...)); }
-			if(std::is_same<T, InnerModelTouchSensor>::value)
+			else if(std::is_same<T, InnerModelTouchSensor>::value)
 			{ 	node.reset(new InnerModelTouchSensor(std::forward<Ts>(params)...)); }
-			if(std::is_same<T, InnerModelPrismaticJoint>::value)
+			else if(std::is_same<T, InnerModelPrismaticJoint>::value)
 			{ 	node.reset(new InnerModelPrismaticJoint(std::forward<Ts>(params)...)); }
-			if(std::is_same<T, InnerModelDifferentialRobot>::value)
+			else if(std::is_same<T, InnerModelDifferentialRobot>::value)
 			{ 	node.reset(new InnerModelDifferentialRobot(std::forward<Ts>(params)...));} 
-			if(std::is_same<T, InnerModelOmniRobot>::value)
+			else if(std::is_same<T, InnerModelOmniRobot>::value)
 			{ 	node.reset(new InnerModelOmniRobot(std::forward<Ts>(params)...)); }
-			if(std::is_same<T, InnerModelCamera>::value)
+			else if(std::is_same<T, InnerModelCamera>::value)
 			{ 	node.reset(new InnerModelCamera(std::forward<Ts>(params)...));} 
-			if(std::is_same<T, InnerModelIMU>::value)
+			else if(std::is_same<T, InnerModelIMU>::value)
 			{ 	node.reset(new InnerModelIMU(std::forward<Ts>(params)...)); }
-			if(std::is_same<T, InnerModelRGBD>::value)
+			else if(std::is_same<T, InnerModelRGBD>::value)
 			{ 	node.reset(new InnerModelRGBD(std::forward<Ts>(params)...)); }
-			if(std::is_same<T, InnerModelLaser>::value)
+			else if(std::is_same<T, InnerModelLaser>::value)
 			{ 	node.reset(new InnerModelLaser(std::forward<Ts>(params)...)); }
-			if(std::is_same<T, InnerModelPlane>::value)
+			else if(std::is_same<T, InnerModelPlane>::value)
 			{ 	node.reset(new InnerModelPlane(std::forward<Ts>(params)...)); }
-			if(std::is_same<T, InnerModelMesh>::value)
+			else if(std::is_same<T, InnerModelMesh>::value)
 			{ 	node.reset(new InnerModelMesh(std::forward<Ts>(params)...)); }
-			if(std::is_same<T, InnerModelPointCloud>::value)
+			else if(std::is_same<T, InnerModelPointCloud>::value)
 			{ 	node.reset(new InnerModelPointCloud(std::forward<Ts>(params)...)); }
+			
 			return node;
 		}
 		
@@ -312,7 +318,7 @@ class InnerModel
 		//ThreadSafeHash<QPair<QString, QString>, QMat> localHashRot;
 		sf::safe_ptr< QHash<QPair<QString, QString>, QMat> > localHashRot;
 		sf::safe_ptr< QHash<QPair<QString, QString>, RTMat> > localHashTr;
-		std::pair<QList<InnerModelNode *>, QList<InnerModelNode *>> setLocalLists(const QString & origId, const QString & destId);		
+		std::pair<QList<NodePtr>, QList<NodePtr>> setLocalLists(const QString & origId, const QString & destId);		
 		
 		void removeNode(const QString & id);
 };

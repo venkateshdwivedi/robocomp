@@ -18,7 +18,7 @@
 #include "innermodelcamera.h"
 #include <innermodel/innermodel.h>
 
-InnerModelCamera::InnerModelCamera(QString id_, float width_, float height_, float focal_, InnerModel *innermodel_, InnerModelNode *parent_) 
+InnerModelCamera::InnerModelCamera(QString id_, float width_, float height_, float focal_, InnerModel *innermodel_, NodePtr parent_) 
 : InnerModelNode(id_, parent_), innermodel(innermodel_)
 {
 #if FCL_SUPPORT==1
@@ -44,10 +44,12 @@ void InnerModelCamera::save(QTextStream &out, int tabs)
 	out << "<camera id=\"" << id << "\" width=\"" << QString::number(width, 'g', 10) << "\" height=\"" << QString::number(height, 'g', 10) << "\" focal=\"" << QString::number(camera.getFocal(), 'g', 10) << "\" />\n";
 }
 
-InnerModelNode * InnerModelCamera::copyNode(THash hash, InnerModelNode *parent)
+InnerModelNode::NodePtr InnerModelCamera::copyNode(THash hash, NodePtr parent)
 {
 	Lock lock(mutex);
-	InnerModelCamera *ret = new InnerModelCamera(id, width, height, focal, innermodel, parent);
+	//InnerModelCamera *ret = new InnerModelCamera(id, width, height, focal, innermodel, parent);
+	std::shared_ptr<InnerModelCamera> ret( new InnerModelCamera(id, width, height, focal, innermodel, parent));
+	
 	ret->level = level;
 	ret->fixed = fixed;
 	ret->children->clear();

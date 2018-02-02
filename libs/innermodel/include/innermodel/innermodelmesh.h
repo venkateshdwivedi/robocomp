@@ -42,8 +42,6 @@
 	typedef boost::shared_ptr<FCLModel> FCLModelPtr;
 #endif
 
-
-
 #if FCL_SUPPORT==1
 struct IncludeTrianglesInFCL_functor
 {
@@ -144,15 +142,16 @@ class InnerModelMesh : public InnerModelNode
 {
 	public:
 			enum RenderingModes { NormalRendering=0, WireframeRendering=1};		
-			InnerModelMesh(QString id_, QString meshPath_, float scale, RenderingModes render_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, bool collidable, InnerModelNode *parent_=NULL);
-			InnerModelMesh(QString id_, QString meshPath_, float scalex_, float scaley_, float scalez_, RenderingModes render_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, bool collidable, InnerModelNode *parent_=NULL);
+			InnerModelMesh(QString id_, QString meshPath_, float scale, RenderingModes render_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, bool collidable, NodePtr parent_ = nullptr);
+			InnerModelMesh(QString id_, QString meshPath_, float scalex_, float scaley_, float scalez_, RenderingModes render_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, 
+						   bool collidable, NodePtr parent_ = nullptr);
 			void save(QTextStream &out, int tabs);
 			void print(bool verbose);
 			void update();
 			void setScale(float x, float y, float z);
 			bool normalRendering() const;
 			bool wireframeRendering() const;
-			virtual InnerModelNode *copyNode(THash hash, InnerModelNode *parent);
+			virtual NodePtr copyNode(THash hash, NodePtr parent);
 			QString getMeshPath() 		{ Lock lock(mutex); return meshPath;};
 			float getScalex() 			{ Lock lock(mutex); return scalex;};
 			float getScaley() 			{ Lock lock(mutex); return scaley;};

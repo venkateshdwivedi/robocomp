@@ -17,7 +17,7 @@
 
 #include "innermodeltouchsensor.h"
 
-InnerModelTouchSensor::InnerModelTouchSensor(QString id_, QString stype_, float nx_, float ny_, float nz_, float min_, float max_, uint32_t port_, InnerModelNode *parent_) : InnerModelNode(id_, parent_)
+InnerModelTouchSensor::InnerModelTouchSensor(QString id_, QString stype_, float nx_, float ny_, float nz_, float min_, float max_, uint32_t port_, NodePtr parent_) : InnerModelNode(id_, parent_)
 {
 #if FCL_SUPPORT==1
 	collisionObject = NULL;
@@ -33,11 +33,13 @@ InnerModelTouchSensor::InnerModelTouchSensor(QString id_, QString stype_, float 
 	port = port_;
 }
 
-InnerModelNode * InnerModelTouchSensor::copyNode(THash hash, InnerModelNode *parent)
+InnerModelNode::NodePtr InnerModelTouchSensor::copyNode(THash hash, NodePtr parent)
 {
 	Lock lock(mutex);
 	
-	InnerModelTouchSensor *ret = new InnerModelTouchSensor(id, stype, nx, ny, nz, min, max, port, parent);
+	//InnerModelTouchSensor *ret = new InnerModelTouchSensor(id, stype, nx, ny, nz, min, max, port, parent);
+	std::shared_ptr<InnerModelTouchSensor> ret( new InnerModelTouchSensor(id, stype, nx, ny, nz, min, max, port, parent));
+	
 	ret->level = level;
 	ret->fixed = fixed;
 	ret->children->clear();

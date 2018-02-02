@@ -18,7 +18,7 @@
 #include "innermodelmesh.h"
 
 
-InnerModelMesh::InnerModelMesh(QString id_, QString meshPath_, float scale, RenderingModes render_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, bool collidable,  InnerModelNode *parent_) : InnerModelNode(id_, parent_)
+InnerModelMesh::InnerModelMesh(QString id_, QString meshPath_, float scale, RenderingModes render_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, bool collidable,  NodePtr parent_) : InnerModelNode(id_, parent_)
 {
 #if FCL_SUPPORT==1
 	collisionObject = NULL;
@@ -26,7 +26,7 @@ InnerModelMesh::InnerModelMesh(QString id_, QString meshPath_, float scale, Rend
 	InnerModelMesh(id_,meshPath_,scale,scale,scale,render_,tx_,ty_,tz_,rx_,ry_,rz_, collidable, parent_);
 }
 
-InnerModelMesh::InnerModelMesh(QString id_, QString meshPath_, float scalex_, float scaley_, float scalez_, RenderingModes render_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, bool collidable_, InnerModelNode *parent_) : InnerModelNode(id_, parent_)
+InnerModelMesh::InnerModelMesh(QString id_, QString meshPath_, float scalex_, float scaley_, float scalez_, RenderingModes render_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, bool collidable_, NodePtr parent_) : InnerModelNode(id_, parent_)
 {
 #if FCL_SUPPORT==1
 	collisionObject = NULL;
@@ -158,10 +158,12 @@ bool InnerModelMesh::wireframeRendering() const
 	return render == WireframeRendering;
 }
 
-InnerModelNode * InnerModelMesh::copyNode(THash hash, InnerModelNode *parent)
+InnerModelNode::NodePtr InnerModelMesh::copyNode(THash hash, NodePtr parent)
 {
 	Lock lock(mutex);
-	InnerModelMesh *ret = new InnerModelMesh(id, meshPath, scalex, scaley, scalez, render, tx, ty, tz, rx, ry, rz, parent);
+	//InnerModelMesh *ret = new InnerModelMesh(id, meshPath, scalex, scaley, scalez, render, tx, ty, tz, rx, ry, rz, parent);
+	std::shared_ptr<InnerModelMesh> ret( new InnerModelMesh(id, meshPath, scalex, scaley, scalez, render, tx, ty, tz, rx, ry, rz, collidable, parent));
+	
 	ret->level = level;
 	ret->fixed = fixed;
 	ret->children->clear();

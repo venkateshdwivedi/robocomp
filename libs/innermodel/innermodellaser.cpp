@@ -18,7 +18,7 @@
 #include "innermodellaser.h"
 #include <innermodel/innermodel.h>
 
-InnerModelLaser::InnerModelLaser(QString id_, uint32_t _port, uint32_t _min, uint32_t _max, float _angle, uint32_t _measures, QString _ifconfig, InnerModel *innermodel_, InnerModelNode *parent_) :  InnerModelNode(id_, parent_) , innermodel(innermodel_)
+InnerModelLaser::InnerModelLaser(QString id_, uint32_t _port, uint32_t _min, uint32_t _max, float _angle, uint32_t _measures, QString _ifconfig, InnerModel *innermodel_, NodePtr parent_) :  InnerModelNode(id_, parent_) , innermodel(innermodel_)
 {
 	
  #if FCL_SUPPORT==1
@@ -49,10 +49,12 @@ void InnerModelLaser::print(bool verbose)
 	if (verbose) printf("LASER.");
 }
 
-InnerModelNode * InnerModelLaser::copyNode(THash hash, InnerModelNode *parent)
+InnerModelNode::NodePtr InnerModelLaser::copyNode(THash hash, NodePtr parent)
 {
 	Lock lock(mutex);
-	InnerModelLaser *ret = new InnerModelLaser(id, port, min, max, angle, measures, ifconfig, innermodel, parent);
+	//InnerModelLaser *ret = new InnerModelLaser(id, port, min, max, angle, measures, ifconfig, innermodel, parent);
+	std::shared_ptr<InnerModelLaser> ret( new InnerModelLaser(id, port, min, max, angle, measures, ifconfig, innermodel, parent));
+	
 	ret->level = level;
 	ret->fixed = fixed;
 	ret->children->clear();

@@ -25,11 +25,11 @@ class InnerModel;
 class InnerModelLaser : public InnerModelNode
 {
 	public:
-		InnerModelLaser(QString id_, uint32_t _port, uint32_t _min, uint32_t _max, float _angle, uint32_t _measures, QString _ifconfig, InnerModel *innermodel_, InnerModelNode *parent_=NULL);
+		InnerModelLaser(QString id_, uint32_t _port, uint32_t _min, uint32_t _max, float _angle, uint32_t _measures, QString _ifconfig, InnerModel *innermodel_, NodePtr parent_ = nullptr);
 		void save(QTextStream &out, int tabs);
 		void print(bool verbose);
 		void update();
-		virtual InnerModelNode *copyNode(THash hash, InnerModelNode *parent);
+		virtual NodePtr copyNode(THash hash, NodePtr parent);
 		
 		/**
 		* \brief Local laser measure of range r and angle alfa is converted to Any RS

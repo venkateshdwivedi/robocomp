@@ -17,7 +17,7 @@
 
 #include "innermodelimu.h"
 
-InnerModelIMU::InnerModelIMU(QString id_, uint32_t _port, InnerModelNode *parent_) : InnerModelNode(id_, parent_)
+InnerModelIMU::InnerModelIMU(QString id_, uint32_t _port, NodePtr parent_) : InnerModelNode(id_, parent_)
 {
 #if FCL_SUPPORT==1
 	collisionObject = NULL;
@@ -46,10 +46,12 @@ void InnerModelIMU::print(bool verbose)
 // 	updateChildren();
 // }
 
-InnerModelNode * InnerModelIMU::copyNode(THash hash, InnerModelNode *parent)
+InnerModelNode::NodePtr InnerModelIMU::copyNode(THash hash, NodePtr parent)
 {
 	Lock lock(mutex);
-	InnerModelIMU *ret = new InnerModelIMU(id, port, parent);
+	//InnerModelIMU *ret = new InnerModelIMU(id, port, parent);
+	std::shared_ptr<InnerModelIMU> ret( new InnerModelIMU(id, port, parent));
+	
 	ret->level = level;
 	ret->fixed = fixed;
 	ret->children->clear();

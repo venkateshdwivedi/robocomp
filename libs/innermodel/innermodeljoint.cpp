@@ -20,11 +20,6 @@
 
 class InnerModel;
 
-InnerModelJoint::InnerModelJoint() : InnerModelTransform("invalid",QString("static"), 0,0,0, 0,0,0, 0, NULL)
-{
-	throw InnerModelException("Can't actually build InnerModelJoint using the default constructor");
-}
-
 InnerModelJoint::InnerModelJoint(QString id_, float lx_, float ly_, float lz_, float hx_, float hy_, float hz_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, float min_, float max_, uint32_t port_, std::string axis_, float home_, TransformPtr parent_) : InnerModelTransform(id_,QString("static"),tx_,ty_,tz_,rx_,ry_,rz_, 0, parent_)
 {
 	#if FCL_SUPPORT==1
@@ -180,20 +175,26 @@ QVec InnerModelJoint::unitaryAxis()
 	return QVec::zeros(3);
 }
 
-InnerModelNode * InnerModelJoint::copyNode(THash hash, InnerModelNode *parent)
+InnerModelNode::NodePtr InnerModelJoint::copyNode(THash hash, NodePtr parent)
 {
-	InnerModelJoint *ret;
+	JointPtr ret;
 	if (axis == "x")
 	{
-		ret = new InnerModelJoint(id, backlX, backlY, backlZ, backhX, backhY, backhZ, backtX, backtY, backtZ, backrZ, 0, 0, min, max, port, axis, home, (InnerModelTransform *)parent);
+//		ret = new InnerModelJoint(id, backlX, backlY, backlZ, backhX, backhY, backhZ, backtX, backtY, backtZ, backrZ, 0, 0, min, max, port, axis, home, (InnerModelTransform *)parent);
+		std::shared_ptr<InnerModelJoint> ret( new InnerModelJoint(id, backlX, backlY, backlZ, backhX, backhY, backhZ, backtX, backtY, backtZ, backrZ, 0, 0, 
+																  min, max, port, axis, home, std::static_pointer_cast<InnerModelTransform>(parent)));
 	}
 	else if (axis == "y")
 	{
-		ret = new InnerModelJoint(id, backlX, backlY, backlZ, backhX, backhY, backhZ, backtX, backtY, backtZ, 0, backrZ, 0, min, max, port, axis, home, (InnerModelTransform *)parent);
+//		ret = new InnerModelJoint(id, backlX, backlY, backlZ, backhX, backhY, backhZ, backtX, backtY, backtZ, 0, backrZ, 0, min, max, port, axis, home, (InnerModelTransform *)parent);
+		std::shared_ptr<InnerModelJoint> ret( new InnerModelJoint(id, backlX, backlY, backlZ, backhX, backhY, backhZ, backtX, backtY, backtZ, 0, backrZ, 0, 
+																  min, max, port, axis, home, std::static_pointer_cast<InnerModelTransform>(parent)));
 	}
 	else if (axis == "z")
 	{
-		ret = new InnerModelJoint(id, backlX, backlY, backlZ, backhX, backhY, backhZ, backtX, backtY, backtZ, 0, 0, backrZ, min, max, port, axis, home, (InnerModelTransform *)parent);
+//		ret = new InnerModelJoint(id, backlX, backlY, backlZ, backhX, backhY, backhZ, backtX, backtY, backtZ, 0, 0, backrZ, min, max, port, axis, home, (InnerModelTransform *)parent);
+		std::shared_ptr<InnerModelJoint> ret( new InnerModelJoint(id, backlX, backlY, backlZ, backhX, backhY, backhZ, backtX, backtY, backtZ, 0, 0, backrZ,  
+																min, max, port, axis, home, std::static_pointer_cast<InnerModelTransform>(parent)));
 	}
 	else
 	{
