@@ -125,15 +125,6 @@ class InnerModel
 		////////////////////////////////
 		/// Factory constructors
 		///////////////////////////////
-// 		template<typename T, typename... Ts>
-//         std::shared_ptr<T> newNode(Ts&&... params)
-//          {
-// 			std::tuple<Ts...> p(params...);
-// 			std::shared_ptr<T> node(new T{std::forward<Ts>(params)...});
-// 			//auto res = hash->insert(std::make_pair<std::string, std::shared_ptr<Base>>(std::get<0>(p), std::static_pointer_cast<Base>(newObj)));
-// 			auto res = hash->insert(std::get<0>(p), std::static_pointer_cast<InnerModelNode>(node));
-// 			return node;
-// 		}
 
 		template<typename T, typename... Ts>
 		std::shared_ptr<T> newNode(Ts&&... params)

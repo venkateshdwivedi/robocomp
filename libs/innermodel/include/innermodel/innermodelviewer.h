@@ -73,7 +73,7 @@ struct IMVCamera
 {
 	osg::Image *rgb;
 	osg::Image *d;
-	InnerModelRGBD *RGBDNode;
+	InnerModel::RGBDPtr RGBDNode;
 	osgViewer::Viewer *viewerCamera;
 	osgGA::TrackballManipulator *manipulator;
 	QString id;
@@ -81,8 +81,7 @@ struct IMVCamera
 
 struct IMVLaser
 {
-	InnerModelLaser *laserNode;
-	//osg::Switch *osgNode;
+	InnerModel::LaserPtr laserNode;
 	osg::ref_ptr<osg::Switch> osgNode;
 	QString id;
 };
@@ -98,7 +97,7 @@ class IMVPlane : public osg::Geode
 {
 	friend class InnerModelViewer;
 	public:
-		IMVPlane(InnerModelPlane *plane, std::string imagenEntrada, osg::Vec4 valoresMaterial, float transparencia);
+		IMVPlane(InnerModel::PlanePtr plane, std::string imagenEntrada, osg::Vec4 valoresMaterial, float transparencia);
 		~IMVPlane();
 		void updateBuffer(uint8_t *data_, int32_t width_, int32_t height_);
 		void performUpdate();

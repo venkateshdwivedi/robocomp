@@ -103,12 +103,12 @@ void InnerModelViewer::recursiveConstructor(InnerModel::NodePtr node, osg::Group
 			// Camera ID
 			cam.id = node->getId();
 			// XML node for the camera
-			cam.RGBDNode = rgbd.get();			///OJO ÑAPA
+			cam.RGBDNode = rgbd;			///OJO ÑAPA
 			
 			// Viewer
 			cam.viewerCamera = new osgViewer::Viewer();
 		
-			double fov = 2. * atan2(0.5*cam.RGBDNode->height, cam.RGBDNode->focal);
+			double fov = 2. * atan2(0.5 * cam.RGBDNode->height, cam.RGBDNode->focal);
 			double aspectRatio = cam.RGBDNode->width / cam.RGBDNode->height;
 			double zNear = 0.01, zFar = 10000.0;
 			
@@ -152,7 +152,7 @@ void InnerModelViewer::recursiveConstructor(InnerModel::NodePtr node, osg::Group
 		IMVLaser iml;
 		iml.id = node->getId();
 		iml.osgNode = new osg::Switch();
-		iml.laserNode = laser.get();
+		iml.laserNode = laser;
 		parent->addChild(iml.osgNode);
 		lasers[iml.id] = iml;
 	}
@@ -161,9 +161,9 @@ void InnerModelViewer::recursiveConstructor(InnerModel::NodePtr node, osg::Group
 		// Create plane's specific mt
 		osg::ref_ptr<osg::MatrixTransform> mt = new osg::MatrixTransform;
 		planeMts[plane->getId()] = mt;
-		IMVPlane *imvplane = new IMVPlane(plane.get(), plane->getTexture().toStdString(), osg::Vec4(0.8,0.5,0.5,0.5), 0); 
+		IMVPlane *imvplane = new IMVPlane(plane, plane->getTexture().toStdString(), osg::Vec4(0.8,0.5,0.5,0.5), 0); 
 		planesHash[node->getId()] = imvplane;
-		setOSGMatrixTransformForPlane(mt, plane.get());
+		setOSGMatrixTransformForPlane(mt, plane.get());  //ÑAPA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 		if (parent) parent->addChild(mt);
 		mt->addChild(imvplane);
 	}
@@ -417,7 +417,7 @@ osg::Matrix QMatToOSGMat4(const RTMat &nodeB)
 // IMVPlane
 // ------------------------------------------------------------------------------------------------
 
-IMVPlane::IMVPlane(InnerModelPlane *plane, std::string imagenEntrada, osg::Vec4 valoresMaterial, float transparencia) : osg::Geode()
+IMVPlane::IMVPlane(InnerModel::PlanePtr plane, std::string imagenEntrada, osg::Vec4 valoresMaterial, float transparencia) : osg::Geode()
 {
 	data = NULL;
 	bool constantColor = false;

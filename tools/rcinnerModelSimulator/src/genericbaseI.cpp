@@ -30,18 +30,12 @@ GenericBaseI::GenericBaseI(SpecificWorker *_worker, QObject *parent) // : QThrea
 
 void GenericBaseI::add(QString id)
 {
-	node                        = innerModel->getOmniRobot(id);
-	parent                      = innerModel->getTransform(node->parent->getId());
+	//node = innerModel->getOmniRobot(id);
+	//parent = innerModel->getTransform(node->parent->getId());
+	node = innerModel->getNode<InnerModelOmniRobot>(id);
+	parent = innerModel->getNode<InnerModelTransform>(node->parent->getId());
+	
 }
-
-
-// void GenericBaseI::run()
-// {
-// 	while (true)
-// 	{
-// 		usleep(10000);
-// 	}
-// }
 
 
 void GenericBaseI::getBaseState(RoboCompGenericBase::TBaseState& state, const Ice::Current&)

@@ -54,7 +54,7 @@ public:
 private:
 	QString id;
 	InnerModel *innerModel;
-	InnerModelLaser *laserNode;
+	InnerModel::LaserPtr laserNode;
 	osg::Group *group;
 	SpecificWorker *worker;
 	LaserConfData laserConf;

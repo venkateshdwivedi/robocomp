@@ -57,16 +57,16 @@ void JointMotorI::add(QString id)
 	param.invertedSign = false;
 	param.busId = jointIDs.size();
 	
-	InnerModelNode *node = innerModel->getNode(id);
-	if (dynamic_cast<InnerModelJoint*>(node) != NULL)
+	InnerModel::NodePtr node = innerModel->getNode<InnerModelNode>(id);
+	if (std::dynamic_pointer_cast<InnerModelJoint>(node) != nullptr)
 	{
-		param.minPos = dynamic_cast<InnerModelJoint*>(node)->getMin();
-		param.maxPos = dynamic_cast<InnerModelJoint*>(node)->getMax();
+		param.minPos = std::dynamic_pointer_cast<InnerModelJoint>(node)->getMin();
+		param.maxPos = std::dynamic_pointer_cast<InnerModelJoint>(node)->getMax();
 	}
-	else if (dynamic_cast<InnerModelPrismaticJoint*>(node) != NULL)
+	else if (std::dynamic_pointer_cast<InnerModelPrismaticJoint>(node) != nullptr)
 	{
-		param.minPos = dynamic_cast<InnerModelPrismaticJoint *>(node)->getMin();
-		param.maxPos = dynamic_cast<InnerModelPrismaticJoint *>(node)->getMax();
+		param.minPos = std::dynamic_pointer_cast<InnerModelPrismaticJoint>(node)->getMin();
+		param.maxPos = std::dynamic_pointer_cast<InnerModelPrismaticJoint>(node)->getMax();
 	}
 
 	param.maxVelocity = 10000.;
@@ -165,14 +165,14 @@ MotorState JointMotorI::getMotorState(const string &motor, const Ice::Current&)
 {
 	for (QStringList::const_iterator name = jointIDs.constBegin() ; name != jointIDs.constEnd() ; ++name)
 	{
-		InnerModelNode *node = innerModel->getNode(*name);
-		if (dynamic_cast<InnerModelJoint*>(node) != NULL)
+		InnerModel::NodePtr node = innerModel->getNode<InnerModelNode>(*name);
+		if (std::dynamic_pointer_cast<InnerModelJoint>(node) != NULL)
 		{
-			states[name->toStdString()].pos = dynamic_cast<InnerModelJoint*>(node)->getAngle();
+			states[name->toStdString()].pos = std::dynamic_pointer_cast<InnerModelJoint>(node)->getAngle();
 		}
-		else if (dynamic_cast<InnerModelPrismaticJoint*>(node) != NULL)
+		else if (std::dynamic_pointer_cast<InnerModelPrismaticJoint>(node) != NULL)
 		{
-			states[name->toStdString()].pos = dynamic_cast<InnerModelPrismaticJoint*>(node)->getPosition();
+			states[name->toStdString()].pos = std::dynamic_pointer_cast<InnerModelPrismaticJoint>(node)->getPosition();
 		}
 	}
 	return states[motor];
@@ -183,14 +183,14 @@ MotorStateMap JointMotorI::getMotorStateMap(const MotorList &mList, const Ice::C
 {
 	for (QStringList::const_iterator name = jointIDs.constBegin() ; name != jointIDs.constEnd() ; ++name)
 	{
-		InnerModelNode *node = innerModel->getNode(*name);
-		if (dynamic_cast<InnerModelJoint*>(node) != NULL)
+		InnerModel::NodePtr node = innerModel->getNode<InnerModelNode>(*name);
+		if (std::dynamic_pointer_cast<InnerModelJoint>(node) != nullptr)
 		{
-			states[name->toStdString()].pos = dynamic_cast<InnerModelJoint*>(node)->getAngle();
+			states[name->toStdString()].pos = std::dynamic_pointer_cast<InnerModelJoint>(node)->getAngle();
 		}
-		else if (dynamic_cast<InnerModelPrismaticJoint*>(node) != NULL)
+		else if (dynamic_pointer_cast<InnerModelPrismaticJoint>(node) != nullptr)
 		{
-			states[name->toStdString()].pos = dynamic_cast<InnerModelPrismaticJoint*>(node)->getPosition();
+			states[name->toStdString()].pos = std::dynamic_pointer_cast<InnerModelPrismaticJoint>(node)->getPosition();
 		}
 	}
 	return states;
@@ -201,14 +201,14 @@ void JointMotorI::getAllMotorState(MotorStateMap &mstateMap, const Ice::Current&
 {
 	for (QStringList::const_iterator name = jointIDs.constBegin() ; name != jointIDs.constEnd() ; ++name)
 	{
-		InnerModelNode *node = innerModel->getNode(*name);
-		if (dynamic_cast<InnerModelJoint*>(node) != NULL)
+		InnerModel::NodePtr node = innerModel->getNode<InnerModelNode>(*name);
+		if (std::dynamic_pointer_cast<InnerModelJoint>(node) != nullptr)
 		{
-			states[name->toStdString()].pos = dynamic_cast<InnerModelJoint*>(node)->getAngle();
+			states[name->toStdString()].pos = std::dynamic_pointer_cast<InnerModelJoint>(node)->getAngle();
 		}
-		else if (dynamic_cast<InnerModelPrismaticJoint*>(node) != NULL)
+		else if (std::dynamic_pointer_cast<InnerModelPrismaticJoint>(node) != nullptr)
 		{
-			states[name->toStdString()].pos = dynamic_cast<InnerModelPrismaticJoint*>(node)->getPosition();
+			states[name->toStdString()].pos = std::dynamic_pointer_cast<InnerModelPrismaticJoint>(node)->getPosition();
 		}
 	}
 	mstateMap = states;

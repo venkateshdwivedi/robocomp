@@ -37,13 +37,13 @@ void OmniRobotI::add(QString id)
 	InnerModelMgr::guard gl(innerModel.mutex());
 
 	omniIDs << id;
-	node                        = innerModel->getOmniRobot(id);
-	parent                      = innerModel->getTransform(node->parent->getId());
-	rawOdometryParentNode       = innerModel->newTransform(id+"_raw_odometry_parent\"", "static", parent, 0, 0, 0, 0, 0, 0);
-	rawOdometryNode             = innerModel->newTransform(id+"_raw_odometry\"", "static", rawOdometryParentNode, 0, 0, 0, 0, 0, 0);
-	correctedOdometryParentNode = innerModel->newTransform(id+"_corrected_odometry_parent\"", "static", parent, 0, 0, 0, 0, 0, 0);
-	correctedOdometryNode       = innerModel->newTransform(id+"_corrected_odometry\"", "static", correctedOdometryParentNode, 0, 0, 0, 0, 0, 0);
-	movementFutureNode          = innerModel->newTransform(id+"_move\"", "static", node, 0, 0, 0, 0, 0, 0);
+	node                        = innerModel->getNode<InnerModelOmniRobot>(id);
+	parent                      = innerModel->getNode<InnerModelTransform>(node->parent->getId());
+	rawOdometryParentNode       = innerModel->newNode<InnerModelTransform>(id+"_raw_odometry_parent\"", "static", 0, 0, 0, 0, 0, 0, 0, parent);
+	rawOdometryNode             = innerModel->newNode<InnerModelTransform>(id+"_raw_odometry\"", "static", 0, 0, 0, 0, 0, 0, 0 , rawOdometryParentNode);
+	correctedOdometryParentNode = innerModel->newNode<InnerModelTransform>(id+"_corrected_odometry_parent\"", "static", 0, 0, 0, 0, 0, 0, 0, parent);
+	correctedOdometryNode       = innerModel->newNode<InnerModelTransform>(id+"_corrected_odometry\"", "static", 0, 0, 0, 0, 0, 0, 0, correctedOdometryParentNode);
+	movementFutureNode          = innerModel->newNode<InnerModelTransform>(id+"_move\"", "static", 0, 0, 0, 0, 0, 0, 0, node);
 }
 
 
@@ -189,7 +189,7 @@ bool OmniRobotI::canMoveBaseTo(const QString nodeId)
 	return true;
 }
 
-void OmniRobotI::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out)
+void OmniRobotI::recursiveIncludeMeshes(InnerModel::NodePtr node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out)
 {
 	InnerModelMgr::guard gl(innerModel.mutex());
 
@@ -198,18 +198,18 @@ void OmniRobotI::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, b
 		inside = true;
 	}
 
-	InnerModelMesh *mesh;
-	InnerModelPlane *plane;
-	InnerModelTransform *transformation;
+	InnerModel::MeshPtr mesh;
+	InnerModel::PlanePtr plane;
+	InnerModel::TransformPtr transformation;
 
-	if ((transformation = dynamic_cast<InnerModelTransform *>(node)))
+	if ((transformation = std::dynamic_pointer_cast<InnerModelTransform>(node)))
 	{
 		for (int i=0; i<node->children->size(); i++)
 		{
 			recursiveIncludeMeshes(node->children->value(i), robotId, inside, in, out);
 		}
 	}
-	else if ((mesh = dynamic_cast<InnerModelMesh *>(node)) or (plane = dynamic_cast<InnerModelPlane *>(node)))
+	else if ((mesh = std::dynamic_pointer_cast<InnerModelMesh>(node)) or (plane = std::dynamic_pointer_cast<InnerModelPlane>(node)))
 	{
 		if (inside)
 		{

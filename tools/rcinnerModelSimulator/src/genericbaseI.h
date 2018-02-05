@@ -33,8 +33,6 @@
 // Simulator includes
 #include "config.h"
 
-
-
 using namespace RoboCompGenericBase;
 
 class SpecificWorker;
@@ -54,8 +52,8 @@ public:
 private:
 	SpecificWorker *worker;
 	InnerModelMgr innerModel;
-	InnerModelTransform *parent;
-	InnerModelOmniRobot *node;
+	InnerModel::TransformPtr parent;
+	InnerModel::OmniRobotPtr node;
 };
 
 #endif

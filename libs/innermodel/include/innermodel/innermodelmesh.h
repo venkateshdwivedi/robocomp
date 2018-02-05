@@ -141,7 +141,7 @@ class CalculateTriangles : public osg::NodeVisitor
 class InnerModelMesh : public InnerModelNode
 {
 	public:
-			enum RenderingModes { NormalRendering=0, WireframeRendering=1};		
+			enum class RenderingModes { NormalRendering=0, WireframeRendering=1};		
 			InnerModelMesh(QString id_, QString meshPath_, float scale, RenderingModes render_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, bool collidable, NodePtr parent_ = nullptr);
 			InnerModelMesh(QString id_, QString meshPath_, float scalex_, float scaley_, float scalez_, RenderingModes render_, float tx_, float ty_, float tz_, float rx_, float ry_, float rz_, 
 						   bool collidable, NodePtr parent_ = nullptr);

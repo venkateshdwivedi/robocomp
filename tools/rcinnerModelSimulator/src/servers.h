@@ -27,10 +27,10 @@ class JointMotorServer
 {
 public:
 	JointMotorServer(Ice::CommunicatorPtr communicator, SpecificWorker *worker_, uint32_t _port);
-	void add(InnerModelJoint *joint);
-	void remove(InnerModelJoint *joint);
-	void add(InnerModelPrismaticJoint *joint);
-	void remove(InnerModelPrismaticJoint *joint);
+	void add(InnerModel::JointPtr joint);
+	void remove(InnerModel::JointPtr joint);
+	void add(InnerModel::PrismaticJointPtr joint);
+	void remove(InnerModel::PrismaticJointPtr joint);
 	bool empty();
 	void shutdown();
 
@@ -38,7 +38,8 @@ public:
 	Ice::CommunicatorPtr comm;
 	Ice::ObjectAdapterPtr adapter;
 	JointMotorI *interface;
-	std::vector<void *> joints;
+	std::vector<InnerModel::JointPtr> joints;
+	std::vector<InnerModel::PrismaticJointPtr> prismaticjoints;
 	SpecificWorker *worker;
 };
 
@@ -46,8 +47,8 @@ class TouchSensorServer
 {
 public:
 	TouchSensorServer(Ice::CommunicatorPtr communicator, SpecificWorker *worker_, uint32_t _port);
-	void add(InnerModelTouchSensor *sensor);
-	void remove(InnerModelTouchSensor *sensor);
+	void add(InnerModel::TouchSensorPtr sensor);
+	void remove(InnerModel::TouchSensorPtr sensor);
 	bool empty();
 	void shutdown();
 
@@ -55,7 +56,7 @@ public:
 	Ice::CommunicatorPtr comm;
 	Ice::ObjectAdapterPtr adapter;
 	TouchSensorI *interface;
-	std::vector<InnerModelTouchSensor *> sensors;
+	std::vector<InnerModel::TouchSensorPtr> sensors;
 	SpecificWorker *worker;
 };
 
@@ -64,12 +65,12 @@ class LaserServer
 {
 public:
 	LaserServer(Ice::CommunicatorPtr communicator, SpecificWorker *worker, uint32_t _port);
-	void add(InnerModelLaser *laser);
+	void add(InnerModel::LaserPtr laser);
 
 	uint32_t port;
 	Ice::ObjectAdapterPtr adapter;
 	LaserI *interface;
-	std::vector<InnerModelLaser *> lasers;
+	std::vector<InnerModel::LaserPtr> lasers;
 };
 
 
@@ -77,12 +78,12 @@ class RGBDServer
 {
 public:
 	RGBDServer(Ice::CommunicatorPtr communicator, SpecificWorker *worker, uint32_t _port);
-	void add(InnerModelRGBD *rgbd);
+	void add(InnerModel::RGBDPtr rgbd);
 
 	uint32_t port;
 	Ice::ObjectAdapterPtr adapter;
 	RGBDI *interface;
-	std::vector<InnerModelRGBD *> rgbds;
+	std::vector<InnerModel::RGBDPtr> rgbds;
 };
 
 
@@ -90,12 +91,12 @@ class IMUServer
 {
 public:
 	IMUServer(Ice::CommunicatorPtr communicator, SpecificWorker *worker, uint32_t _port);
-	void add(InnerModelIMU *imu);
+	void add(InnerModel::IMUPtr imu);
 
 	uint32_t port;
 	Ice::ObjectAdapterPtr adapter;
 	IMUI *interface;
-	std::vector<InnerModelIMU *> imus;
+	std::vector<InnerModel::IMUPtr> imus;
 };
 
 
@@ -103,25 +104,25 @@ class DifferentialRobotServer
 {
 public:
 	DifferentialRobotServer(Ice::CommunicatorPtr communicator, SpecificWorker *worker, uint32_t _port);
-	void add(InnerModelDifferentialRobot *differentialrobot);
+	void add(InnerModel::DifferentialRobotPtr differentialrobot);
 
 	uint32_t port;
 	Ice::ObjectAdapterPtr adapter;
 	DifferentialRobotI *interface;
-	std::vector<InnerModelDifferentialRobot *> differentialrobots;
+	std::vector<InnerModel::DifferentialRobotPtr> differentialrobots;
 };
 
 class OmniRobotServer
 {
 public:
 	OmniRobotServer(Ice::CommunicatorPtr communicator, SpecificWorker *worker, uint32_t _port);
-	void add(InnerModelOmniRobot *omnirobot);
+	void add(InnerModel::OmniRobotPtr omnirobot);
 
 	uint32_t port;
 	Ice::ObjectAdapterPtr adapter;
 	OmniRobotI *interface;
 	DifferentialRobotI *interfaceDFR;
 	GenericBaseI *interfaceGB;
-	std::vector<InnerModelOmniRobot *> omnirobots;
+	std::vector<InnerModel::OmniRobotPtr> omnirobots;
 };
 

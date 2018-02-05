@@ -40,19 +40,19 @@ void DifferentialRobotI::add(QString id)
 	try
 	{
 		nodeOmni = NULL;
-		node = innerModel->getDifferentialRobot(id);
-		parent = innerModel->getTransform(node->parent->getId());
+		node = innerModel->getNode<InnerModelDifferentialRobot>(id);
+		parent = innerModel->getNode<InnerModelTransform>(node->parent->getId());
 	}
 	catch (QString err)
 	{
 		node = NULL;
-		nodeOmni = innerModel->getOmniRobot(id);
-		parent = innerModel->getTransform(nodeOmni->parent->getId());
+		nodeOmni = innerModel->getNode<InnerModelOmniRobot>(id);
+		parent = innerModel->getNode<InnerModelTransform>(nodeOmni->parent->getId());
 	}
 	differentialIDs << id;
 	newAngle = innerModel->getRotationMatrixTo(parent->getId(), id).extractAnglesR()(1);
 	noisyNewAngle = innerModel->getRotationMatrixTo(parent->getId(), id).extractAnglesR()(1);
-	realNode = innerModel->newTransform(id+"_odometry\"", "static", parent, 0, 0, 0, 0, newAngle, 0);
+	realNode = innerModel->newNode<InnerModelTransform>(id+"_odometry\"", "static", 0, 0, 0, 0, newAngle, 0, 0, std::dynamic_pointer_cast<InnerModelTransform>(parent));
 }
 
 
@@ -246,25 +246,25 @@ bool DifferentialRobotI::canMoveBaseTo(const QString nodeId, const QVec position
 	return true;
 }
 
-void DifferentialRobotI::recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out)
+void DifferentialRobotI::recursiveIncludeMeshes(InnerModelNode::NodePtr node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out)
 {
 	if (node->getId() == robotId)
 	{
 		inside = true;
 	}
 
-	InnerModelMesh *mesh;
-	InnerModelPlane *plane;
-	InnerModelTransform *transformation;
+	InnerModel::MeshPtr mesh;
+	InnerModel::PlanePtr plane;
+	InnerModel::TransformPtr transformation;
 
-	if ((transformation = dynamic_cast<InnerModelTransform *>(node)))
+	if ((transformation = std::dynamic_pointer_cast<InnerModelTransform>(node)))
 	{
 		for (int i=0; i<node->children->size(); i++)
 		{
 			recursiveIncludeMeshes(node->children->value(i), robotId, inside, in, out);
 		}
 	}
-	else if ((mesh = dynamic_cast<InnerModelMesh *>(node)) or (plane = dynamic_cast<InnerModelPlane *>(node)))
+	else if ((mesh = std::dynamic_pointer_cast<InnerModelMesh>(node)) or (plane = std::dynamic_pointer_cast<InnerModelPlane>(node)))
 	{
 		if (node->getCollidable())
 		{

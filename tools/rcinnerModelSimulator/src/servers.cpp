@@ -22,34 +22,34 @@ JointMotorServer::JointMotorServer(Ice::CommunicatorPtr communicator, SpecificWo
 }
 
 
-void JointMotorServer::add(InnerModelJoint *joint)
+void JointMotorServer::add(InnerModel::JointPtr joint)
 {
 	joints.push_back(joint);
 	interface->add(joint->getId());
 	joint->setAngle(joint->getHome());
 }
 
-void JointMotorServer::add(InnerModelPrismaticJoint *joint)
+void JointMotorServer::add(InnerModel::PrismaticJointPtr joint)
 {
-	joints.push_back(joint);
+	prismaticjoints.push_back(joint);
 	interface->add(joint->getId());
 }
 
-void JointMotorServer::remove(InnerModelJoint *joint)
+void JointMotorServer::remove(InnerModel::JointPtr joint)
 {
 	interface->remove(joint->getId());
 	joints.erase(std::remove(joints.begin(), joints.end(), joint), joints.end());
 }
 
-void JointMotorServer::remove(InnerModelPrismaticJoint *joint)
+void JointMotorServer::remove(InnerModel::PrismaticJointPtr joint)
 {
 	interface->remove(joint->getId());
-	joints.erase(std::remove(joints.begin(), joints.end(), joint), joints.end());
+	prismaticjoints.erase(std::remove(prismaticjoints.begin(), prismaticjoints.end(), prismaticjoints), prismaticjoints.end());
 }
 
 bool JointMotorServer::empty()
 {
-	if (joints.size()==0)
+	if (joints.size()==0 and prismaticjoints.size()==0)
 		return true;
 	return false;
 }
@@ -83,12 +83,12 @@ TouchSensorServer::TouchSensorServer(Ice::CommunicatorPtr communicator, Specific
 	adapter->add(interface, communicator->stringToIdentity("touchsensor"));
 	adapter->activate();
 }
-void TouchSensorServer::add(InnerModelTouchSensor *sensor)
+void TouchSensorServer::add(InnerModel::TouchSensorPtr sensor)
 {
 	sensors.push_back(sensor);
 	interface->add(sensor->getId());
 }
-void TouchSensorServer::remove(InnerModelTouchSensor *sensor)
+void TouchSensorServer::remove(InnerModel::TouchSensorPtr sensor)
 {
 	interface->remove(sensor->getId());
 	sensors.erase(std::remove(sensors.begin(), sensors.end(), sensor), sensors.end());
@@ -111,8 +111,6 @@ void TouchSensorServer::shutdown()
 	adapter->destroy();
 }
 
-
-
 LaserServer::LaserServer(Ice::CommunicatorPtr communicator, SpecificWorker *worker, uint32_t _port)
 {
 	port = _port;
@@ -128,7 +126,7 @@ LaserServer::LaserServer(Ice::CommunicatorPtr communicator, SpecificWorker *work
 }
 
 
-void LaserServer::add(InnerModelLaser *laser)
+void LaserServer::add(InnerModel::LaserPtr laser)
 {
 	lasers.push_back(laser);
 	interface->add(laser->getId());
@@ -149,7 +147,7 @@ RGBDServer::RGBDServer(Ice::CommunicatorPtr communicator, SpecificWorker *worker
 	adapter->activate();
 }
 
-void RGBDServer::add(InnerModelRGBD *rgbd)
+void RGBDServer::add(InnerModel::RGBDPtr rgbd)
 {
 	rgbds.push_back(rgbd);
 	interface->add(rgbd->getId());
@@ -170,7 +168,7 @@ IMUServer::IMUServer(Ice::CommunicatorPtr communicator, SpecificWorker *worker, 
 }
 
 
-void IMUServer::add(InnerModelIMU *imu)
+void IMUServer::add(InnerModel::IMUPtr imu)
 {
 	imus.push_back(imu);
 	interface->add(imu->getId());
@@ -191,7 +189,7 @@ DifferentialRobotServer::DifferentialRobotServer(Ice::CommunicatorPtr communicat
 	adapter->activate();
 }
 
-void DifferentialRobotServer::add(InnerModelDifferentialRobot *differentialrobot)
+void DifferentialRobotServer::add(InnerModel::DifferentialRobotPtr differentialrobot)
 {
 	differentialrobots.push_back(differentialrobot);
 	interface->add(differentialrobot->getId());
@@ -223,7 +221,7 @@ OmniRobotServer::OmniRobotServer(Ice::CommunicatorPtr communicator, SpecificWork
 	adapter->activate();
 }
 
-void OmniRobotServer::add(InnerModelOmniRobot *omnirobot)
+void OmniRobotServer::add(InnerModel::OmniRobotPtr omnirobot)
 {
 	omnirobots.push_back(omnirobot);
 	interface->add(omnirobot->getId());

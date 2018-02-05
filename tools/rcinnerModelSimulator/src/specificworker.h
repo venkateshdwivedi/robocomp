@@ -99,14 +99,14 @@ private:
 		// ------------------------------------------------------------------------------------------------
 		RoboCompLaser::TLaserData LASER_createLaserData(const IMVLaser &laser);
 		//RoboCompTouchSensor::SensorMap TOUCH_createTouchData(const IMVLaser &laser);
-		InnerModelNode *getNode(const QString &id, const QString &msg);
-		void checkOperationInvalidNode(InnerModelNode *node,QString msg);
+		InnerModel::NodePtr getNode(const QString &id, const QString &msg);
+		void checkOperationInvalidNode(InnerModel::NodePtr node,QString msg);
 		void checkNodeAlreadyExists(const QString &id, const QString &msg);
 		void checkInvalidMeshValues(RoboCompInnerModelManager::meshType m, QString msg);
-		void AttributeAlreadyExists(InnerModelNode *node, QString attributeName, QString msg);
-		void NonExistingAttribute(InnerModelNode *node, QString attributeName, QString msg);
-		void getRecursiveNodeInformation(RoboCompInnerModelManager::NodeInformationSequence& nodesInfo, InnerModelNode *node);
-		RoboCompInnerModelManager::NodeType getNodeType(InnerModelNode *node);
+		void AttributeAlreadyExists(InnerModel::NodePtr node, QString attributeName, QString msg);
+		void NonExistingAttribute(InnerModel::NodePtr node, QString attributeName, QString msg);
+		void getRecursiveNodeInformation(RoboCompInnerModelManager::NodeInformationSequence& nodesInfo, InnerModel::NodePtr node);
+		RoboCompInnerModelManager::NodeType getNodeType(InnerModel::NodePtr node);
 		void cambiaColor(QString id, osg::Vec4 color);
 		void devuelveColor(QString id);
 		void changeLigthState(bool apagar);
@@ -116,18 +116,18 @@ private:
 		void updateCameras();
 		void updateLasers();
 		
-		void addDFR(InnerModelDifferentialRobot *node);
-		void addOMN(InnerModelOmniRobot *node);
-		void addIMU(InnerModelIMU *node);
-		void addJM(InnerModelJoint *node);
-		void addJM(InnerModelPrismaticJoint *node);
-		void addTouch(InnerModelTouchSensor *node);
-		void addLaser(InnerModelLaser *node);
-		void addRGBD(InnerModelRGBD *node);
-		void removeJM(InnerModelJoint *node);
+		void addDFR(InnerModel::DifferentialRobotPtr node);
+		void addOMN(InnerModel::OmniRobotPtr node);
+		void addIMU(InnerModel::IMUPtr node);
+		void addJM(InnerModel::JointPtr node);
+		void addJM(InnerModel::PrismaticJointPtr node);
+		void addTouch(InnerModel::TouchSensorPtr node);
+		void addLaser(InnerModel::LaserPtr node);
+		void addRGBD(InnerModel::RGBDPtr node);
+		void removeJM(InnerModel::JointPtr node);
 		void includeLasers();
 		void includeRGBDs();
-		void walkTree(InnerModelNode *node = NULL);
+		void walkTree(InnerModel::NodePtr node = nullptr);
 	
 	public slots:
 		// ----------------------------------------------------------------------------------------

@@ -252,10 +252,10 @@ void SpecificWorker::updateJoints(const float delta)
 	QHash<QString, JointMovement>::const_iterator iter;
 	for (iter = jointMovements.constBegin() ; iter != jointMovements.constEnd() ; ++iter)
 	{
-		InnerModelNode *node = innerModel->getNode(iter.key());
-		InnerModelJoint *ajoint;
-		InnerModelPrismaticJoint *pjoint;
-		if ((ajoint = dynamic_cast<InnerModelJoint*>(node)) != nullptr)
+		InnerModel::NodePtr node = innerModel->getNode<InnerModelNode>(iter.key());
+		InnerModel::JointPtr ajoint;
+		InnerModel::PrismaticJointPtr pjoint;
+		if ((ajoint = std::dynamic_pointer_cast<InnerModelJoint>(node)) != nullptr)
 		{
 			const float angle = ajoint->getAngle();
 			const float amount = fminf(fabsf(iter->endPos - angle), iter->endSpeed  *delta);
@@ -277,7 +277,7 @@ void SpecificWorker::updateJoints(const float delta)
 				break;
 			}
 		}
-		else if ((pjoint = dynamic_cast<InnerModelPrismaticJoint*>(node)) != nullptr)
+		else if ((pjoint = std::dynamic_pointer_cast<InnerModelPrismaticJoint>(node)) != nullptr)
 		{
 			pjoint->setPosition(iter->endPos);
 		}
@@ -290,21 +290,10 @@ void SpecificWorker::updateTouchSensors()
 	std::map<uint32_t, TouchSensorServer>::iterator touchIt;
 	for (touchIt=touch_servers.begin(); touchIt!= touch_servers.end(); touchIt++)
 	{
-		for (uint32_t sss=0; sss<touchIt->second.sensors.size(); sss++)
+		for (uint32_t sss=0; sss < touchIt->second.sensors.size(); sss++)
 		{
-			// 	TouchSensorI *interface;
-			// touchIt->interface->sensorMap[touchIt->sensors[sss].id].value = XXX
-			InnerModelTouchSensor *sensorr = touchIt->second.sensors[sss];
+			InnerModel::TouchSensorPtr sensorr = touchIt->second.sensors[sss];
 			std::string idd = sensorr->getId().toStdString();
-// 				printf("%d: %s (%f)\n",
-//
-// 					touchIt->second.port,
-//
-// 					idd.c_str(),
-//
-// 					touchIt->second.interface->sensorMap[idd].value
-//
-// 				);
 		}
 	}
 }
@@ -320,7 +309,7 @@ void SpecificWorker::startServers()
 	includeRGBDs();
 }
 
-void SpecificWorker::addDFR(InnerModelDifferentialRobot *node)
+void SpecificWorker::addDFR(InnerModel::DifferentialRobotPtr node)
 {
 	const uint32_t port = node->getPort();
 	if (dfr_servers.count(port) == 0)
@@ -331,7 +320,7 @@ void SpecificWorker::addDFR(InnerModelDifferentialRobot *node)
 }
 
 
-void SpecificWorker::addOMN(InnerModelOmniRobot *node)
+void SpecificWorker::addOMN(InnerModel::OmniRobotPtr node)
 {
 	const uint32_t port = node->getPort();
 	if (omn_servers.count(port) == 0)
@@ -342,7 +331,7 @@ void SpecificWorker::addOMN(InnerModelOmniRobot *node)
 }
 
 
-void SpecificWorker::addIMU(InnerModelIMU *node)
+void SpecificWorker::addIMU(InnerModel::IMUPtr node)
 {
 	const uint32_t port = node->getPort();
 	if (imu_servers.count(port) == 0)
@@ -353,7 +342,7 @@ void SpecificWorker::addIMU(InnerModelIMU *node)
 }
 
 
-void SpecificWorker::addJM(InnerModelJoint *node)
+void SpecificWorker::addJM(InnerModel::JointPtr node)
 {
 	const uint32_t port = node->getPort();
 	if (jm_servers.count(port) == 0)
@@ -363,7 +352,7 @@ void SpecificWorker::addJM(InnerModelJoint *node)
 	jm_servers.at(port).add(node);
 }
 
-void SpecificWorker::addJM(InnerModelPrismaticJoint *node)
+void SpecificWorker::addJM(InnerModel::PrismaticJointPtr node)
 {
 	const uint32_t port = node->getPort();
 	if (jm_servers.count(port) == 0)
@@ -373,7 +362,7 @@ void SpecificWorker::addJM(InnerModelPrismaticJoint *node)
 	jm_servers.at(port).add(node);
 }
 
-void SpecificWorker::addTouch(InnerModelTouchSensor *node)
+void SpecificWorker::addTouch(InnerModel::TouchSensorPtr node)
 {
 	const uint32_t port = node->getPort();
 	if (touch_servers.count(port) == 0)
@@ -384,7 +373,7 @@ void SpecificWorker::addTouch(InnerModelTouchSensor *node)
 }
 
 
-void SpecificWorker::addLaser(InnerModelLaser *node)
+void SpecificWorker::addLaser(InnerModel::LaserPtr node)
 {
 	const uint32_t port = node->getPort();
 	if (laser_servers.count(port) == 0)
@@ -395,7 +384,7 @@ void SpecificWorker::addLaser(InnerModelLaser *node)
 }
 
 
-void SpecificWorker::addRGBD(InnerModelRGBD *node)
+void SpecificWorker::addRGBD(InnerModel::RGBDPtr node)
 {
 	const uint32_t port = node->getPort();
 	if (rgbd_servers.count(port) == 0)
@@ -405,7 +394,7 @@ void SpecificWorker::addRGBD(InnerModelRGBD *node)
 	rgbd_servers.at(port).add(node);
 }
 
-void SpecificWorker::removeJM(InnerModelJoint *node)
+void SpecificWorker::removeJM(InnerModel::JointPtr node)
 {
 	std::map<uint32_t, JointMotorServer>::iterator it;
 	for (it = jm_servers.begin(); it != jm_servers.end(); ++it)
@@ -440,7 +429,7 @@ void SpecificWorker::includeRGBDs()
 	}
 }
 
-void SpecificWorker::walkTree(InnerModelNode *node)
+void SpecificWorker::walkTree(InnerModel::NodePtr node)
 {
 	if (node == nullptr)
 	{
@@ -452,45 +441,45 @@ void SpecificWorker::walkTree(InnerModelNode *node)
 		//std::cout << "nrml: " << (void *)node << "  " << (uint64_t)node << std::endl;
 	}
 
-	QList<InnerModelNode*>::iterator it;
+	QList<InnerModel::NodePtr>::iterator it;
 	for (it=node->children->begin(); it!=node->children->end(); ++it)
 	{
 		//std::cout << "  --> " << (void *)*it << "  " << (uint64_t)*it << std::endl;
-		InnerModelDifferentialRobot *differentialNode = dynamic_cast<InnerModelDifferentialRobot *>(*it);
+		InnerModel::DifferentialRobotPtr differentialNode = std::dynamic_pointer_cast<InnerModelDifferentialRobot>(*it);
 		if (differentialNode != nullptr)
 		{
 			//qDebug() << "DifferentialRobot " << differentialNode->getId() << differentialNode->port;
 			addDFR(differentialNode);
 		}
 
-		InnerModelOmniRobot *omniNode = dynamic_cast<InnerModelOmniRobot *>(*it);
+		InnerModel::OmniRobotPtr omniNode = std::dynamic_pointer_cast<InnerModelOmniRobot>(*it);
 		if (omniNode != nullptr)
 		{
 			//qDebug() << "OmniRobot " << omniNode->getId() << omniNode->port;
 			addOMN(omniNode);
 		}
 
-		InnerModelIMU *imuNode = dynamic_cast<InnerModelIMU *>(*it);
+		InnerModel::IMUPtr imuNode = std::dynamic_pointer_cast<InnerModelIMU>(*it);
 		if (imuNode != nullptr)
 		{
 			//qDebug() << "IMU " << imuNode->getId() << imuNode->port;
 			addIMU(imuNode);
 		}
 
-		InnerModelJoint *jointNode = dynamic_cast<InnerModelJoint *>(*it);
+		InnerModel::JointPtr jointNode = std::dynamic_pointer_cast<InnerModelJoint>(*it);
 		if (jointNode != nullptr)
 		{
 			//qDebug() << "Joint " << (*it)->getId();
 			addJM(jointNode);
 		}
-		InnerModelPrismaticJoint *pjointNode = dynamic_cast<InnerModelPrismaticJoint *>(*it);
+		InnerModel::PrismaticJointPtr pjointNode = std::dynamic_pointer_cast<InnerModelPrismaticJoint>(*it);
 		if (pjointNode != nullptr)
 		{
 			//qDebug() << "Joint " << (*it)->getId();
 			addJM(pjointNode);
 		}
 
-		InnerModelTouchSensor *touchNode = dynamic_cast<InnerModelTouchSensor *>(*it);
+		InnerModel::TouchSensorPtr touchNode = std::dynamic_pointer_cast<InnerModelTouchSensor>(*it);
 		if (touchNode != nullptr)
 		{
 			qDebug() << "Touch " << (*it)->getId() << "CALLING addTouch";
@@ -613,10 +602,10 @@ RoboCompTouchSensor::SensorMap TOUCH_createTouchData(const IMVLaser &laser)
 
 */
 ///--- useful functions.
-InnerModelNode* SpecificWorker::getNode(const QString &id, const QString &msg)
+InnerModel::NodePtr SpecificWorker::getNode(const QString &id, const QString &msg)
 {
 	InnerModelMgr::guard gl(innerModel.mutex());
-	InnerModelNode *node = innerModel->getNode(id);
+	InnerModel::NodePtr node = innerModel->getNode<InnerModelNode>(id);
 	if (node==nullptr)
 	{
 		RoboCompInnerModelManager::InnerModelManagerError err;
@@ -632,7 +621,7 @@ InnerModelNode* SpecificWorker::getNode(const QString &id, const QString &msg)
 	}
 }
 
-void SpecificWorker::checkOperationInvalidNode(InnerModelNode *node,QString msg)
+void SpecificWorker::checkOperationInvalidNode(InnerModel::NodePtr node,QString msg)
 {
 	if (node==nullptr)
 	{
@@ -696,7 +685,7 @@ void SpecificWorker::checkInvalidMeshValues(RoboCompInnerModelManager::meshType 
 	}
 }
 
-void SpecificWorker::AttributeAlreadyExists(InnerModelNode *node, QString attributeName, QString msg)
+void SpecificWorker::AttributeAlreadyExists(InnerModel::NodePtr node, QString attributeName, QString msg)
 {
 	if (node->getAttributes().contains(attributeName))
 	{
@@ -712,7 +701,7 @@ void SpecificWorker::AttributeAlreadyExists(InnerModelNode *node, QString attrib
 	}
 }
 
-void SpecificWorker::NonExistingAttribute(InnerModelNode *node, QString attributeName, QString msg)
+void SpecificWorker::NonExistingAttribute(InnerModel::NodePtr node, QString attributeName, QString msg)
 {
 	if (node->getAttributes().contains(attributeName) ==false)
 	{
@@ -728,7 +717,7 @@ void SpecificWorker::NonExistingAttribute(InnerModelNode *node, QString attribut
 	}
 }
 
-void SpecificWorker::getRecursiveNodeInformation(RoboCompInnerModelManager::NodeInformationSequence& nodesInfo, InnerModelNode *node)
+void SpecificWorker::getRecursiveNodeInformation(RoboCompInnerModelManager::NodeInformationSequence& nodesInfo, InnerModel::NodePtr node)
 {
 	/// Add current node information
 	RoboCompInnerModelManager::NodeInformation ni;
@@ -751,60 +740,60 @@ void SpecificWorker::getRecursiveNodeInformation(RoboCompInnerModelManager::Node
 	nodesInfo.push_back(ni);
 
 	/// Recursive call for all children
-	QList<InnerModelNode *>::iterator child;
+	QList<InnerModel::NodePtr >::iterator child;
 	for (child = node->children->begin(); child != node->children->end(); child++)
 	{
 		getRecursiveNodeInformation(nodesInfo, *child);
 	}
 }
 
-RoboCompInnerModelManager::NodeType SpecificWorker::getNodeType(InnerModelNode *node)
+RoboCompInnerModelManager::NodeType SpecificWorker::getNodeType(InnerModel::NodePtr node)
 {
-	if (dynamic_cast<InnerModelJoint*>(node) != nullptr)
+	if (std::dynamic_pointer_cast<InnerModelJoint>(node) != nullptr)
 	{
 		return RoboCompInnerModelManager::Joint;
 	}
-	else if (dynamic_cast<InnerModelTouchSensor*>(node) != nullptr)
+	else if (std::dynamic_pointer_cast<InnerModelTouchSensor>(node) != nullptr)
 	{
 		return RoboCompInnerModelManager::TouchSensor;
 	}
-	else if (dynamic_cast<InnerModelDifferentialRobot*>(node) != nullptr)
+	else if (std::dynamic_pointer_cast<InnerModelDifferentialRobot>(node) != nullptr)
 	{
 		return RoboCompInnerModelManager::DifferentialRobot;
 	}
-	else if (dynamic_cast<InnerModelOmniRobot*>(node) != nullptr)
+	else if (std::dynamic_pointer_cast<InnerModelOmniRobot>(node) != nullptr)
 	{
 		return RoboCompInnerModelManager::OmniRobot;
 	}
-	else if (dynamic_cast<InnerModelPlane*>(node) != nullptr)
+	else if (std::dynamic_pointer_cast<InnerModelPlane>(node) != nullptr)
 	{
 		return RoboCompInnerModelManager::Plane;
 	}
-	else if (dynamic_cast<InnerModelRGBD*>(node) != nullptr)
+	else if (std::dynamic_pointer_cast<InnerModelRGBD>(node) != nullptr)
 	{
 		return RoboCompInnerModelManager::RGBD;
 	}
-	else if (dynamic_cast<InnerModelCamera*>(node) != nullptr)
+	else if (std::dynamic_pointer_cast<InnerModelCamera>(node) != nullptr)
 	{
 		return RoboCompInnerModelManager::Camera;
 	}
-	else if (dynamic_cast<InnerModelIMU*>(node) != nullptr)
+	else if (std::dynamic_pointer_cast<InnerModelIMU>(node) != nullptr)
 	{
 		return RoboCompInnerModelManager::IMU;
 	}
-	else if (dynamic_cast<InnerModelLaser*>(node) != nullptr)
+	else if (std::dynamic_pointer_cast<InnerModelLaser>(node) != nullptr)
 	{
 		return RoboCompInnerModelManager::Laser;
 	}
-	else if (dynamic_cast<InnerModelMesh*>(node) != nullptr)
+	else if (std::dynamic_pointer_cast<InnerModelMesh>(node) != nullptr)
 	{
 		return RoboCompInnerModelManager::Mesh;
 	}
-	else if (dynamic_cast<InnerModelPointCloud*>(node) != nullptr)
+	else if (std::dynamic_pointer_cast<InnerModelPointCloud>(node) != nullptr)
 	{
 		return RoboCompInnerModelManager::PointCloud;
 	}
-	else if (dynamic_cast<InnerModelTransform*>(node) != nullptr)
+	else if (std::dynamic_pointer_cast<InnerModelTransform>(node) != nullptr)
 	{
 		return RoboCompInnerModelManager::Transform;
 	}

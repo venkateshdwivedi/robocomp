@@ -38,7 +38,7 @@ LaserI::~LaserI()
 void LaserI::add ( QString _id )
 {
 	id = _id;
-	laserNode = innerModel->getLaser ( id );
+	laserNode = innerModel->getNode<InnerModelLaser>(id);
 	laserConf.staticConf   =  1;
 	laserConf.maxMeasures  =  laserNode->getMeasures();
 	laserConf.maxDegrees   = ( int ) ( 180.f*laserNode->getAngle() / M_PI );

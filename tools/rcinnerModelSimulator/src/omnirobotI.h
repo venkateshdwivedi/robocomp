@@ -55,42 +55,23 @@ public:
 	void setOdometer(const RoboCompGenericBase::TBaseState& state, const Ice::Current& = Ice::Current());
 	void setOdometerPose(Ice::Int x, Ice::Int z, Ice::Float alpha, const Ice::Current& = Ice::Current());
 	void correctOdometer(Ice::Int x, Ice::Int z, Ice::Float alpha, const Ice::Current& = Ice::Current());
-/*	
-	template<typename T> void stateFromVector(T &state, QVec vec)
-	{
-		state.x = vec(0);
-		state.z = vec(2);
-		state.alpha = vec(4);
-	}
-*/
+
 private:
 	SpecificWorker *worker;
 	InnerModelMgr innerModel;
 	QStringList omniIDs;
 	
-// 	RMat::RTMat zeroTR;
-// 	float zeroANG;
-	
-// 	// Real Noisy Pose
-// 	RoboCompGenericBase::TBaseState pose;
-// 	// Odometry pose
-// 	RoboCompGenericBase::TBaseState noisyPose;
-	// Real Angle
-// 	double newAngle;
-	//Noisy Angle
-// 	double noisyNewAngle;
-
 	timeval lastCommand_timeval;
 	float advVelx, advVelz, rotVel;
 
-	InnerModelTransform *parent;
-	InnerModelOmniRobot *node;
-	InnerModelTransform *rawOdometryNode, *rawOdometryParentNode;
-	InnerModelTransform *correctedOdometryNode, *correctedOdometryParentNode;
-	InnerModelTransform *movementFutureNode;
+	InnerModel::TransformPtr parent;
+	InnerModel::OmniRobotPtr node;
+	InnerModel::TransformPtr rawOdometryNode, rawOdometryParentNode;
+	InnerModel::TransformPtr correctedOdometryNode, correctedOdometryParentNode;
+	InnerModel::TransformPtr movementFutureNode;
 	
 	bool canMoveBaseTo(const QString nodeId);
-	void recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out);
+	void recursiveIncludeMeshes(InnerModel::NodePtr node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out);
 
 };
 

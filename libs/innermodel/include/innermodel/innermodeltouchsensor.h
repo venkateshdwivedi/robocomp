@@ -27,7 +27,6 @@ class InnerModelTouchSensor :public InnerModelNode
 		void print(bool verbose) {}
 		void save(QTextStream &out, int tabs) {}
 		QVec getMeasure() { return value; }
-		//void update() {}
 		virtual NodePtr copyNode(THash hash, NodePtr parent);
 		uint32_t getPort() const			{ Lock lock(mutex); return port;}
 		float getNx()						{ Lock lock(mutex); return nx;}

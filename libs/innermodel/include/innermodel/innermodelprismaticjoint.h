@@ -24,8 +24,6 @@ class InnerModelPrismaticJoint : public InnerModelTransform
 {
 	public:
 		using PrismaticJointPtr = std::shared_ptr<InnerModelPrismaticJoint>;
-		//friend class InnerModel;
-		//friend class InnerModelReader;		
 		InnerModelPrismaticJoint(QString id_, float min_, float max_, float val_, float offset_, uint32_t port_=0, std::string axis_="z", float home_=0, TransformPtr parent_= nullptr);
 		void print(bool verbose);
 		void save(QTextStream &out, int tabs);

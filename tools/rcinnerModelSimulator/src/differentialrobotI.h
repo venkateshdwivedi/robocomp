@@ -81,14 +81,14 @@ private:
 	timeval lastCommand_timeval;
 	float advVel, rotVel;
 
-	InnerModelTransform *parent;
-	InnerModelDifferentialRobot *node;
-	InnerModelOmniRobot *nodeOmni;
+	InnerModel::TransformPtr parent;
+	InnerModel::DifferentialRobotPtr node;
+	InnerModel::OmniRobotPtr nodeOmni;
 	OmniRobotI *omniI;
-	InnerModelTransform *realNode;
+	InnerModel::TransformPtr realNode;
 
 	bool canMoveBaseTo(const QString nodeId, const QVec position, const double alpha);
-	void recursiveIncludeMeshes(InnerModelNode *node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out);
+	void recursiveIncludeMeshes(InnerModel::NodePtr node, QString robotId, bool inside, std::vector<QString> &in, std::vector<QString> &out);
 
 };
 
