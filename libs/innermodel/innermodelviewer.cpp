@@ -32,7 +32,7 @@ InnerModelViewer::InnerModelViewer(const InnerModelMgr &im, QString root,  osg::
 		throw "InnerModelViewer::InnerModelViewer(): Error, InnerModel is nullptr";
 	
 	// Get main node
-	InnerModelNode *imnode = innerModel->getNode(root);
+	InnerModel::NodePtr imnode = innerModel->getNode<InnerModelNode>(root);
 	if (not imnode)
 	{
 		qDebug() << "InnerModelViewer::InnerModelViewer(): Error: Specified root node" << root << "not found.";
@@ -58,7 +58,7 @@ InnerModelViewer::InnerModelViewer(InnerModel *im, QString root,  osg::Group *pa
 		throw "InnerModelViewer::InnerModelViewer(): Error, InnerModel is nullptr";
 	
 	// Get main node
-	InnerModelNode *imnode = innerModel->getNode(root);
+	InnerModel::TransformPtr imnode = innerModel->getNode<InnerModelTransform>(root);
 	if (not imnode)
 	{
 		qDebug() << "InnerModelViewer::InnerModelViewer(): Error: Specified root node" << root << "not found.";
@@ -75,20 +75,11 @@ InnerModelViewer::InnerModelViewer(InnerModel *im, QString root,  osg::Group *pa
 
 
 //CAUTION
-void InnerModelViewer::recursiveConstructor(InnerModelNode *node, osg::Group* parent,QHash<QString, osg::MatrixTransform *> &mtsHash, QHash<QString, IMVMesh> &meshHash, bool ignoreCameras)
+void InnerModelViewer::recursiveConstructor(InnerModel::NodePtr node, osg::Group* parent,QHash<QString, osg::MatrixTransform *> &mtsHash, QHash<QString, IMVMesh> &meshHash, bool ignoreCameras)
 {
-	InnerModelTouchSensor *touch;
-	InnerModelMesh *mesh;
-	InnerModelPointCloud *pointcloud;
-	InnerModelPlane *plane;
-	InnerModelCamera *camera;
-	InnerModelRGBD *rgbd;
-	InnerModelIMU *imu;
-	InnerModelLaser *laser;
-	InnerModelTransform *transformation;
-
+	
 	// Find out which kind of node are we dealing with
-	if ((transformation = dynamic_cast<InnerModelTransform *>(node)))
+	if (InnerModel::TransformPtr transformation = std::dynamic_pointer_cast<InnerModelTransform>(node) )
 	{
 		// Create and include MT
 		osg::ref_ptr<osg::MatrixTransform> mt = new osg::MatrixTransform;
@@ -104,7 +95,7 @@ void InnerModelViewer::recursiveConstructor(InnerModelNode *node, osg::Group* pa
 			recursiveConstructor(node->children->value(i), mt, mtsHash, meshHash, ignoreCameras);
 		}
 	}
-	else if ((rgbd = dynamic_cast<InnerModelRGBD *>(node)))
+	else if (InnerModel::RGBDPtr rgbd = std::dynamic_pointer_cast<InnerModelRGBD>(node))
 	{
 		if ((not ignoreCameras) and rgbd->getPort())
 		{
@@ -112,7 +103,7 @@ void InnerModelViewer::recursiveConstructor(InnerModelNode *node, osg::Group* pa
 			// Camera ID
 			cam.id = node->getId();
 			// XML node for the camera
-			cam.RGBDNode = rgbd;
+			cam.RGBDNode = rgbd.get();			///OJO ÑAPA
 			
 			// Viewer
 			cam.viewerCamera = new osgViewer::Viewer();
@@ -147,42 +138,42 @@ void InnerModelViewer::recursiveConstructor(InnerModelNode *node, osg::Group* pa
 			cameras[cam.id] = cam;
 		}
 	}
-	else if ((camera = dynamic_cast<InnerModelCamera *>(node)))
+	else if (InnerModel::CameraPtr camera = std::dynamic_pointer_cast<InnerModelCamera >(node))
 	{
 		if (not ignoreCameras)
 		{
 		}
 	}
-	else if ((imu = dynamic_cast<InnerModelIMU *>(node)))
+	else if ( InnerModel::IMUPtr imu = std::dynamic_pointer_cast<InnerModelIMU>(node))
 	{
 	}
-	else if ((laser = dynamic_cast<InnerModelLaser *>(node)))
+	else if (InnerModel::LaserPtr laser = std::dynamic_pointer_cast<InnerModelLaser>(node))
 	{
 		IMVLaser iml;
 		iml.id = node->getId();
 		iml.osgNode = new osg::Switch();
-		iml.laserNode = laser;
+		iml.laserNode = laser.get();
 		parent->addChild(iml.osgNode);
 		lasers[iml.id] = iml;
 	}
-	else if ((plane = dynamic_cast<InnerModelPlane *>(node)))
+	else if (InnerModel::PlanePtr plane = std::dynamic_pointer_cast<InnerModelPlane>(node))
 	{
 		// Create plane's specific mt
 		osg::ref_ptr<osg::MatrixTransform> mt = new osg::MatrixTransform;
 		planeMts[plane->getId()] = mt;
-		IMVPlane *imvplane = new IMVPlane(plane, plane->getTexture().toStdString(), osg::Vec4(0.8,0.5,0.5,0.5), 0); 
+		IMVPlane *imvplane = new IMVPlane(plane.get(), plane->getTexture().toStdString(), osg::Vec4(0.8,0.5,0.5,0.5), 0); 
 		planesHash[node->getId()] = imvplane;
-		setOSGMatrixTransformForPlane(mt, plane);
+		setOSGMatrixTransformForPlane(mt, plane.get());
 		if (parent) parent->addChild(mt);
 		mt->addChild(imvplane);
 	}
-	else if ((pointcloud = dynamic_cast<InnerModelPointCloud *>(node)))
+	else if (InnerModel::PointCloudPtr pointcloud = std::dynamic_pointer_cast<InnerModelPointCloud>(node))
 	{
 		IMVPointCloud *imvpc = new IMVPointCloud(node->getId().toStdString());
 		pointCloudsHash[node->getId()] = imvpc;
 		parent->addChild(imvpc);
 	}
-	else if ((mesh = dynamic_cast<InnerModelMesh *>(node)))
+	else if (InnerModel::MeshPtr mesh = std::dynamic_pointer_cast<InnerModelMesh>(node))
 	{
 		// Create mesh's specific mt
 		osg::ref_ptr<osg::MatrixTransform> mt = new osg::MatrixTransform;
@@ -218,7 +209,7 @@ void InnerModelViewer::recursiveConstructor(InnerModelNode *node, osg::Group* pa
 		osgmeshmodes[mesh->getId()] = polygonMode;
 		smt->addChild(osgMesh);
 	}
-	else if ((touch = dynamic_cast<InnerModelTouchSensor *>(node)))
+	else if (InnerModel::TouchSensorPtr touch = std::dynamic_pointer_cast<InnerModelTouchSensor>(node))
 	{
 	}
 	else
@@ -236,7 +227,7 @@ void InnerModelViewer::update()
 {	
 		foreach(QString key, mts.keys())
 		{
-			InnerModelNode *node = innerModel->getNode(key);
+			InnerModel::NodePtr node = innerModel->getNode<InnerModelNode>(key);
 			if (node->parent)
 			{
 				mts[key]->setMatrix(QMatToOSGMat4(*node));
@@ -245,8 +236,8 @@ void InnerModelViewer::update()
 		foreach(QString key, planeMts.keys())
 		{
 			osg::MatrixTransform *mt = planeMts[key];
-			InnerModelPlane *plane = (InnerModelPlane *)innerModel->getNode(key);
-			setOSGMatrixTransformForPlane(mt, plane);
+			InnerModel::PlanePtr plane = innerModel->getNode<InnerModelPlane>(key);
+			setOSGMatrixTransformForPlane(mt, plane.get());
 			IMVPlane *imvplane = planesHash[key];
 			if (imvplane)
 			{
@@ -259,7 +250,7 @@ void InnerModelViewer::update()
 		foreach(QString key, meshHash.keys()) 
 		{
 			osg::MatrixTransform *mt = meshHash[key].meshMts;// meshMts[key];
-			InnerModelMesh *mesh = (InnerModelMesh *)innerModel->getNode(key);
+			InnerModel::MeshPtr mesh = innerModel->getNode<InnerModelMesh>(key);
 			RTMat rtmat = RTMat();
 			rtmat.setR (mesh->getRx(), mesh->getRy(), mesh->getRz());
 			rtmat.setTr(mesh->getTx(), mesh->getTy(), mesh->getTz());
@@ -294,7 +285,7 @@ void InnerModelViewer::setOSGMatrixTransformForPlane(osg::MatrixTransform *mt, I
 void InnerModelViewer::reloadMesh(QString id)
 {
 	// Create mesh
-	InnerModelMesh *mesh = (InnerModelMesh *)innerModel->getNode(id);
+	InnerModel::MeshPtr mesh = innerModel->getNode<InnerModelMesh>(id);
 	if (not mesh)
 	{
 		printf("Internal error\n");

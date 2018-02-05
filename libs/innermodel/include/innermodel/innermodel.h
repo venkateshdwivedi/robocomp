@@ -125,43 +125,26 @@ class InnerModel
 		////////////////////////////////
 		/// Factory constructors
 		///////////////////////////////
+// 		template<typename T, typename... Ts>
+//         std::shared_ptr<T> newNode(Ts&&... params)
+//          {
+// 			std::tuple<Ts...> p(params...);
+// 			std::shared_ptr<T> node(new T{std::forward<Ts>(params)...});
+// 			//auto res = hash->insert(std::make_pair<std::string, std::shared_ptr<Base>>(std::get<0>(p), std::static_pointer_cast<Base>(newObj)));
+// 			auto res = hash->insert(std::get<0>(p), std::static_pointer_cast<InnerModelNode>(node));
+// 			return node;
+// 		}
 
 		template<typename T, typename... Ts>
 		std::shared_ptr<T> newNode(Ts&&... params)
 		{
-			std::shared_ptr<InnerModelNode> node(nullptr);
-			if(std::is_same<T, InnerModelTransform>::value)
-			{	
-				node.reset(new InnerModelTransform(std::forward<Ts>(params)...)); 
-				if (hash->contains(node->getId()))
-					throw InnerModelException("InnerModel::newTransform: Error: Trying to insert a node with an already-existing key: " + node->getId().toStdString() + "\n");
-				hash->insert(node->getId(),node);
-			}
-			else if(std::is_same<T, InnerModelJoint>::value)
-			{ 	node.reset(new InnerModelJoint(std::forward<Ts>(params)...)); }
-			else if(std::is_same<T, InnerModelTouchSensor>::value)
-			{ 	node.reset(new InnerModelTouchSensor(std::forward<Ts>(params)...)); }
-			else if(std::is_same<T, InnerModelPrismaticJoint>::value)
-			{ 	node.reset(new InnerModelPrismaticJoint(std::forward<Ts>(params)...)); }
-			else if(std::is_same<T, InnerModelDifferentialRobot>::value)
-			{ 	node.reset(new InnerModelDifferentialRobot(std::forward<Ts>(params)...));} 
-			else if(std::is_same<T, InnerModelOmniRobot>::value)
-			{ 	node.reset(new InnerModelOmniRobot(std::forward<Ts>(params)...)); }
-			else if(std::is_same<T, InnerModelCamera>::value)
-			{ 	node.reset(new InnerModelCamera(std::forward<Ts>(params)...));} 
-			else if(std::is_same<T, InnerModelIMU>::value)
-			{ 	node.reset(new InnerModelIMU(std::forward<Ts>(params)...)); }
-			else if(std::is_same<T, InnerModelRGBD>::value)
-			{ 	node.reset(new InnerModelRGBD(std::forward<Ts>(params)...)); }
-			else if(std::is_same<T, InnerModelLaser>::value)
-			{ 	node.reset(new InnerModelLaser(std::forward<Ts>(params)...)); }
-			else if(std::is_same<T, InnerModelPlane>::value)
-			{ 	node.reset(new InnerModelPlane(std::forward<Ts>(params)...)); }
-			else if(std::is_same<T, InnerModelMesh>::value)
-			{ 	node.reset(new InnerModelMesh(std::forward<Ts>(params)...)); }
-			else if(std::is_same<T, InnerModelPointCloud>::value)
-			{ 	node.reset(new InnerModelPointCloud(std::forward<Ts>(params)...)); }
+			auto t = std::make_tuple(params...);
+			QString id = QString(std::get<0>(t));
+			if(hash->contains(id))
+				throw InnerModelException("InnerModel::newNode Error: Cannot insert new node with already existing name" + id.toStdString());
 			
+			std::shared_ptr<T> node(new T(std::forward<Ts>(params)...)); 
+			hash->insert(id, std::static_pointer_cast<InnerModelNode>(node));
 			return node;
 		}
 		

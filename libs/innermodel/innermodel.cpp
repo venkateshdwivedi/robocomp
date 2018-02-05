@@ -423,17 +423,17 @@ RTMat InnerModel::getTransformationMatrix(const QString &to, const QString &from
 		return r;
 	
 	RTMat ret;	
-	std::pair<QList<InnerModelNode *>, QList<InnerModelNode *>> list;
+	std::pair<QList<NodePtr>, QList<NodePtr>> list;
 	try 
 	{	list = setLocalLists(from, to);	} 		//QUIZAS METIENDO EN LOCAL EL BUCLE DE MULTIPLICAcIONES
 	catch(const InnerModelException &e){ throw e; }
 	
-	QList<InnerModelNode *> &listA = list.first;
-	QList<InnerModelNode *> &listB = list.second;
+	QList<NodePtr> &listA = list.first;
+	QList<NodePtr> &listB = list.second;
 	
-	foreach (InnerModelNode *i, listA)
+	foreach (NodePtr i, listA)
 		ret = (*i).matrixmultTS(ret);
-	foreach (InnerModelNode *i, listB)
+	foreach (NodePtr i, listB)
 	{
 // 		QMat inv = (*i).invertTS();
 // 		ret = inv * ret;
