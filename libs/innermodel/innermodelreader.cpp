@@ -54,12 +54,12 @@ bool InnerModelReader::load(const QString &file, InnerModel *model)
 	if (not model->getRoot())
 	{
 		//InnerModelTransform *r = new InnerModelTransform(QString("root"), QString("static"), 0, 0, 0, 0, 0, 0, 0);
-		auto r = std::static_pointer_cast<InnerModelTransform>(model->newNode<InnerModelTransform>(QString("root"), QString("static"), 0, 0, 0, 0, 0, 0, 0));
+		auto r = model->newNode<InnerModelTransform>(QString("root"), QString("static"), 0, 0, 0, 0, 0, 0, 0);
 		model->setRoot(r);
 		r->parent = NULL;
 	}
 	recursive(root, model, model->root);
-
+	qDebug() << "Reader finished";
 	fich.close();
 	return true;
 }
@@ -91,19 +91,14 @@ bool InnerModelReader::include(const QString &file, InnerModel *model, InnerMode
 	{
 		qFatal("<innerModel> tag missing.");
 	}
-
 	recursive(root, model, node);
-
 	fich.close();
 	return true;
 }
 
-
-
 InnerModelReader::~InnerModelReader()
 {
 }
-
 
 void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, InnerModelNode::NodePtr imNode)
 {
