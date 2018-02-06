@@ -149,13 +149,13 @@ void InnerModelMesh::setScale(float x, float y, float z)
 bool InnerModelMesh::normalRendering() const
 {
 	Lock lock(mutex);
-	return render == NormalRendering;
+	return render == RenderingModes::NormalRendering;
 }
 
 bool InnerModelMesh::wireframeRendering() const 
 {
 	Lock lock(mutex);
-	return render == WireframeRendering;
+	return render == RenderingModes::WireframeRendering;
 }
 
 InnerModelNode::NodePtr InnerModelMesh::copyNode(THash hash, NodePtr parent)

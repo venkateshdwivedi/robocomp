@@ -25,7 +25,6 @@
 #include <mutex>
 #include <innermodel/safe_ptr.h>
 
-
 #if FCL_SUPPORT==1
 	#include <boost/shared_ptr.hpp>
 	#include <fcl/collision.h>
@@ -45,14 +44,8 @@ class InnerModel;
 	
 typedef std::lock_guard<std::recursive_mutex> Lock;
 
-
-
 class InnerModelNode : public RTMat
 {
-// 		friend class InnerModelCamera;
-// 		friend class InnerModelRGBD;
-// 		friend class InnerModelReader;
-
 	public:
 		using THash = sf::safe_ptr< QHash<QString, std::shared_ptr<InnerModelNode>>>;
 		using NodePtr = std::shared_ptr<InnerModelNode>;
@@ -68,15 +61,10 @@ class InnerModelNode : public RTMat
 		
 		void treePrint(QString s, bool verbose=false);
 		virtual void print(bool verbose) = 0;
-		//virtual void update() = 0;
 		virtual NodePtr copyNode(THash hash, NodePtr parent) = 0;
 		virtual void save(QTextStream &out, int tabs) = 0;
-		//void setParent(InnerModelNode *parent_);
 		void setParent(NodePtr parent_);
-		//void addChild(InnerModelNode *child);
 		void addChild(NodePtr child);
-		
-		//void updateChildren();
 
 		/////////////////////////////////////////
 		/// Thread safe API for InnerModel nodes

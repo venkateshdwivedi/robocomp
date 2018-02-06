@@ -264,9 +264,9 @@ void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, Inne
 			{
 				InnerModelMesh::RenderingModes render;
 				if (e.attribute("render", "normal").toLower() == "wireframe")
-					render = InnerModelMesh::WireframeRendering;
+					render = InnerModelMesh::RenderingModes::WireframeRendering;
 				else if (e.attribute("render", "normal").toLower() == "normal")
-					render = InnerModelMesh::NormalRendering;
+					render = InnerModelMesh::RenderingModes::NormalRendering;
 				else
 				{
 					qFatal("Rendering mode not valid \"render=%s\"\n", e.attribute("render", "normal").toStdString().c_str());

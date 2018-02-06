@@ -139,65 +139,13 @@ class InnerModel
 			return node;
 		}
 		
-// 		InnerModelTransform* newTransform(QString id, QString engine, InnerModelNode *parent, float tx=0, float ty=0, float tz=0, float rx=0, float ry=0, float rz=0, float mass=0);
-// 		InnerModelJoint* newJoint(QString id, InnerModelTransform* parent, float lx = 0, float ly = 0, float lz = 0, float hx = 0, float hy = 0, float hz = 0,  float tx = 0, float ty = 0, float tz = 0, float rx = 0, float ry = 0, float rz = 0, float min=-INFINITY, float max=INFINITY, uint32_t port = 0, std::string axis = "z", float home=0);
-// 		InnerModelTouchSensor* newTouchSensor(QString id, InnerModelTransform* parent, QString type, float nx = 0, float ny = 0, float nz = 0, float min=0, float max=INFINITY, uint32_t port=0);
-// 		InnerModelPrismaticJoint* newPrismaticJoint(QString id, InnerModelTransform* parent, float min=-INFINITY, float max=INFINITY, float value=0, float offset=0, uint32_t port = 0, std::string axis = "z", float home=0);
-// 		InnerModelDifferentialRobot* newDifferentialRobot(QString id, InnerModelTransform* parent, float tx = 0, float ty = 0, float tz = 0, float rx = 0, float ry = 0, float rz = 0, uint32_t port = 0, float noise=0., bool collide=false);
-// 		InnerModelOmniRobot* newOmniRobot(QString id, InnerModelTransform* parent, float tx = 0, float ty = 0, float tz = 0, float rx = 0, float ry = 0, float rz = 0, uint32_t port = 0, float noise=0., bool collide=false);
-// 		InnerModelCamera* newCamera(QString id, InnerModelNode *parent, float width, float height, float focal);
-// 		InnerModelRGBD* newRGBD(QString id, InnerModelNode *parent, float width, float height, float focal, float noise, uint32_t port = 0, QString ifconfig="");
-// 		InnerModelIMU* newIMU(QString id, InnerModelNode *parent, uint32_t port = 0);
-// 		InnerModelLaser* newLaser(QString id, InnerModelNode *parent, uint32_t port = 0, uint32_t min=0, uint32_t max=30000, float angle = M_PIl, uint32_t measures = 360, QString ifconfig="");
-// 		InnerModelPlane* newPlane(QString id, InnerModelNode *parent, QString texture, float width, float height, float depth, int repeat, float nx=0, float ny=0, float nz=0, float px=0, float py=0, float pz=0, bool collidable=0);
-// 		InnerModelMesh* newMesh(QString id, InnerModelNode *parent, QString path, float scale, int render, float tx, float ty, float tz, float rx, float ry, float rz, bool collidable=0);
-// 		InnerModelMesh* newMesh(QString id, InnerModelNode *parent, QString path, float scalex, float scaley, float scalez, int render, float tx, float ty, float tz, float rx, float ry, float rz, bool collidable=0);
-// 		InnerModelPointCloud* newPointCloud(QString id, InnerModelNode *parent);
-
-		////////////////////////////////
-		/// NOT thread safe Accessors. Use template class  getNodeSafeAndLock() below
-		///////////////////////////////
-// 		TransformPtr getTransform(const QString &id)                 { return getNode<TransformPtr>(id); }
-// 		JointPtr getJoint(const QString &id)                         { return getNode<JointPtr>(id); }
-// 		JointPtr getJoint(const std::string &id)                     { return getNode<JointPtr>(QString::fromStdString(id)); }
-// 		JointPtr getJointS(const std::string &id)                    { return getNode<JointPtr>(QString::fromStdString(id)); }
-// 		//OJO
-// 		//JointPtr &getJointRef(const std::string &id)               { return *getNode<InnerModelJoint>(QString::fromStdString(id)); }
-// 		TouchSensorPtr getTouchSensor(const QString &id)             { return getNode<TouchSensorPtr>(id); }
-// 		PrismaticJointPtr getPrismaticJoint(const QString &id)       { return getNode<PrismaticJointPtr>(id); }
-// 		DifferentialRobotPtr getDifferentialRobot(const QString &id) { return getNode<DifferentialRobotPtr>(id); }
-// 		OmniRobotPtr getOmniRobot(const QString &id)                 { return getNode<OmniRobotPtr>(id); }
-// 		CameraPtr getCamera(QString id)                              { return getNode<CameraPtr>(id); }
-// 		RGBDPtr getRGBD(QString id)                                  { return getNode<RGBDPtr>(id); }
-// 		IMUPtr getIMU(QString id)                                    { return getNode<IMUPtr>(id); }
-// 		LaserPtr getLaser(QString id)                                { return getNode<LaserPtr>(id); }
-// 		PlanePtr getPlane(const QString &id)                         { return getNode<PlanePtr>(id); }
-// 		MeshPtr getMesh(const QString &id)                           { return getNode<MeshPtr>(id); }
-// 		//PointCloud *getPointCloud(const QString &id)               { return getNode<InnerModelPointCloud>(id); }
-
-		QList<QString> getIDKeys() 									 { return hash->keys(); }
-		//NodePtr getNode(const QString & id) 	 					 { return hash->value(id); }
-		
+		QList<QString> getIDKeys() 	{ return hash->keys(); }
 		template <typename N> 
 		std::shared_ptr<N> getNode(const QString &id) 
 		{
 			N* r = dynamic_cast<N*>(hash->value(id).get());
 			return std::shared_ptr<N>(r);
 		}
-
-		// Thread safe node getter. It might be null
-// 		template <class N> N* getNodeSafe(const QString &id) 
-// 		{
-// 			return dynamic_cast<N *>(hash->value(id));
-// 		}
-// 		// Thread safe node getter that returns a locked node. 
-// 		template <class N> N* getNodeSafeAndLock(const QString &id) 
-// 		{
-// 			N* r = dynamic_cast<N *>(hash->value(id));
-// // 			if (r == nullptr)
-// // 				throw InnerModelException("InnerModel::getNodeSafeAndLock() Error getting non existing node: " + id.toStdString());
-// 			return r;	
-// 		}
 		
 		////////////////////////////////////////////////////////////////////////
 		/// Thread safe kinematic transformation methods
@@ -288,8 +236,6 @@ class InnerModel
 		
 	protected:
 		NodePtr root;
-		//ThreadSafeHash<QPair<QString, QString>, RTMat> localHashTr;
-		//ThreadSafeHash<QPair<QString, QString>, QMat> localHashRot;
 		sf::safe_ptr< QHash<QPair<QString, QString>, QMat> > localHashRot;
 		sf::safe_ptr< QHash<QPair<QString, QString>, RTMat> > localHashTr;
 		std::pair<QList<NodePtr>, QList<NodePtr>> setLocalLists(const QString & origId, const QString & destId);		

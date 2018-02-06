@@ -197,7 +197,7 @@ void InnerModelViewer::recursiveConstructor(InnerModel::NodePtr node, osg::Group
 			printf("Could not find %s osg.\n", mesh->getMeshPath().toStdString().c_str());
 		
 		osg::ref_ptr<osg::PolygonMode> polygonMode = new osg::PolygonMode();
-		if (mesh->getRender() == InnerModelMesh::WireframeRendering) // wireframe
+		if (mesh->getRender() == InnerModelMesh::RenderingModes::WireframeRendering) // wireframe
 			polygonMode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
 		else
 			polygonMode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);
@@ -261,7 +261,7 @@ void InnerModelViewer::update()
 			if (!osgMesh)
 				printf("Could not find %s osg.\n", mesh->getMeshPath().toStdString().c_str());
 			osg::PolygonMode* polygonMode = osgmeshmodes[mesh->getId()];
-			if (mesh->getRender() == InnerModelMesh::WireframeRendering) // wireframe
+			if (mesh->getRender() == InnerModelMesh::RenderingModes::WireframeRendering) // wireframe
 				polygonMode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
 			else
 				polygonMode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);

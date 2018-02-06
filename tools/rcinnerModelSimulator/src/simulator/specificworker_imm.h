@@ -391,12 +391,15 @@ bool SpecificWorker::imm_addMesh(const QString &server, const std::string &item,
 	checkOperationInvalidNode(parent, msg);
 	checkNodeAlreadyExists(QString::fromStdString(item), msg);
 	checkInvalidMeshValues(m,msg);
-
-	InnerModelMesh::RenderingModes render = m.render;
-	if(render!=0 and render!=1)
-	{
-		render = NormalRendering;
-	}
+	
+	InnerModelMesh::RenderingModes render;
+	if(m.render == 0)
+		render= InnerModelMesh::RenderingModes::NormalRendering;
+	if(m.render == 1)
+		render= InnerModelMesh::RenderingModes::WireframeRendering;
+	
+	if(render != InnerModelMesh::RenderingModes::NormalRendering and render != InnerModelMesh::RenderingModes::WireframeRendering)
+		render = InnerModelMesh::RenderingModes::NormalRendering;
 	
 	InnerModel::MeshPtr mesh = innerModel->newNode<InnerModelMesh>(
 		QString::fromStdString(item),
@@ -404,22 +407,13 @@ bool SpecificWorker::imm_addMesh(const QString &server, const std::string &item,
 		m.scaleX, m.scaleY, m.scaleZ,
 		render,
 		m.pose.x, m.pose.y, m.pose.z,
-		m.pose.rx, m.pose.ry, m.pose.rz, parent);
+		m.pose.rx, m.pose.ry, m.pose.rz, false, parent);
 
 	mesh->setScale(m.scaleX, m.scaleY, m.scaleZ);
 	parent->addChild(mesh);
 
 	imv->recursiveConstructor(mesh, imv->mts[parent->getId()], imv->mts, imv->meshHash); // osgmeshes,imv->osgmeshPats);
-	//I think not necessary	
-	//imv->update();
-
-	///create boundingBox as innerModelNodeMesh when it has been added to innermodel and imnnermodelViewer
-	///TODO create boundingBox
-	///Create rapid model for the new mesh
-// 	if(collisiondetection->isChecked()) {
-// 		meshColision[QString::fromStdString(item)]=cargaTris(QString::fromStdString(item));
-// 	}
-
+ 	
 	return true;
 }
 
@@ -430,9 +424,9 @@ bool SpecificWorker::imm_addPlane(const QString &server, const std::string &item
 	InnerModel::NodePtr parent = getNode(QString::fromStdString(base), "RoboCompInnerModelManager::addPlane()");
 	checkNodeAlreadyExists(QString::fromStdString(item), "RoboCompInnerModelManager::addPlane()");
 
-	InnerModel::PlanePtr plane = innerModel->newNode<InnerModelPlane>(QString::fromStdString(item), parent, QString::fromStdString(p.texture),
+	InnerModel::PlanePtr plane = innerModel->newNode<InnerModelPlane>(QString::fromStdString(item), QString::fromStdString(p.texture),
 	                         p.width, p.height, p.thickness, 1,
-	                         p.nx, p.ny, p.nz, p.px, p.py, p.pz);
+	                         p.nx, p.ny, p.nz, p.px, p.py, p.pz, false, parent);
 	parent->addChild(plane);
 	imv->recursiveConstructor(plane, imv->mts[parent->getId()], imv->mts, imv->meshHash);
 	return true;

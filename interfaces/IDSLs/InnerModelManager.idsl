@@ -89,6 +89,7 @@ module RoboCompInnerModelManager
 		float scaleY;
 		float scaleZ;
 		int render; // 0 means normal mode, 1 wireframe mode
+		enum render { NormalRendering = 0, WireframeRendering = 1};
 		string meshPath;
 	};
 

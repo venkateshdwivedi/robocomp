@@ -44,7 +44,7 @@ void JointMotorServer::remove(InnerModel::JointPtr joint)
 void JointMotorServer::remove(InnerModel::PrismaticJointPtr joint)
 {
 	interface->remove(joint->getId());
-	prismaticjoints.erase(std::remove(prismaticjoints.begin(), prismaticjoints.end(), prismaticjoints), prismaticjoints.end());
+	prismaticjoints.erase(std::remove(prismaticjoints.begin(), prismaticjoints.end(), joint), prismaticjoints.end());
 }
 
 bool JointMotorServer::empty()
