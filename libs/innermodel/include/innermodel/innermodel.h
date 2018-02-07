@@ -109,7 +109,7 @@ class InnerModel
 		///////////////////////
 		/// Tree update methods
 		///////////////////////
-		void setRoot(TransformPtr node);
+		void setRoot(const TransformPtr &node);
 		void update();
 		void cleanupTables();
 		void updateTransformValues(QString transformId, float tx, float ty, float tz, float rx, float ry, float rz, QString parentId="");

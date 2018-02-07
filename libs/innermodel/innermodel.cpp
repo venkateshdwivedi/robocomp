@@ -36,13 +36,14 @@ bool InnerModel::support_fcl()
 ///////////////////////
 InnerModel::InnerModel(std::string xmlFilePath)
 {
-	root = NULL;
+	
 	if (not InnerModelReader::load(QString::fromStdString(xmlFilePath), this))
 	{
 		QString error;
 		error.sprintf("InnerModelReader::load error using file %s\n", xmlFilePath.c_str());
 		throw error;
 	}
+	//root->treePrint("tree", true);
 }
 
 InnerModel::InnerModel()
@@ -523,7 +524,7 @@ std::pair<QList<InnerModel::NodePtr>, QList<InnerModel::NodePtr>> InnerModel::se
 /// Model construction methods
 /////////////////////////////////////////////////////////////////
 
-void InnerModel::setRoot(TransformPtr node)
+void InnerModel::setRoot(const TransformPtr &node)
 {
 	root = node;
 	hash->insert("root", root);

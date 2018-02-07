@@ -34,7 +34,6 @@ class InnerModelTransform : public InnerModelNode
 		void update(float tx_, float ty_, float tz_, float rx_, float ry_, float rz_);
 		void updateT(float tx_, float ty_, float tz_);
 		void updateR(float rx_, float ry_, float rz_);
-		//virtual InnerModelNode *copyNode(THash hash, InnerModelNode *parent);
 		virtual InnerModelNode::NodePtr copyNode(THash hash, NodePtr parent);
 		void transformValues(const RTMat &Tpb, float tx, float ty, float tz, float rx, float ry, float rz, const NodePtr parentNode);
 		void translateValues(const RTMat &Tpb, float tx, float ty, float tz, const NodePtr parentNode);

@@ -45,21 +45,20 @@ bool InnerModelReader::load(const QString &file, InnerModel *model)
 		fich.close();
 		return false;
 	}
-
 	QDomElement root = doc.documentElement();
 	if (root.tagName().toLower() != QString("innerModel").toLower())
 	{
 		qFatal("<innerModel> tag missing.");
 	}
-	if (not model->getRoot())
+	if (model->root.get() == nullptr)
 	{
-		//InnerModelTransform *r = new InnerModelTransform(QString("root"), QString("static"), 0, 0, 0, 0, 0, 0, 0);
 		auto r = model->newNode<InnerModelTransform>(QString("root"), QString("static"), 0, 0, 0, 0, 0, 0, 0);
 		model->setRoot(r);
-		r->parent = NULL;
+		r->parent = nullptr;
 	}
 	recursive(root, model, model->root);
 	qDebug() << "Reader finished";
+	//model->root->treePrint("tree", true);
 	fich.close();
 	return true;
 }
@@ -94,10 +93,6 @@ bool InnerModelReader::include(const QString &file, InnerModel *model, InnerMode
 	recursive(root, model, node);
 	fich.close();
 	return true;
-}
-
-InnerModelReader::~InnerModelReader()
-{
 }
 
 void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, InnerModelNode::NodePtr imNode)
@@ -156,9 +151,8 @@ void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, Inne
 			if (e.tagName().toLower() == "rotation")
 			{
 				QString ngn = e.attribute("engine", "static");
-				if (ngn != "static" and ngn != "bullet") qFatal("Error in line %d: %s is not a valid physics engine.", domNode.lineNumber(), ngn.toStdString().c_str());
-				/*InnerModelTransform *tr = model->newTransform(e.attribute("id"), e.attribute("engine", "static"), imNode, 0., 0., 0., e.attribute("rx", "0").toFloat(), e.attribute("ry", "0").toFloat(), e.attribute("rz", "0").toFloat(), e.attribute("mass", "0").toFloat());
-				*/
+				if (ngn != "static" and ngn != "bullet") 
+					qFatal("Error in line %d: %s is not a valid physics engine.", domNode.lineNumber(), ngn.toStdString().c_str());
 				InnerModel::TransformPtr tr = model->newNode<InnerModelTransform>(e.attribute("id"), e.attribute("engine", "static"), 0, 0, 0, e.attribute("rx", "0").toFloat(), e.attribute("ry", "0").toFloat(), e.attribute("rz", "0").toFloat(), e.attribute("mass", "0").toFloat(), imNode);
 				tr->setGuiTranslation(false);
 				imNode->addChild(tr);
@@ -168,7 +162,8 @@ void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, Inne
 			else if (e.tagName().toLower() == "translation")
 			{
 				QString ngn = e.attribute("engine", "static");
-				if (ngn != "static" and ngn != "bullet") qFatal("Error in line %d: %s is not a valid physics engine.", domNode.lineNumber(), ngn.toStdString().c_str());
+				if (ngn != "static" and ngn != "bullet") 
+					qFatal("Error in line %d: %s is not a valid physics engine.", domNode.lineNumber(), ngn.toStdString().c_str());
 				InnerModel::TransformPtr tr = model->newNode<InnerModelTransform>(e.attribute("id"), e.attribute("engine", "static"), e.attribute("tx", "0").toFloat(), e.attribute("ty", "0").toFloat(), e.attribute("tz", "0").toFloat(), 0., 0., 0., e.attribute("mass", "0").toFloat(), imNode);
 				tr->setGuiRotation(false);
 				imNode->addChild(tr);
@@ -177,8 +172,10 @@ void InnerModelReader::recursive(QDomNode parentDomNode, InnerModel *model, Inne
 			}
 			else if (e.tagName().toLower() == "transform")
 			{
+				qDebug() << "Creando transform";
 				QString ngn = e.attribute("engine", "static");
-				if (ngn != "static" and ngn != "bullet") qFatal("Error in line %d: %s is not a valid physics engine.", domNode.lineNumber(), ngn.toStdString().c_str());
+				if (ngn != "static" and ngn != "bullet") 
+					qFatal("Error in line %d: %s is not a valid physics engine.", domNode.lineNumber(), ngn.toStdString().c_str());
 				InnerModel::TransformPtr tr = model->newNode<InnerModelTransform>(e.attribute("id"), e.attribute("engine", "static"),  e.attribute("tx", "0").toFloat(), e.attribute("ty", "0").toFloat(), e.attribute("tz", "0").toFloat(), e.attribute("rx", "0").toFloat(), e.attribute("ry", "0").toFloat(), e.attribute("rz", "0").toFloat(), e.attribute("mass", "0").toFloat(), imNode);
 				imNode->addChild(tr);
                     imNode->innerModel = tr->innerModel = model;

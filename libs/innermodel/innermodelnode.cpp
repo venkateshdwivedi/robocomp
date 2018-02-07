@@ -48,15 +48,14 @@ InnerModelNode::~InnerModelNode()
 
 void InnerModelNode::treePrint(QString s, bool verbose)
 {
-// 	printf("%s%s l(%d) [%d]\n", qPrintable(s), qPrintable(id), level, children->size());
-// 	QList<InnerModelNode*>::iterator i;
-// 	for (i=children->begin(); i!=children->end(); i++)
-// 	{
-// 		if (verbose)
-// 			(*i)->print(verbose);
-// 		(*i)->treePrint(s+QString("  "), verbose);
-// 
-// 	}
+	printf("%s%s l(%d) [%d]\n", qPrintable(s), qPrintable(id), level, children->size());
+ 	QList<NodePtr>::iterator i;
+ 	for (i=children->begin(); i!=children->end(); i++)
+ 	{
+ 		if (verbose)
+ 			(*i)->print(verbose);
+ 		(*i)->treePrint(s+QString("  "), verbose); 
+ 	}
 }
 
 void InnerModelNode::setParent(NodePtr parent_)
@@ -73,7 +72,7 @@ void InnerModelNode::addChild(NodePtr child)
 	{
 		children->append(child);
 	}
-	child->parent.reset(this);  //MIRAR
+	//child->parent.reset(this);  //MIRAR
 }
 
 

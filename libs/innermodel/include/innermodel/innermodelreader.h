@@ -31,7 +31,6 @@ class InnerModelReader
 {
 public:
 	InnerModelReader();
-	~InnerModelReader();
 	static bool load(const QString &file, InnerModel *model);
 	
 private:
