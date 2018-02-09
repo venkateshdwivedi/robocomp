@@ -140,11 +140,11 @@ class InnerModel
 		}
 		
 		QList<QString> getIDKeys() 	{ return hash->keys(); }
+		
 		template <typename N> 
 		std::shared_ptr<N> getNode(const QString &id) 
 		{
-			N* r = dynamic_cast<N*>(hash->value(id).get());
-			return std::shared_ptr<N>(r);
+			return std::dynamic_pointer_cast<N>(hash->value(id));
 		}
 		
 		////////////////////////////////////////////////////////////////////////

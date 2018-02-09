@@ -49,10 +49,7 @@ InnerModel::InnerModel(std::string xmlFilePath)
 InnerModel::InnerModel()
 {	
 	// Set Root node
-	//auto root = std::make_shared<InnerModelTransform>(InnerModelTransform("root", "static", 0, 0, 0, 0, 0, 0, 0));
 	auto root = newNode<InnerModelTransform>(QString("root"), QString("static"), 0, 0, 0, 0, 0, 0, 0, nullptr);
-	//InnerModelTransform *root = new InnerModelTransform("root", "static", 0, 0, 0, 0, 0, 0, 0);
-	//root->parent = NULL;
 	root->parent = nullptr;
 	setRoot(root);
 	root->innerModel = this;
@@ -61,38 +58,34 @@ InnerModel::InnerModel()
 
 InnerModel::InnerModel(const InnerModel &original)
 {
-	//root = new InnerModelTransform("root", "static", 0, 0, 0, 0, 0, 0, 0);
 	auto root = newNode<InnerModelTransform>(QString("root"), QString("static"), 0, 0, 0, 0, 0, 0, 0, nullptr);
 	setRoot(root);
 	root->innerModel = this;
 	hash->insert("root",root);
 	
-// 	QList<InnerModelNode *>::iterator i;
-// 	for (i=original.root->children->begin(); i!=original.root->children->end(); i++)
-// 	{
-// 		root->addChild((*i)->copyNode(hash, root));
-// 	}
+ 	QList<NodePtr>::iterator i;
+ 	for (i=original.root->children->begin(); i!=original.root->children->end(); i++)
+ 	{
+ 		root->addChild((*i)->copyNode(hash, root));
+ 	}
 }
 
 InnerModel::InnerModel(InnerModel &original)
 {
-	
-	//root = new InnerModelTransform("root", "static", 0, 0, 0, 0, 0, 0, 0);
 	auto root = newNode<InnerModelTransform>(QString("root"), QString("static"), 0, 0, 0, 0, 0, 0, 0, nullptr);
 	setRoot(root);
 	root->innerModel = this;
 	hash->insert("root", root);
 
-// 	QList<InnerModelNode *>::iterator i;
-// 	for (i=original.root->children->begin(); i!=original.root->children->end(); i++)
-// 	{
-// 		root->addChild((*i)->copyNode(hash, root));
-// 	}
+ 	QList<NodePtr>::iterator i;
+ 	for (i=original.root->children->begin(); i!=original.root->children->end(); i++)
+ 	{
+ 		root->addChild((*i)->copyNode(hash, root));
+ 	}
 }
 
 InnerModel::InnerModel(InnerModel *original)
 {
-	//root = new InnerModelTransform("root", "static", 0, 0, 0, 0, 0, 0, 0);
 	auto root = newNode<InnerModelTransform>(QString("root"), QString("static"), 0, 0, 0, 0, 0, 0, 0, nullptr);
 	root = std::static_pointer_cast<InnerModelTransform>(root);
 	
@@ -100,11 +93,11 @@ InnerModel::InnerModel(InnerModel *original)
 	root->innerModel = this;
 	hash->insert("root", root);
 
-// 	QList<InnerModelNode *>::iterator i;
-// 	for (i=original->root->children->begin(); i!=original->root->children->end(); i++)
-// 	{
-// 		root->addChild((*i)->copyNode(hash, root));
-// 	}
+ 	QList<NodePtr>::iterator i;
+ 	for (i=original->root->children->begin(); i!=original->root->children->end(); i++)
+ 	{
+ 		root->addChild((*i)->copyNode(hash, root));
+ 	}
 }
 
 InnerModel::~InnerModel()
@@ -531,145 +524,6 @@ void InnerModel::setRoot(const TransformPtr &node)
 	root->parent = nullptr;
 }
 
-// InnerModelJoint *InnerModel::newJoint(QString id, InnerModelTransform *parent,float lx, float ly, float lz,float hx, float hy, float hz, float tx, float ty, float tz, float rx, float ry, float rz, float min, float max, uint32_t port,std::string axis, float home)
-// {
-// 	if (hash->contains(id))
-// 		throw InnerModelException("InnerModel::newJoint: Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");
-// 	
-// 	InnerModelJoint *newnode = new InnerModelJoint(id,lx,ly,lz,hx,hy,hz, tx, ty, tz, rx, ry, rz, min, max, port, axis, home, parent);
-// 	hash->insert(id,newnode); 
-// 	return newnode;
-// }
-// 
-// InnerModelTouchSensor *InnerModel::newTouchSensor(QString id, InnerModelTransform *parent, QString stype, float nx, float ny, float nz, float min, float max, uint32_t port)
-// {
-// 	if (hash->contains(id))
-// 		throw InnerModelException("InnerModel::newTouchSensor: Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");
-// 	
-// 	InnerModelTouchSensor *newnode = new InnerModelTouchSensor(id, stype, nx, ny, nz, min, max, port, parent);
-// 	hash->insert(id,newnode);
-// 	return newnode;
-// }
-// 
-// InnerModelPrismaticJoint *InnerModel::newPrismaticJoint(QString id, InnerModelTransform *parent, float min, float max, float value, float offset, uint32_t port,std::string axis, float home)
-// {	
-// 	if (hash->contains(id))
-// 		throw InnerModelException("InnerModel::newPrismaticJoint: Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");
-// 
-// 	InnerModelPrismaticJoint *newnode = new InnerModelPrismaticJoint(id, min, max, value, offset, port, axis, home, parent);
-// 	hash->insert(id,newnode);
-// 	return newnode;
-// }
-// 
-// InnerModelDifferentialRobot *InnerModel::newDifferentialRobot(QString id, InnerModelTransform *parent, float tx, float ty, float tz, float rx, float ry, float rz, uint32_t port, float noise, bool collide)
-// {
-// 	if (hash->contains(id))
-// 		throw InnerModelException("InnerModel::newDifferentialRobot: Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");
-// 	
-// 	InnerModelDifferentialRobot *newnode = new InnerModelDifferentialRobot(id, tx, ty, tz, rx, ry, rz, port, noise, collide, parent);
-// 	hash->insert(id,newnode);
-// 	return newnode;
-// }
-// 
-// InnerModelOmniRobot *InnerModel::newOmniRobot(QString id, InnerModelTransform *parent, float tx, float ty, float tz, float rx, float ry, float rz, uint32_t port, float noise, bool collide)
-// {
-// 	if (hash->contains(id))
-// 		throw InnerModelException("InnerModel::newOmniRobot: Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");	
-// 		
-// 	InnerModelOmniRobot *newnode = new InnerModelOmniRobot(id, tx, ty, tz, rx, ry, rz, port, noise, collide, parent);
-// 	hash->insert(id,newnode);
-// 	return newnode;
-// }
-// 
-// InnerModelCamera *InnerModel::newCamera(QString id, InnerModelNode *parent, float width, float height, float focal)
-// {
-// 	if (hash->contains(id))
-// 		throw InnerModelException("InnerModel::newCamera: Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");	
-// 		
-// 	InnerModelCamera *newnode = new InnerModelCamera(id, width, height, focal, this, parent);
-// 	hash->insert(id,newnode);
-// 	return newnode;
-// }
-// 
-// InnerModelRGBD *InnerModel::newRGBD(QString id, InnerModelNode *parent, float width, float height, float focal, float noise, uint32_t port, QString ifconfig)
-// {
-// 	if (noise < 0)
-// 		throw InnerModelException("InnerModel::newRGBD: Error: noise can't have negative values " + std::to_string(noise) + "\n");	
-// 
-// 	if (hash->contains(id))
-// 		throw InnerModelException("InnerModel::newRGBD: Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");	
-// 		
-// 	InnerModelRGBD *newnode = new InnerModelRGBD(id, width, height, focal, noise, port, ifconfig, this, parent);
-// 	hash->insert(id,newnode);
-// 	return newnode;
-// }
-// 
-// InnerModelIMU *InnerModel::newIMU(QString id, InnerModelNode *parent, uint32_t port)
-// {
-// 	if (hash->contains(id))
-// 		throw InnerModelException("InnerModel::newIMU: Error Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");	
-// 		
-// 	InnerModelIMU *newnode = new InnerModelIMU(id, port, parent);
-// 	hash->insert(id,newnode);
-// 	return newnode;
-// }
-// 
-// InnerModelLaser *InnerModel::newLaser(QString id, InnerModelNode *parent, uint32_t port, uint32_t min, uint32_t max, float angle, uint32_t measures, QString ifconfig)
-// {
-// 	if (hash->contains(id))
-// 		throw InnerModelException("InnerModel::newLaser Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");
-// 		
-// 	InnerModelLaser *newnode = new InnerModelLaser(id, port, min, max, angle, measures, ifconfig, this, parent);
-// 	hash->insert(id,newnode);
-// 	return newnode;
-// }
-// 
-// InnerModelPlane *InnerModel::newPlane(QString id, InnerModelNode *parent, QString texture, float width, float height, float depth, int repeat, float nx, float ny, float nz, float px, float py, float pz, bool collidable)
-// {
-// 	if (hash->contains(id))
-// 		throw InnerModelException("InnerModel::newPlane Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");
-// 		
-// 	InnerModelPlane *newnode = new InnerModelPlane(id, texture, width, height, depth, repeat, nx, ny, nz, px, py, pz, collidable, parent);
-// 	hash->insert(id,newnode);
-// 	return newnode;
-// }
-// 
-// InnerModelMesh *InnerModel::newMesh(QString id, InnerModelNode *parent, QString path, float scalex, float scaley, float scalez, int render, float tx, float ty, float tz, float rx, float ry, float rz, bool collidable)
-// {
-// 	if (hash->contains(id))
-// 		throw InnerModelException("InnerModel::newMesh Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");
-// 		
-// 	InnerModelMesh *newnode = new InnerModelMesh(id, path, scalex, scaley, scalez, (InnerModelMesh::RenderingModes)render, tx, ty, tz, rx, ry, rz, collidable, parent);
-// 	hash->insert(id,newnode);
-// 	return newnode;
-// }
-// 
-// InnerModelMesh *InnerModel::newMesh(QString id, InnerModelNode *parent, QString path, float scale, int render, float tx, float ty, float tz, float rx, float ry, float rz, bool collidable)
-// {
-// 	return newMesh(id,parent,path,scale,scale,scale,render,tx,ty,tz,rx,ry,rz, collidable);
-// }
-// 
-// InnerModelPointCloud *InnerModel::newPointCloud(QString id, InnerModelNode *parent)
-// {
-// 	if (hash->contains(id))
-// 		throw InnerModelException("InnerModel::newPointCloud Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");
-// 		
-// 	InnerModelPointCloud *newnode = new InnerModelPointCloud(id, parent);
-// 	hash->insert(id,newnode);
-// 	return newnode;
-// }
-// 
-// InnerModelTransform *InnerModel::newTransform(QString id, QString engine, InnerModelNode *parent, float tx, float ty, float tz, float rx, float ry, float rz, float mass)
-// {
-// 	if (hash->contains(id))
-// 		throw InnerModelException("InnerModel::newTransform: Error: Trying to insert a node with an already-existing key: " + id.toStdString() + "\n");
-// 		
-// 	//InnerModelTransform *newnode = new InnerModelTransform(id, engine, tx, ty, tz, rx, ry, rz, mass, parent);
-// 	auto newnode = std::make_shared(InnerModelTransform(id, engine, tx, ty, tz, rx, ry, rz, mass, parent));
-// 	hash->insert(id,newnode);
-// 	return newnode;
-// }
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 /// Thread safe Auxiliary
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -733,7 +587,6 @@ bool InnerModel::collide(const QString &a, const QString &b)
 	throw InnerModelException("InnerModel was not compiled with collision support");
 #endif
 }
-
 
 /**
  * @brief ...
