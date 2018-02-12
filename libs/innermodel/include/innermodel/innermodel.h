@@ -147,6 +147,18 @@ class InnerModel
 			return std::dynamic_pointer_cast<N>(hash->value(id));
 		}
 		
+
+		template <typename N>
+		std::shared_ptr<N> getNodeProxy(const QString &id)
+		{
+			if( n = hash->value(id))
+			{
+				new N(n);
+				
+			}
+			
+		}
+		
 		////////////////////////////////////////////////////////////////////////
 		/// Thread safe kinematic transformation methods
 		/// Transformation is guaranteed to occur with existing, stable nodes but the final result might correspond to nodes no longer existing in the tree
