@@ -147,16 +147,21 @@ class InnerModel
 			return std::dynamic_pointer_cast<N>(hash->value(id));
 		}
 		
+		template <typename N>
+		struct Proxy : N
+		{
+			Proxy(N *n)  	{ myN = n;}
+			N *myN;
+			N* operator->()	{ return myN;};
+			~Proxy()		{ std::cout << "deleting proxy" << std::endl;}
+		};
 
 		template <typename N>
 		std::shared_ptr<N> getNodeProxy(const QString &id)
 		{
-			if( n = hash->value(id))
-			{
-				new N(n);
-				
-			}
-			
+			InnerModelTransform *n = hash->value(id).get();
+			std::shared_ptr<N> node(new Proxy<N>(n));
+			return node;
 		}
 		
 		////////////////////////////////////////////////////////////////////////
