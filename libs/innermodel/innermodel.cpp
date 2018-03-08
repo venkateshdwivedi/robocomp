@@ -205,7 +205,8 @@ void InnerModel::getSubTree(NodePtr node, QList<NodePtr> *l)
 void InnerModel::moveSubTree(NodePtr nodeSrc, NodePtr nodeDst)
 {
 	nodeSrc->parent->children->removeOne(nodeSrc);
-	nodeDst->addChild(nodeSrc);
+	nodeDst->
+	(nodeSrc);
 	nodeSrc->setParent(nodeDst);
 	computeLevels(nodeDst);
 }
