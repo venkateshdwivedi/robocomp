@@ -40,14 +40,14 @@ InnerModelTransform::InnerModelTransform(QString id_, QString engine_, float tx_
 
 void InnerModelTransform::print(bool verbose)
 {
-// 	Lock lock(mutex);
-// 	printf("Transform: %s\n", qPrintable(id));
-// 	if (verbose)
-// 	{
-// 		((QMat *)this)->print(qPrintable(id));
-// 		getTr().print(id+"_T");
-// 		//extractAnglesR().print(id+"_R");
-// 	}
+	//Lock lock(mutex);
+	printf("Transform: %s\n", qPrintable(id));
+	if (verbose)
+	{
+		((QMat *)this)->print(qPrintable(id));
+		getTrTS().print(id + "_T");
+		//extractAnglesR().print(id+"_R");
+	}
 }
 
 void InnerModelTransform::save(QTextStream &out, int tabs)

@@ -266,7 +266,7 @@ QMat InnerModelCamera::getAffineHomographyMatrix(QString virtualCamera, QString 
 	for (int r=0;r<2;r++)
 		for (int c=0;c<3;c++)
 			H(r,c) = H(r,c) * 1000.;
-		return H;
+	return H;
 }
 
 QMat InnerModelCamera::getPlaneProjectionMatrix(QString virtualCamera, QString plane, QString sourceCamera)

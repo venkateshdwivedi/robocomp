@@ -109,7 +109,7 @@ class InnerModel
 		///////////////////////
 		/// Tree update methods
 		///////////////////////
-		void setRoot(TransformPtr node);
+		void setRoot(const TransformPtr &node);
 		void update();
 		void cleanupTables();
 		void updateTransformValues(QString transformId, float tx, float ty, float tz, float rx, float ry, float rz, QString parentId="");
@@ -140,11 +140,28 @@ class InnerModel
 		}
 		
 		QList<QString> getIDKeys() 	{ return hash->keys(); }
+		
 		template <typename N> 
 		std::shared_ptr<N> getNode(const QString &id) 
 		{
-			N* r = dynamic_cast<N*>(hash->value(id).get());
-			return std::shared_ptr<N>(r);
+			return std::dynamic_pointer_cast<N>(hash->value(id));
+		}
+		
+		template <typename N>
+		struct Proxy : N
+		{
+			Proxy(N *n)  	{ myN = n;}
+			N *myN;
+			N* operator->()	{ return myN;};
+			~Proxy()		{ std::cout << "deleting proxy" << std::endl;}
+		};
+
+		template <typename N>
+		std::shared_ptr<N> getNodeProxy(const QString &id)
+		{
+			InnerModelTransform *n = hash->value(id).get();
+			std::shared_ptr<N> node(new Proxy<N>(n));
+			return node;
 		}
 		
 		////////////////////////////////////////////////////////////////////////
