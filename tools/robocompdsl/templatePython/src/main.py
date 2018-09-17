@@ -170,9 +170,8 @@ from specificworker import *
 
 
 class CommonBehaviorI(RoboCompCommonBehavior.CommonBehavior):
-	def __init__(self, _handler, _communicator):
+	def __init__(self, _handler):
 		self.handler = _handler
-		self.communicator = _communicator
 	def getFreq(self, current = None):
 		self.handler.getFreq()
 	def setFreq(self, freq, current = None):
@@ -186,7 +185,7 @@ class CommonBehaviorI(RoboCompCommonBehavior.CommonBehavior):
 		self.handler.killYourSelf()
 	def getAttrList(self, current = None):
 		try:
-			return self.handler.getAttrList(self.communicator)
+			return self.handler.getAttrList()
 		except:
 			print 'Problem getting getAttrList'
 			traceback.print_exc()
