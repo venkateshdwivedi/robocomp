@@ -57,8 +57,8 @@ Let's change the template file above by something like this,
 	{
             requires DifferentialRobot, Laser;
         };
-    gui Qt(QWidget);
     language Cpp; // or language Python;
+    gui Qt(QWidget);
     };
 ```    
     
